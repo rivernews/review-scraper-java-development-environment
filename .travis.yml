@@ -12,25 +12,17 @@ install:
   # - mvn clean install
   - skip
 
-script:
-  - cd shaungc-java-dev
-  - mvn exec:java
-
 # env:
 # - IMAGE_NAME=shaungc/kafka-connectors-cdc
-# jobs:
-#   include:
-#   # stage can span across multiple name/script; each name/script (job) within a stage will be executed concurrently.
-#   # default env var: https://docs.travis-ci.com/user/environment-variables#default-environment-variables
-#   - stage: build_push
-#     name: Build and push docker image
-#     script:
-#     - docker build -f ./Dockerfile -t $IMAGE_NAME:latest .
-#     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-#     - export SHORT_TRAVIS_COMMIT=$(git rev-parse --short ${TRAVIS_COMMIT})
-#     - docker tag $IMAGE_NAME:latest $IMAGE_NAME:$SHORT_TRAVIS_COMMIT
-#     - docker push $IMAGE_NAME:latest
-#     - docker push $IMAGE_NAME:$SHORT_TRAVIS_COMMIT
+jobs:
+  include:
+  # stage can span across multiple name/script; each name/script (job) within a stage will be executed concurrently.
+  # default env var: https://docs.travis-ci.com/user/environment-variables#default-environment-variables
+  - stage: launch_scraper
+    name: Launch scraper
+    script:
+    - cd shaungc-java-dev
+    - mvn exec:java
 
 notifications:
   slack:
