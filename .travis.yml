@@ -21,8 +21,7 @@ jobs:
   - stage: launch_scraper
     name: Launch scraper
     script:
-    - cd shaungc-java-dev
-    - mvn exec:java
+    - cd shaungc-java-dev && mvn clean install && mvn exec:java
 
 notifications:
   slack:
