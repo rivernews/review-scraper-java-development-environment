@@ -12,21 +12,22 @@ install: mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
 script: mvn exec:java
 
-env:
-- IMAGE_NAME=shaungc/kafka-connectors-cdc
-jobs:
-  include:
-  # stage can span across multiple name/script; each name/script (job) within a stage will be executed concurrently.
-  # default env var: https://docs.travis-ci.com/user/environment-variables#default-environment-variables
-  - stage: build_push
-    name: Build and push docker image
-    script:
-    - docker build -f ./Dockerfile -t $IMAGE_NAME:latest .
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-    - export SHORT_TRAVIS_COMMIT=$(git rev-parse --short ${TRAVIS_COMMIT})
-    - docker tag $IMAGE_NAME:latest $IMAGE_NAME:$SHORT_TRAVIS_COMMIT
-    - docker push $IMAGE_NAME:latest
-    - docker push $IMAGE_NAME:$SHORT_TRAVIS_COMMIT
+# env:
+# - IMAGE_NAME=shaungc/kafka-connectors-cdc
+# jobs:
+#   include:
+#   # stage can span across multiple name/script; each name/script (job) within a stage will be executed concurrently.
+#   # default env var: https://docs.travis-ci.com/user/environment-variables#default-environment-variables
+#   - stage: build_push
+#     name: Build and push docker image
+#     script:
+#     - docker build -f ./Dockerfile -t $IMAGE_NAME:latest .
+#     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+#     - export SHORT_TRAVIS_COMMIT=$(git rev-parse --short ${TRAVIS_COMMIT})
+#     - docker tag $IMAGE_NAME:latest $IMAGE_NAME:$SHORT_TRAVIS_COMMIT
+#     - docker push $IMAGE_NAME:latest
+#     - docker push $IMAGE_NAME:$SHORT_TRAVIS_COMMIT
+
 notifications:
   slack:
     # run the following to generate the encrypted code
