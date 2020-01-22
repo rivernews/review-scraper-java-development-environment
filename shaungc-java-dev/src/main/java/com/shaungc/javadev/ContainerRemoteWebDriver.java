@@ -16,6 +16,7 @@ public class ContainerRemoteWebDriver extends RemoteWebDriver{
         super(webDriverServiceUrl, new ChromeOptions());
     }
     public ContainerRemoteWebDriver() throws MalformedURLException {
-        super(new URL("http://host.docker.internal:4444/wd/hub"), new ChromeOptions());
+        // super(new URL("http://host.docker.internal:4444/wd/hub"), new ChromeOptions());
+        super(new URL("http://localhost:4444/"), new ChromeOptions());
     }
 }
