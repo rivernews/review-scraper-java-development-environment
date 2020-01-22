@@ -2,18 +2,24 @@ dist: trusty
 
 addons:
   chrome: stable
+  apt:
+    packages:
+      - chromium-chromedriver
 
 language: java
 
 # JDK versions available: https://docs.travis-ci.com/user/reference/trusty/#jvm-clojure-groovy-java-scala-images
 jdk: oraclejdk11
 
-before_install:
+before_script:
+  #
+  # include ChromeDriver in PATH
+  - ln --symbolic /usr/lib/chromium-browser/chromedriver "${HOME}/bin/chromedriver"
+  #
+  # start Chrome and listen on localhost
   - google-chrome-stable --headless --disable-gpu --remote-debugging-port=4444 http://localhost &
 
-install: 
-  # - mvn clean install
-  - skip
+install: skip
 
 # env:
 # - IMAGE_NAME=shaungc/kafka-connectors-cdc
