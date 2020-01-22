@@ -24,6 +24,7 @@ jobs:
   - stage: launch_scraper
     name: Launch scraper
     script:
+    - cp .devcontainer/chromedriver_linux /tmp/chromedriver_linux
     - cd shaungc-java-dev && mvn clean install && mvn exec:java
 
 notifications:
