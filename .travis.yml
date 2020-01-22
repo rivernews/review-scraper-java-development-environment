@@ -1,3 +1,5 @@
+sudo: false
+
 dist: trusty
 
 addons:
@@ -9,7 +11,7 @@ addons:
 language: java
 
 # JDK versions available: https://docs.travis-ci.com/user/reference/trusty/#jvm-clojure-groovy-java-scala-images
-jdk: oraclejdk11
+# jdk: oraclejdk11
 
 before_script:
   #
