@@ -5,6 +5,9 @@ addons:
 
 language: java
 
+# JDK versions available: https://docs.travis-ci.com/user/reference/trusty/#jvm-clojure-groovy-java-scala-images
+jdk: oraclejdk11
+
 before_install:
   - google-chrome-stable --headless --disable-gpu --remote-debugging-port=4444 http://localhost &
 
