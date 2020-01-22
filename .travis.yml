@@ -9,7 +9,8 @@ before_install:
   - google-chrome-stable --headless --disable-gpu --remote-debugging-port=4444 http://localhost &
 
 install: 
-  - mvn clean install
+  # - mvn clean install
+  - skip
 
 script:
   - mvn exec:java
