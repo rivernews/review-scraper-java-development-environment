@@ -48,7 +48,7 @@ public class LoginGlassdoorTask {
         // confirm that login succeed
         new WebDriverWait(driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND).until(
             ExpectedConditions.elementToBeClickable(By.cssSelector("header nav div.container-menu"))
-        ));
+        );
 
         System.out.println("\n\n\nOK, login complete!");
     }
