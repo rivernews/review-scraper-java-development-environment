@@ -89,9 +89,8 @@ public class ScrapeReviewFromCompanyReviewPage
             while (true) {
                 // pull out review elements
                 final List<WebElement> employeeReviewElements = reviewPanelElement
-                .findElements(By.cssSelector("div#ReviewsFeed ol > li"));
+                        .findElements(By.cssSelector("div#ReviewsFeed ol > li"));
 
-                
                 for (final WebElement employeeReviewElement : employeeReviewElements) {
                     final EmployeeReviewData employeeReviewData = new EmployeeReviewData();
                     this.scrapeEmployeeReview(employeeReviewElement, employeeReviewData);
@@ -108,7 +107,7 @@ public class ScrapeReviewFromCompanyReviewPage
                 this.driver
                         .findElement(By.cssSelector("ul[class^=pagination] li[class$=next] a:not([class$=disabled])"))
                         .click();
-                
+
                 this.waitForReviewPanelLoading();
             }
         } catch (final NoSuchElementException e) {
@@ -153,8 +152,11 @@ public class ScrapeReviewFromCompanyReviewPage
         // TODO: check review id
 
         // scrape time
-        reviewDataStore.reviewDate = employeeReviewLiElement.findElement(By.cssSelector("time.date"))
-                .getAttribute("datetime");
+        try {
+            reviewDataStore.reviewDate = employeeReviewLiElement.findElement(By.cssSelector("time.date"))
+                    .getAttribute("datetime").strip();
+        } catch (NoSuchElementException e) {
+        }
 
         // scrape comment title
         reviewDataStore.reviewEmployeePositionText = employeeReviewLiElement.findElement(By.cssSelector("h2.summary a"))
