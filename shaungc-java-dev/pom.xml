@@ -97,6 +97,7 @@
           </executions> -->
           <configuration>
             <mainClass>com.shaungc.javadev.App</mainClass>
+            <cleanupDaemonThreads>false</cleanupDaemonThreads>
           </configuration>
         </plugin>
       </plugins>

@@ -35,12 +35,12 @@ public class WebDriverFactory {
             final ChromeOptions chromeOptions = new ChromeOptions();
             chromeOptions.addArguments("--headless");
             chromeOptions.addArguments("--disable-gpu");
-            // chromeOptions.addArguments("--window-size=1920,1080");
-            // chromeOptions.addArguments("--disable-extensions");
-            // chromeOptions.addArguments("--proxy-server='direct://'");
-            // chromeOptions.addArguments("--proxy-bypass-list=*");
-            // chromeOptions.addArguments("--start-maximized");
-            // chromeOptions.addArguments("--no-sandbox");
+            chromeOptions.addArguments("--window-size=1920,1080");
+            chromeOptions.addArguments("--disable-extensions");
+            chromeOptions.addArguments("--proxy-server='direct://'");
+            chromeOptions.addArguments("--proxy-bypass-list=*");
+            chromeOptions.addArguments("--start-maximized");
+            chromeOptions.addArguments("--no-sandbox");
             chromeOptions.addArguments("--ignore-certificate-errors");
 
             // deprecated
