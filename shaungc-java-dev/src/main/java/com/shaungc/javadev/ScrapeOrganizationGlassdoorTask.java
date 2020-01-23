@@ -6,21 +6,23 @@ import com.shaungc.events.JudgeQueryCompanyPageEvent;
 import com.shaungc.events.ScrapeBasicDataFromCompanyNamePage;
 import com.shaungc.events.ScrapeReviewFromCompanyReviewPage;
 
+import org.openqa.selenium.chrome.ChromeDriver;
+
 /**
  * ScrapeOrganizationGlassdoorTask
  */
 public class ScrapeOrganizationGlassdoorTask {
-    private ContainerRemoteWebDriver driver;
+    private ChromeDriver driver;
     private String searchCompanyName;
 
-    public ScrapeOrganizationGlassdoorTask(ContainerRemoteWebDriver driver, String companyName) {
+    public ScrapeOrganizationGlassdoorTask(ChromeDriver driver, String companyName) {
         this.driver = driver;
         this.searchCompanyName = companyName;
 
         this.launchScraper();
     }
     public ScrapeOrganizationGlassdoorTask(String companyName) throws MalformedURLException {
-        this.driver = new ContainerRemoteWebDriver();
+        this.driver = new ContainerWebDriver();
 
         this.launchScraper();
     }

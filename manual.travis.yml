@@ -1,0 +1,55 @@
+sudo: false
+
+dist: trusty
+
+addons:
+  chrome: stable
+  apt:
+    packages:
+      - chromium-chromedriver
+
+language: java
+
+# JDK versions available: https://docs.travis-ci.com/user/reference/trusty/#jvm-clojure-groovy-java-scala-images
+# jdk: oraclejdk11
+
+before_script:
+  #
+  # include ChromeDriver in PATH
+  - ln --symbolic /usr/lib/chromium-browser/chromedriver "${HOME}/bin/chromedriver"
+  #
+  # start Chrome and listen on localhost
+  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=4444 http://localhost &
+
+install: skip
+
+# env:
+# - IMAGE_NAME=shaungc/kafka-connectors-cdc
+jobs:
+  include:
+  # stage can span across multiple name/script; each name/script (job) within a stage will be executed concurrently.
+  # default env var: https://docs.travis-ci.com/user/environment-variables#default-environment-variables
+  - stage: launch_scraper
+    name: Launch scraper
+    script:
+    - cp .devcontainer/chromedriver_linux /tmp/chromedriver_linux
+    - cd shaungc-java-dev && mvn clean install && mvn exec:java
+
+notifications:
+  slack:
+    # run the following to generate the encrypted code
+    # travis login --pro --auto
+    # travis encrypt "<account>:<token>" --add notifications.slack.rooms --com
+    rooms:
+      secure: IxTr5+m5sjqaoLF9GjGZT3f3Pf+d6lC42ghqFbnB4wG1w+RcKV4qFAroctTlnLmgibNNFy44exnL8cGUBDgRyF2I5Avz91nzuq8TrwtJVatAmCwF7ZxkAY2/TPkk9UpwuAUIMSEKxbIk1IUfMiCTIsUYx1aNb4ai42GkRp0puVAl2Ze5+5REJPaLj7OiXRUvKCsW+vZqdwwfew68WDjC+IL1FwZMg1keHZo8Ir1SAeqPbC2kIBCtQpp4drbw5+62FbFr5b82hsUz+bIuZ0bIdc5Q0OpU/wejygmC9iyLKZjFNeNKkWQIVbUlBE0cyPcgwQiW1Mk1R5PFXzWt0FhKj1/Q01iLL3QcHEOAyfmlSme+NRTBxP7qpVGqjPqKf97pMxNcJaL2jFuGBDET7Xf5KbFnMgJMYVT63AsyiU4tY/3G/8rF49Y0Le6N7lDiOKVBnz52Ru7KGzJcs8QHgz+UGX4qxKemN1yGpty0wE9WZoUKypIcXbRlVCPamhbZeFiBaaeUVxSPcN/0cObdEFS4Swi/pEJ7H9u7AALqoooFvGIA+UTUeSCYxzZO++5x0THLKDt18F5ShL0tgwAScg38VilIQoOFsC2GGBzb9TQNl7I4bm+nyVBoWKkXVUCgZC6n/gA5b5wjObB4pJX7BQXTDQ9nXvHN2IhwE/S8V6q5bQw=
+    on_start: always
+    on_success: always
+    on_failure: always
+    # config vars available: https://docs.travis-ci.com/user/notifications/#configuring-slack-notifications
+    template:
+    - "*%{repository_slug}: %{message}*"
+    - '*Git commit:* %{commit_message}'
+    - 'Build result: %{result} in %{duration}'
+    - 'Docker image tag: `%{commit}`'
+    - 'Dockerhub page: https://hub.docker.com/repository/docker/shaungc/kafka-connectors-cdc'
+    - 'Build details: %{build_url}'

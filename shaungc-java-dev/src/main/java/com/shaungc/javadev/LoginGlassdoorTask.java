@@ -6,6 +6,7 @@ import java.net.URL;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WebDriver.Navigation;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -13,9 +14,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  * LoginGlassdoorTask
  */
 public class LoginGlassdoorTask {
-    ContainerRemoteWebDriver driver;
+    ChromeDriver driver;
 
-    public LoginGlassdoorTask(ContainerRemoteWebDriver driver) throws MalformedURLException {
+    public LoginGlassdoorTask(ChromeDriver driver) throws MalformedURLException {
         this.driver = driver;
 
         this.launchTask();

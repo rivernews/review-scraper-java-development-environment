@@ -11,15 +11,17 @@ import org.openqa.selenium.chrome.ChromeOptions;
 /**
  * ContainerRemoteWebDriver
  */
-public class ContainerRemoteWebDriver extends RemoteWebDriver{
+public class ContainerWebDriver extends RemoteWebDriver{
 
-    public ContainerRemoteWebDriver(URL webDriverServiceUrl) {
+    public ContainerWebDriver(URL webDriverServiceUrl) {
         super(webDriverServiceUrl, new ChromeOptions());
     }
-    public ContainerRemoteWebDriver() throws MalformedURLException {
+    public ContainerWebDriver() throws MalformedURLException {
         // super(new URL("http://host.docker.internal:4444/wd/hub"), new ChromeOptions());
-        super(new URL("http://localhost:4444/wd/hub"), Configuration.DEBUG ? new ChromeOptions() : ContainerRemoteWebDriver.createDesiredCapabilities());
+        
+        super(new URL("http://localhost:4444/wd/hub"), Configuration.DEBUG ? new ChromeOptions() : ContainerWebDriver.createDesiredCapabilities());
     }
+    
     public static DesiredCapabilities createDesiredCapabilities() {
         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
         ChromeOptions chromeOptions = new ChromeOptions();

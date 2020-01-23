@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.shaungc.dataTypes.ReviewParsedData;
 import com.shaungc.javadev.Configuration;
-import com.shaungc.javadev.ContainerRemoteWebDriver;
+import com.shaungc.javadev.ContainerWebDriver;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -18,7 +18,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  * ScrapeReviewFromCompanyReviewPage
  */
 public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<ReviewParsedData, ReviewParsedData> {
-    public ScrapeReviewFromCompanyReviewPage(ContainerRemoteWebDriver passedInRemoteWebDriver) {
+    public ScrapeReviewFromCompanyReviewPage(ContainerWebDriver passedInRemoteWebDriver) {
         super(passedInRemoteWebDriver);
     }
 
