@@ -16,7 +16,8 @@ public class App {
 
             new LoginGlassdoorTask(driver);
 
-            new ScrapeOrganizationGlassdoorTask(driver, "DigitalOcean");
+            // new ScrapeOrganizationGlassdoorTask(driver, "DigitalOcean");
+            new ScrapeOrganizationGlassdoorTask(driver, "Waymo");
 
             driver.quit();
         } catch (Exception e) {

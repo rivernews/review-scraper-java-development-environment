@@ -6,13 +6,17 @@ import java.util.List;
 /**
  * ReviewData
  */
-public class EmplopyeeReviewParsedData {
+public class GlassdoorCompanyParsedData {
     public Float overallRating = Float.valueOf(-1);
+    public Integer localReviewCount = 0;
+    public Integer reviewCount = 0;
     public List<EmployeeReviewData> employeeReviewDataList = new ArrayList<EmployeeReviewData>();
 
     public void debug() {
         System.out.println("overallRating: " + this.overallRating);
-        for (EmployeeReviewData employeeReviewData: this.employeeReviewDataList) {
+        System.out.println("localReviewCount: " + this.localReviewCount);
+        System.out.println("reviewCount: " + this.reviewCount);
+        for (final EmployeeReviewData employeeReviewData : this.employeeReviewDataList) {
             employeeReviewData.debug();
         }
     }
