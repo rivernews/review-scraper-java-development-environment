@@ -32,8 +32,7 @@ public class LoginGlassdoorTask {
         this.driver.findElement(By.cssSelector("a[href*=signIn]")).click();
 
         // wait login modal pop up
-        Integer waitLoginModalTimeout = 10;
-        WebElement usernameInputElement = new WebDriverWait(driver, waitLoginModalTimeout)
+        WebElement usernameInputElement = new WebDriverWait(driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND)
                 .until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[name=username]")));
 
         // pull out modal element to improve searching element performance
@@ -47,7 +46,7 @@ public class LoginGlassdoorTask {
         loginModalElement.findElement(By.cssSelector("button[type=submit]")).click();
 
         // confirm that login succeed
-        new WebDriverWait(driver, waitLoginModalTimeout).until(ExpectedConditions.and(
+        new WebDriverWait(driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND).until(
             ExpectedConditions.elementToBeClickable(By.cssSelector("header nav div.container-menu"))
         ));
 

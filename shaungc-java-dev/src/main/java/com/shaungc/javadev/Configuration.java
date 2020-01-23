@@ -5,7 +5,7 @@ package com.shaungc.javadev;
  */
 public final class Configuration {
     public static Integer AVOID_GLITCH_WAIT_SECOND = 2;
-    public static Integer EXPECTED_CONDITION_WAIT_SECOND = 10;
+    public static Integer EXPECTED_CONDITION_WAIT_SECOND = 20;
     public static Boolean DEBUG = System.getenv("DEBUG") != null ? Boolean.parseBoolean(System.getenv("DEBUG")) : false;
     
     public static String GLASSDOOR_USERNAME = System.getenv("GLASSDOOR_USERNAME") != null ? System.getenv("GLASSDOOR_USERNAME") : System.getProperty("GLASSDOOR_USERNAME");
