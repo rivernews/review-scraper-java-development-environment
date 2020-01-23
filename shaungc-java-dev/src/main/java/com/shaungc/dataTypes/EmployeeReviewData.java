@@ -6,7 +6,7 @@ package com.shaungc.dataTypes;
 public class EmployeeReviewData {
 
     public String reviewId = "";
-    public String reviewTitle = "";
+    public String reviewHeaderTitle = "";
     public Float reviewRating = Float.valueOf(-1);
     public String reviewEmployeePositionText = "";
     public String reviewEmployeeLocation = "";
@@ -21,7 +21,7 @@ public class EmployeeReviewData {
     public void debug(Integer messageNumber) {
         System.out.println("INFO: =========================== " + messageNumber);
         System.out.println("reviewId: " + this.reviewId);
-        System.out.println("reviewTitle: " + this.reviewTitle);
+        System.out.println("reviewHeaderTitle: " + this.reviewHeaderTitle);
         System.out.println("reviewRating: " + this.reviewRating);
         System.out.println("reviewEmployeePositionText: " + this.reviewEmployeePositionText);
         System.out.println("reviewEmployeeLocation: " + this.reviewEmployeeLocation);

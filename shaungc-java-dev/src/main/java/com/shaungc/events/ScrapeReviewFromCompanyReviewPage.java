@@ -151,7 +151,7 @@ public class ScrapeReviewFromCompanyReviewPage
         reviewDataStore.reviewId = this.parseReviewId(employeeReviewLiElement);
         // TODO: check review id
 
-        // scrape time\
+        // scrape time
         try {
             reviewDataStore.reviewDate = employeeReviewLiElement.findElement(By.cssSelector("time.date"))
                     .getAttribute("datetime").strip();
@@ -159,7 +159,7 @@ public class ScrapeReviewFromCompanyReviewPage
         }
 
         // scrape comment title
-        reviewDataStore.reviewEmployeePositionText = employeeReviewLiElement.findElement(By.cssSelector("h2.summary a"))
+        reviewDataStore.reviewHeaderTitle = employeeReviewLiElement.findElement(By.cssSelector("h2.summary a"))
                 .getText().strip();
 
         // scrape rating
