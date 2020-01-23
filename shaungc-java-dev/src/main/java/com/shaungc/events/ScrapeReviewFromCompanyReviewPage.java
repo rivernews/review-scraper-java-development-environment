@@ -151,7 +151,7 @@ public class ScrapeReviewFromCompanyReviewPage
         reviewDataStore.reviewId = this.parseReviewId(employeeReviewLiElement);
         // TODO: check review id
 
-        // scrape time
+        // scrape time\
         try {
             reviewDataStore.reviewDate = employeeReviewLiElement.findElement(By.cssSelector("time.date"))
                     .getAttribute("datetime").strip();

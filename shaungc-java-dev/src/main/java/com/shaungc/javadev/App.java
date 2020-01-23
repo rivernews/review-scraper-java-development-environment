@@ -1,6 +1,7 @@
 package com.shaungc.javadev;
 
 import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.openqa.selenium.WebDriver;
 
@@ -16,9 +17,18 @@ public class App {
 
             new LoginGlassdoorTask(driver);
 
-            // new ScrapeOrganizationGlassdoorTask(driver, "DigitalOcean");
-            // new ScrapeOrganizationGlassdoorTask(driver, "Waymo");
-            new ScrapeOrganizationGlassdoorTask(driver, "23AndMe");
+            try {
+                URL companyOverviewPageUrl = new URL(Configuration.TEST_COMPANY_INFORMATION_STRING);
+                new ScrapeOrganizationGlassdoorTask(driver, companyOverviewPageUrl);
+            } catch (MalformedURLException e) {
+                if (Configuration.TEST_COMPANY_INFORMATION_STRING != null) {
+                    new ScrapeOrganizationGlassdoorTask(driver, Configuration.TEST_COMPANY_INFORMATION_STRING);
+                } else {
+                    // new ScrapeOrganizationGlassdoorTask(driver, "DigitalOcean");
+                    // new ScrapeOrganizationGlassdoorTask(driver, "Waymo");
+                    new ScrapeOrganizationGlassdoorTask(driver, "23AndMe");
+                }
+            }
 
             driver.quit();
         } catch (Exception e) {

@@ -13,6 +13,8 @@ public final class Configuration {
 
     public static Boolean RUNNING_FROM_CONTAINER = System.getenv("RUNNING_FROM_CONTAINER") != null ? Boolean.parseBoolean(System.getenv("RUNNING_FROM_CONTAINER")) : true;
 
+    public static String TEST_COMPANY_INFORMATION_STRING = System.getenv("TEST_COMPANY_INFORMATION_STRING") != null ? System.getenv("TEST_COMPANY_INFORMATION_STRING") : null;
+
     static {
         if (DEBUG) {
             System.out.println("\nConfiguration:GLASSDOOR_USERNAME = " + GLASSDOOR_USERNAME);
