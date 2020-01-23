@@ -84,11 +84,14 @@ public class ScrapeReviewFromCompanyReviewPage
 
         // foreach review
         try {
+            Integer messageNumberOffset = 0;
+
             while (true) {
                 // pull out review elements
                 final List<WebElement> employeeReviewElements = reviewPanelElement
                 .findElements(By.cssSelector("div#ReviewsFeed ol > li"));
 
+                
                 for (final WebElement employeeReviewElement : employeeReviewElements) {
                     final EmployeeReviewData employeeReviewData = new EmployeeReviewData();
                     this.scrapeEmployeeReview(employeeReviewElement, employeeReviewData);
@@ -96,7 +99,9 @@ public class ScrapeReviewFromCompanyReviewPage
                     glassdoorCompanyParsedData.employeeReviewDataList.add(employeeReviewData);
 
                     System.out.println("\n\n");
-                    employeeReviewData.debug();
+                    employeeReviewData.debug(messageNumberOffset);
+
+                    messageNumberOffset++;
                 }
 
                 // click next page
@@ -224,5 +229,6 @@ public class ScrapeReviewFromCompanyReviewPage
     protected void postAction(final GlassdoorCompanyParsedData parsedData) {
         // TODO Auto-generated method stub
         // parsedData.debug();
+        System.out.println("\n\nINFO: Total reviews processed: " + parsedData.employeeReviewDataList.size());
     }
 }
