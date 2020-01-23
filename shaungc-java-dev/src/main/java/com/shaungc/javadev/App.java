@@ -7,7 +7,7 @@ import org.openqa.selenium.WebDriver;
  *
  */
 public class App {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         WebDriver driver = WebDriverFactory.create();
         try {
             new LoginGlassdoorTask(driver);
@@ -19,5 +19,7 @@ public class App {
             driver.quit();
             throw e;
         }
+
+        return;
     }
 }
