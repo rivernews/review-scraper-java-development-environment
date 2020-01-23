@@ -10,6 +10,7 @@ import com.shaungc.javadev.ContainerWebDriver;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -18,7 +19,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  * ScrapeReviewFromCompanyReviewPage
  */
 public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<ReviewParsedData, ReviewParsedData> {
-    public ScrapeReviewFromCompanyReviewPage(ContainerWebDriver passedInRemoteWebDriver) {
+    public ScrapeReviewFromCompanyReviewPage(ChromeDriver passedInRemoteWebDriver) {
         super(passedInRemoteWebDriver);
     }
 
@@ -27,7 +28,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<ReviewParse
         List<WebElement> locatedElements = new ArrayList<>();
 
         // confirm is on review page while locating filter button
-        Integer waitReviewPageTimeout = 10;
         
         WebDriverWait wait = new WebDriverWait(this.remoteWebDriver, Configuration.EXPECTED_CONDITION_WAIT_SECOND);
 

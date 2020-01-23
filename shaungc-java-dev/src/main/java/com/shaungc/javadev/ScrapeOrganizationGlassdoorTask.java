@@ -22,7 +22,7 @@ public class ScrapeOrganizationGlassdoorTask {
         this.launchScraper();
     }
     public ScrapeOrganizationGlassdoorTask(String companyName) throws MalformedURLException {
-        this.driver = new ContainerWebDriver();
+        this.driver = new ChromeDriver();
 
         this.launchScraper();
     }
