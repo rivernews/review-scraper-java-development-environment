@@ -32,9 +32,10 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<EmplopyeeRe
         
         WebDriverWait wait = new WebDriverWait(this.driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND);
 
-        WebElement filterButtonElement = wait.until(
-            ExpectedConditions.elementToBeClickable(By.cssSelector("article[id*=MainCol] main div.search > div > button"))
-        );
+        // TODO: filter by engineering category
+        // WebElement filterButtonElement = wait.until(
+        //     ExpectedConditions.elementToBeClickable(By.cssSelector("article[id*=MainCol] main div.search > div > button"))
+        // );
         
         // locate sort dropdown list
         WebElement sortDropdownElement = this.driver.findElement(By.cssSelector("body div#PageContent article[id=MainCol] .filterSorts select[name=filterSorts]"));
@@ -122,6 +123,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<EmplopyeeRe
         // TODO: scrape text
         // TODO: click on "Show More" if presents
         ReviewTextData reviewTextData = null;
+        this.parseReviewTextData(employeeReviewLiElement, reviewDataStore);
 
         // scrape helpful
         Integer helpfulCount = 0;
@@ -138,6 +140,37 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<EmplopyeeRe
         // TODO: until next link grayed out
 
         return;
+    }
+
+    private void parseReviewTextData(WebElement employeeReviewLiElement, EmployeeReviewData reviewDataStore) {
+        final List<WebElement> showMoreLinkElements = employeeReviewLiElement.findElements(By.cssSelector("div.hreview div.mt span.link"));
+
+        for (WebElement showMoreLinkElement: showMoreLinkElements) {
+            showMoreLinkElement.click();
+        }
+
+
+        // main text
+        try {
+            reviewDataStore.reviewTextData.mainText = employeeReviewLiElement.findElement(By.cssSelector("p.mainText")).getText().strip();
+        } catch (Exception e) {
+        }
+
+        // pro text
+        // TODO: cannot find element
+        // reviewDataStore.reviewTextData.proText = employeeReviewLiElement.findElement(By.cssSelector("div.hreview div.mt div[class*=ReviewText]:nth-child(1) p:nth-child(2)")).getText().strip();
+
+        // con text
+        // TODO: cannot find element
+        // reviewDataStore.reviewTextData.conText = employeeReviewLiElement.findElement(By.cssSelector("div.hreview div.mt div[class*=ReviewText]:nth-child(2) p:nth-child(2)")).getText().strip();
+        
+        List<WebElement> paragraphElements = employeeReviewLiElement.findElements(By.cssSelector("div.hreview div.mt p"));
+
+        for (WebElement paragraphElement: paragraphElements) {
+            reviewDataStore.reviewTextData.rawParagraphs.add(
+                paragraphElement.getText().strip()
+            );
+        }
     }
 
     @Override
