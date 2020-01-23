@@ -72,7 +72,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<EmplopyeeRe
 
         // pull out review element
         List<WebElement> employeeReviewElements = reviewPanelElement.findElements(By.cssSelector("div#ReviewsFeed ol > li"));
-
+    
         // foreach review
         for (WebElement employeeReviewElement: employeeReviewElements) {
             EmployeeReviewData employeeReviewData = new EmployeeReviewData();
@@ -82,6 +82,10 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<EmplopyeeRe
 
             System.out.println("\n\n");
             employeeReviewData.debug();
+
+            // TODO: click next page
+
+            // TODO: until next link grayed out
         }
 
         return emplopyeeReviewParsedData;
@@ -135,10 +139,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<EmplopyeeRe
         } catch (NoSuchElementException e) {
         }
         
-        // TODO: click next page
-
-        // TODO: until next link grayed out
-
         return;
     }
 
