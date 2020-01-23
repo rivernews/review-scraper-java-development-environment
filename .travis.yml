@@ -23,7 +23,7 @@ install:
   - sudo chmod +x /usr/local/bin/chromedriver
 
 script:
-- mvn clean install
+- cd shaungc-java-dev && mvn clean install && mvn exec:java
 
 cache:
   directories:
