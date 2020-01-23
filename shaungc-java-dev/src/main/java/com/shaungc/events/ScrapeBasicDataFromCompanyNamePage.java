@@ -7,9 +7,9 @@ import com.shaungc.dataTypes.BasicParsedData;
 import com.shaungc.events.AScraperEvent;
 
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.By;
 
 /**
@@ -20,8 +20,8 @@ import org.openqa.selenium.By;
 
 public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParsedData, BasicParsedData> {
 
-    public ScrapeBasicDataFromCompanyNamePage(final RemoteWebDriver remoteWebDriver) {
-        super(remoteWebDriver);
+    public ScrapeBasicDataFromCompanyNamePage(final WebDriver webDriver) {
+        super(webDriver);
     }
 
     @Override
@@ -29,9 +29,9 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
 
         final List<WebElement> locatedElements = new ArrayList<WebElement>();
 
-        locatedElements.add(this.remoteWebDriver.findElementByCssSelector("article[id*=WideCol]"));
+        locatedElements.add(this.driver.findElement(By.cssSelector("article[id*=WideCol]")));
 
-        locatedElements.add(this.remoteWebDriver.findElementByCssSelector("article[id*=MainCol]"));
+        locatedElements.add(this.driver.findElement(By.cssSelector("article[id*=MainCol]")));
 
         return locatedElements;
     }

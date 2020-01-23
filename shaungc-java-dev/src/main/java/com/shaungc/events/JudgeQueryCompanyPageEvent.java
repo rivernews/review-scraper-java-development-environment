@@ -4,8 +4,9 @@ import java.util.List;
 
 import com.shaungc.events.AScraperEvent;
 
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.remote.RemoteWebDriver;
+
 
 /**
  * JudgeQueryCompanyPageEvent
@@ -22,8 +23,8 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 
 
 public class JudgeQueryCompanyPageEvent extends AScraperEvent<List<WebElement>, Boolean> {
-    public JudgeQueryCompanyPageEvent(RemoteWebDriver passedInRemoteWebDriver) {
-        super(passedInRemoteWebDriver);
+    public JudgeQueryCompanyPageEvent(WebDriver driver) {
+        super(driver);
     }
 
     @Override
@@ -33,7 +34,7 @@ public class JudgeQueryCompanyPageEvent extends AScraperEvent<List<WebElement>, 
 
     @Override
     protected void postAction(List<WebElement> parsedData) {
-        String resultPageUrl = this.remoteWebDriver.getCurrentUrl();
+        String resultPageUrl = this.driver.getCurrentUrl();
 
         if (resultPageUrl.contains("/Overview/")) {
             this.sideEffect = true;

@@ -1,16 +1,14 @@
 package com.shaungc.events;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.shaungc.dataTypes.ReviewParsedData;
 import com.shaungc.javadev.Configuration;
-import com.shaungc.javadev.ContainerWebDriver;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -19,8 +17,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  * ScrapeReviewFromCompanyReviewPage
  */
 public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<ReviewParsedData, ReviewParsedData> {
-    public ScrapeReviewFromCompanyReviewPage(ChromeDriver passedInRemoteWebDriver) {
-        super(passedInRemoteWebDriver);
+    public ScrapeReviewFromCompanyReviewPage(WebDriver driver) {
+        super(driver);
     }
 
     @Override
@@ -29,14 +27,14 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<ReviewParse
 
         // confirm is on review page while locating filter button
         
-        WebDriverWait wait = new WebDriverWait(this.remoteWebDriver, Configuration.EXPECTED_CONDITION_WAIT_SECOND);
+        WebDriverWait wait = new WebDriverWait(this.driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND);
 
         WebElement filterButtonElement = wait.until(
             ExpectedConditions.elementToBeClickable(By.cssSelector("article[id*=MainCol] main div.search > div > button"))
         );
         
         // locate sort dropdown list
-        WebElement sortDropdownElement = this.remoteWebDriver.findElementByCssSelector("body div#PageContent article[id=MainCol] .filterSorts select[name=filterSorts]");
+        WebElement sortDropdownElement = this.driver.findElement(By.cssSelector("body div#PageContent article[id=MainCol] .filterSorts select[name=filterSorts]"));
 
         // sort by most recent
         sortDropdownElement.click();

@@ -4,9 +4,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WebDriver.Navigation;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -14,9 +14,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  * LoginGlassdoorTask
  */
 public class LoginGlassdoorTask {
-    ChromeDriver driver;
+    WebDriver driver;
 
-    public LoginGlassdoorTask(ChromeDriver driver) throws MalformedURLException {
+    public LoginGlassdoorTask(WebDriver driver) throws MalformedURLException {
         this.driver = driver;
 
         this.launchTask();
@@ -29,7 +29,7 @@ public class LoginGlassdoorTask {
         navigation.to(loginPageUrl);
 
         // click "sign in" link
-        this.driver.findElementByCssSelector("a[href*=signIn]").click();
+        this.driver.findElement(By.cssSelector("a[href*=signIn]")).click();
 
         // wait login modal pop up
         Integer waitLoginModalTimeout = 10;
@@ -37,7 +37,7 @@ public class LoginGlassdoorTask {
                 .until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[name=username]")));
 
         // pull out modal element to improve searching element performance
-        WebElement loginModalElement = this.driver.findElementByCssSelector("div#LoginModal");
+        WebElement loginModalElement = this.driver.findElement(By.cssSelector("div#LoginModal"));
 
         // fill out login form
         usernameInputElement.sendKeys(Configuration.GLASSDOOR_USERNAME);

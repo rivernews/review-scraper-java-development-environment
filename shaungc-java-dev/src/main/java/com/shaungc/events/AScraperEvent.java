@@ -1,6 +1,7 @@
 package com.shaungc.events;
 
-import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
@@ -9,19 +10,19 @@ import java.util.List;
 
 public abstract class AScraperEvent<TParsedData, TPostActionSideEffect> {
     protected String cssSelector;
-    protected RemoteWebDriver remoteWebDriver;
+    protected WebDriver driver;
 
     // let class caller access values emit by postAction
     public TPostActionSideEffect sideEffect;
 
-    public AScraperEvent(RemoteWebDriver passedInRemoteWebDriver) {
-        this.remoteWebDriver = passedInRemoteWebDriver;
+    public AScraperEvent(WebDriver passedInRemoteWebDriver) {
+        this.driver = passedInRemoteWebDriver;
     }
 
     protected List<WebElement> locate(String passedInCssSelector) {
         if (this.cssSelector != null) {
             this.cssSelector = passedInCssSelector;
-            return this.remoteWebDriver.findElementsByCssSelector(this.cssSelector);
+            return this.driver.findElements(By.cssSelector(this.cssSelector));
         }
         
         return new ArrayList<>();

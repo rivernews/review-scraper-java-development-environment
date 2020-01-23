@@ -6,16 +6,18 @@ import com.shaungc.events.JudgeQueryCompanyPageEvent;
 import com.shaungc.events.ScrapeBasicDataFromCompanyNamePage;
 import com.shaungc.events.ScrapeReviewFromCompanyReviewPage;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 /**
  * ScrapeOrganizationGlassdoorTask
  */
 public class ScrapeOrganizationGlassdoorTask {
-    private ChromeDriver driver;
+    private WebDriver driver;
     private String searchCompanyName;
 
-    public ScrapeOrganizationGlassdoorTask(ChromeDriver driver, String companyName) {
+    public ScrapeOrganizationGlassdoorTask(WebDriver driver, String companyName) {
         this.driver = driver;
         this.searchCompanyName = companyName;
 
@@ -55,7 +57,7 @@ public class ScrapeOrganizationGlassdoorTask {
         }
 
         // navigate to reviews page
-        this.driver.findElementByCssSelector("article[id*=WideCol] a.eiCell.reviews").click();
+        this.driver.findElement(By.cssSelector("article[id*=WideCol] a.eiCell.reviews")).click();
 
         // scrape review page
         ScrapeReviewFromCompanyReviewPage scrapeReviewFromCompanyReviewPage = new ScrapeReviewFromCompanyReviewPage(driver);
