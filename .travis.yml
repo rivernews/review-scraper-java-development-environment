@@ -1,53 +1,38 @@
 language: java
 dist: trusty
 sudo: required
-install: true
-
+install:
+- sudo apt-get install google-chrome-stable
+- wget -N https://chromedriver.storage.googleapis.com/2.43/chromedriver_linux64.zip
+  -P ~/
+- unzip ~/chromedriver_linux64.zip -d ~/
+- rm ~/chromedriver_linux64.zip
+- sudo mv -f ~/chromedriver /usr/local/bin/
+- sudo chmod +x /usr/local/bin/chromedriver
 addons:
   chrome: stable
-  
 jdk:
 - oraclejdk11
-# - oraclejdk8
-
 before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3 # give xvfb some time to start
-  
-install:
-  - sudo apt-get install google-chrome-stable
-  - wget -N https://chromedriver.storage.googleapis.com/2.43/chromedriver_linux64.zip -P ~/
-  - unzip ~/chromedriver_linux64.zip -d ~/
-  - rm ~/chromedriver_linux64.zip
-  - sudo mv -f ~/chromedriver /usr/local/bin/
-  - sudo chmod +x /usr/local/bin/chromedriver
-
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
+- sleep 3
 script:
 - cd shaungc-java-dev && mvn clean install && mvn exec:java
-# - mvn clean install && mvn exec:java
-
 cache:
   directories:
-    - '$HOME/.m2/repository'
-    - '$HOME/.sonar/cache'
-
-
+  - "$HOME/.m2/repository"
+  - "$HOME/.sonar/cache"
 notifications:
   slack:
-    # run the following to generate the encrypted code
-    # travis login --pro --auto
-    # travis encrypt "<account>:<token>" --add notifications.slack.rooms --com
     rooms:
-      secure: IxTr5+m5sjqaoLF9GjGZT3f3Pf+d6lC42ghqFbnB4wG1w+RcKV4qFAroctTlnLmgibNNFy44exnL8cGUBDgRyF2I5Avz91nzuq8TrwtJVatAmCwF7ZxkAY2/TPkk9UpwuAUIMSEKxbIk1IUfMiCTIsUYx1aNb4ai42GkRp0puVAl2Ze5+5REJPaLj7OiXRUvKCsW+vZqdwwfew68WDjC+IL1FwZMg1keHZo8Ir1SAeqPbC2kIBCtQpp4drbw5+62FbFr5b82hsUz+bIuZ0bIdc5Q0OpU/wejygmC9iyLKZjFNeNKkWQIVbUlBE0cyPcgwQiW1Mk1R5PFXzWt0FhKj1/Q01iLL3QcHEOAyfmlSme+NRTBxP7qpVGqjPqKf97pMxNcJaL2jFuGBDET7Xf5KbFnMgJMYVT63AsyiU4tY/3G/8rF49Y0Le6N7lDiOKVBnz52Ru7KGzJcs8QHgz+UGX4qxKemN1yGpty0wE9WZoUKypIcXbRlVCPamhbZeFiBaaeUVxSPcN/0cObdEFS4Swi/pEJ7H9u7AALqoooFvGIA+UTUeSCYxzZO++5x0THLKDt18F5ShL0tgwAScg38VilIQoOFsC2GGBzb9TQNl7I4bm+nyVBoWKkXVUCgZC6n/gA5b5wjObB4pJX7BQXTDQ9nXvHN2IhwE/S8V6q5bQw=
+      secure: OUzeyMSZDeMuQ8ILjE4Gvk8nIIKafObwRq42tJj087SGjfsjA8wxCdXuGXIiCfNhAplcyxWEXSHbk5LPVJrVErqCwzQbxZPG4Qqmp/LE6t7sEgYDb2+9AEjFx51sSq2iJ/zLH009LyByyNbgocSU1urCvm7S4Yx1L9vIUIRWJUO0xFG7SCs5HA6LxErG2m30dV/YB47uL6PGdQCUA6nwtUxCAfLF0P3ZAn4f9SIop7xYWWyLkzk1FfJCtwQ88syO0nwsUjC6HDAmHdMTpVDE79WaTapD43u/JafEDJBd+GNjdbycYhzMh/Axhdd8BrdK1ENhqwsOwR6U+i8RSo7ySf9//DXlz+fhpCqACyCQvCVR1i5j2INUfqRaM263NrgbcNMWfF/wYTBnzG6pENzy8zMKJd+ufg8R/ZFZRx1SO0e2toRbjWTYwxjn2Kj79X1z+NAivdpO5x0ZI5a1tOGgyzLZ+hG2H3y27lTDKnRl7SNbX7KuKX5ZTUR+UCqD7MNQM4GHNjy0hrL5JlxZZbVK1IlDlwyz78cqVPVSREmxsywtI8+d2tWZoIqDVoNeVqA1BzapcLaq3uEbjYGRdBC19Y5G7EeFUUmAecU4lKqd0MRx1FS84klg0IeS+wB5zm20tBqjs5UiWzjTdzN5iGUl6bwA7C8mv0nZIT1cY4VvYbs=
     on_start: always
     on_success: always
     on_failure: always
-    # config vars available: https://docs.travis-ci.com/user/notifications/#configuring-slack-notifications
     template:
     - "*%{repository_slug}: %{message}*"
-    - '*Git commit:* %{commit_message}'
+    - "*Git commit:* %{commit_message}"
     - 'Build result: %{result} in %{duration}'
-    - 'Docker image tag: `%{commit}`'
-    - 'Dockerhub page: https://hub.docker.com/repository/docker/shaungc/kafka-connectors-cdc'
+    - 'Commit hash: `%{commit}`'
     - 'Build details: %{build_url}'
