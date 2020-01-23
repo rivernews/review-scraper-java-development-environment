@@ -48,17 +48,18 @@ public class LoginGlassdoorTask {
 
         // confirm that login succeed
         try {
-            new WebDriverWait(driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND).until(
+            System.out.println("WARN: waiting for login success page...");
+            new WebDriverWait(driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND_LONGER).until(
                 ExpectedConditions.elementToBeClickable(By.cssSelector("header nav div.container-menu"))
             );
         } catch (TimeoutException e) {
             // retry
+            System.out.println("WARN: wait for login success timed out previously. Retrying for the second time.");
             this.driver.navigate().refresh();
             new WebDriverWait(driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND).until(
                 ExpectedConditions.elementToBeClickable(By.cssSelector("header nav div.container-menu"))
             );
         }
-        
 
         System.out.println("\n\n\nOK, login complete!");
     }
