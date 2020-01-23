@@ -8,16 +8,23 @@ import org.openqa.selenium.WebDriver;
  */
 public class App {
     public static void main(String[] args) {
-        WebDriver driver = WebDriverFactory.create();
+        WebDriver driver = null;
         try {
+            driver = WebDriverFactory.create();
+
             new LoginGlassdoorTask(driver);
 
             new ScrapeOrganizationGlassdoorTask(driver, "DigitalOcean");
 
             driver.quit();
         } catch (Exception e) {
-            driver.quit();
-            throw e;
+            if (driver != null) {
+                driver.quit();
+            }
+            
+            if (Configuration.DEBUG) {
+                System.out.println("ERROR: program ended in exception block...!");
+            }
         }
 
         return;
