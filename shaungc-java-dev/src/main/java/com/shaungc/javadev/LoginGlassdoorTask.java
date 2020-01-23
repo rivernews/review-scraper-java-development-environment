@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WebDriver.Navigation;
@@ -46,9 +47,18 @@ public class LoginGlassdoorTask {
         loginModalElement.findElement(By.cssSelector("button[type=submit]")).click();
 
         // confirm that login succeed
-        new WebDriverWait(driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND).until(
-            ExpectedConditions.elementToBeClickable(By.cssSelector("header nav div.container-menu"))
-        );
+        try {
+            new WebDriverWait(driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND).until(
+                ExpectedConditions.elementToBeClickable(By.cssSelector("header nav div.container-menu"))
+            );
+        } catch (TimeoutException e) {
+            // retry
+            this.driver.navigate().refresh();
+            new WebDriverWait(driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND).until(
+                ExpectedConditions.elementToBeClickable(By.cssSelector("header nav div.container-menu"))
+            );
+        }
+        
 
         System.out.println("\n\n\nOK, login complete!");
     }

@@ -1,5 +1,7 @@
 package com.shaungc.javadev;
 
+import java.net.MalformedURLException;
+
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -7,7 +9,7 @@ import org.openqa.selenium.WebDriver;
  *
  */
 public class App {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws MalformedURLException {
         WebDriver driver = null;
         try {
             driver = WebDriverFactory.create();
@@ -23,7 +25,8 @@ public class App {
             }
             
             if (Configuration.DEBUG) {
-                System.out.println("ERROR: program ended in exception block...!");
+                System.out.println("\n\nERROR: program ended in exception block...!\n\n\n");
+                throw e;
             }
         }
 

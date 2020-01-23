@@ -3,7 +3,6 @@ package com.shaungc.javadev;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -33,20 +32,24 @@ public class WebDriverFactory {
             System.out.println("======PRODUCTION MODE======");
 
             final ChromeOptions chromeOptions = new ChromeOptions();
+
+            // use headless mode to improve performance
             chromeOptions.addArguments("--headless");
             chromeOptions.addArguments("--disable-gpu");
+            // chrome will fail on insecure connection in headless mode
+            chromeOptions.addArguments("--ignore-certificate-errors");
+
+            // added to solve no stdout issue
             chromeOptions.addArguments("--window-size=1920,1080");
             chromeOptions.addArguments("--disable-extensions");
             chromeOptions.addArguments("--proxy-server='direct://'");
             chromeOptions.addArguments("--proxy-bypass-list=*");
             chromeOptions.addArguments("--start-maximized");
             chromeOptions.addArguments("--no-sandbox");
-            chromeOptions.addArguments("--ignore-certificate-errors");
 
-            // deprecated
-            // final DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
-            // desiredCapabilities.setJavascriptEnabled(true);
-            // desiredCapabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
+            // clearer log
+            // https://stackoverflow.com/a/20748376/9814131
+            chromeOptions.addArguments("--log-level=3");
 
             return new ChromeDriver(chromeOptions);
         }

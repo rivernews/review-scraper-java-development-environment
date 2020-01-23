@@ -56,14 +56,14 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
 
         // parse review #
         final String reviewNumberText = companyHeader.findElement(By.cssSelector("a.eiCell.reviews span.num")).getText()
-                .trim();
+                .strip();
 
         // parse company overview: website, size, founded, location
         final List<WebElement> companyOverviewEntityElements = companyOverview
                 .findElements(By.cssSelector("div[id*=EmpBasicInfo] div.info div.infoEntity span.value"));
-        final String companySizeText = companyOverviewEntityElements.get(2).getText().trim();
-        final String companyFoundYearText = companyOverviewEntityElements.get(3).getText().trim();
-        final String companyLocationText = companyOverviewEntityElements.get(1).getText().trim();
+        final String companySizeText = companyOverviewEntityElements.get(2).getText().strip();
+        final String companyFoundYearText = companyOverviewEntityElements.get(3).getText().strip();
+        final String companyLocationText = companyOverviewEntityElements.get(1).getText().strip();
         String companyWebsiteUrl = "";
         try {
             companyWebsiteUrl = companyOverviewEntityElements.get(0).findElement(By.cssSelector("a.link"))
