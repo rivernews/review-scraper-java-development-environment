@@ -8,13 +8,16 @@ import org.openqa.selenium.WebDriver;
  */
 public class App {
     public static void main(String[] args) throws Exception {
-        // ContainerRemoteWebDriver driver = new ContainerRemoteWebDriver();
         WebDriver driver = WebDriverFactory.create();
+        try {
+            new LoginGlassdoorTask(driver);
 
-        new LoginGlassdoorTask(driver);
+            new ScrapeOrganizationGlassdoorTask(driver, "DigitalOcean");
 
-        new ScrapeOrganizationGlassdoorTask(driver, "DigitalOcean");
-
-        driver.close();
+            driver.quit();
+        } catch (Exception e) {
+            driver.quit();
+            throw e;
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.shaungc.javadev;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -30,7 +31,17 @@ public class WebDriverFactory {
             );
         } else {
             System.out.println("======PRODUCTION MODE======");
-            return new ChromeDriver();
+
+            final ChromeOptions chromeOptions = new ChromeOptions();
+            chromeOptions.addArguments("--headless");
+            chromeOptions.addArguments("--disable-gpu");
+
+            // deprecated
+            // final DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
+            // desiredCapabilities.setJavascriptEnabled(true);
+            // desiredCapabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
+
+            return new ChromeDriver(chromeOptions);
         }
     }
 }
