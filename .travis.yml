@@ -1,6 +1,11 @@
 language: java
 dist: trusty
 sudo: required
+before_install:
+- |
+  if [ "$SLACK_WEBHOOK_URL" != "" ]; then
+    curl -X POST --data-urlencode "payload={ \"text\": \"Travis session started.\"}" ${SLACK_WEBHOOK_URL}
+  fi
 install:
 - sudo apt-get install google-chrome-stable
 - wget -N https://chromedriver.storage.googleapis.com/2.43/chromedriver_linux64.zip
@@ -18,6 +23,10 @@ before_script:
 - sh -e /etc/init.d/xvfb start
 - sleep 3
 script:
+- |
+  if [ "$SLACK_WEBHOOK_URL" != "" ]; then
+    curl -X POST --data-urlencode "payload={ \"text\": \"About to build and run the scraper.\"}" ${SLACK_WEBHOOK_URL}
+  fi
 - cd shaungc-java-dev && mvn clean install && mvn exec:java
 cache:
   directories:
