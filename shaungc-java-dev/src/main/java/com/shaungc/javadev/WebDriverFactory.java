@@ -33,8 +33,8 @@ public class WebDriverFactory {
             System.out.println("======PRODUCTION MODE======");
 
             final ChromeOptions chromeOptions = new ChromeOptions();
-            chromeOptions.addArguments("--headless");
-            chromeOptions.addArguments("--disable-gpu");
+            // chromeOptions.addArguments("--headless");
+            // chromeOptions.addArguments("--disable-gpu");
 
             // deprecated
             // final DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
