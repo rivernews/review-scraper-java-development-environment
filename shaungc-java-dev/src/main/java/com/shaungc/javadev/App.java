@@ -17,6 +17,8 @@ public class App {
 
             new LoginGlassdoorTask(driver);
 
+            // launch scraping task against a company
+            // TODO: scale up to accept a list of company inputs
             try {
                 URL companyOverviewPageUrl = new URL(Configuration.TEST_COMPANY_INFORMATION_STRING);
                 new ScrapeOrganizationGlassdoorTask(driver, companyOverviewPageUrl);

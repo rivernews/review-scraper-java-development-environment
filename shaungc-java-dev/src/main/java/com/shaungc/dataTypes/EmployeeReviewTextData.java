@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * ReviewTextData
  */
-public class ReviewTextData {
+public class EmployeeReviewTextData {
     public List<String> rawParagraphs = new ArrayList<String>();
     public String mainText = "";
     public String proText = "";

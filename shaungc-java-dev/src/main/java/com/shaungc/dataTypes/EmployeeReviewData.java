@@ -7,10 +7,10 @@ public class EmployeeReviewData {
 
     public String reviewId = "";
     public String reviewHeaderTitle = "";
-    public Float reviewRating = Float.valueOf(-1);
+    public EmployeeReviewRatingMetrics reviewRatingMetrics = new EmployeeReviewRatingMetrics();
     public String reviewEmployeePositionText = "";
     public String reviewEmployeeLocation = "";
-    public ReviewTextData reviewTextData = new ReviewTextData();
+    public EmployeeReviewTextData reviewTextData = new EmployeeReviewTextData();
     public Integer helpfulCount = 0;
     public String reviewDate = "";
     
@@ -23,7 +23,7 @@ public class EmployeeReviewData {
         System.out.println("INFO: =========================== " + baseOneIndexMessageNumber);
         System.out.println("reviewId: " + this.reviewId);
         System.out.println("reviewHeaderTitle: " + this.reviewHeaderTitle);
-        System.out.println("reviewRating: " + this.reviewRating);
+        this.reviewRatingMetrics.debug();
         System.out.println("reviewEmployeePositionText: " + this.reviewEmployeePositionText);
         System.out.println("reviewEmployeeLocation: " + this.reviewEmployeeLocation);
         this.reviewTextData.debug();

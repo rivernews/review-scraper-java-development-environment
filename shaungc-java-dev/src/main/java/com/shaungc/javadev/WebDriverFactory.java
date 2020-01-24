@@ -19,19 +19,22 @@ public class WebDriverFactory {
     }
 
     public static WebDriver create() throws MalformedURLException {
+        final ChromeOptions chromeOptions = new ChromeOptions();
+
         if (Configuration.DEBUG) {
             System.out.println("======DEBUG MODE======");
 
             String webDriverServiceUrl = Configuration.RUNNING_FROM_CONTAINER ? "host.docker.internal" : "localhost";
 
+            chromeOptions.addArguments("--disable-extensions");
+            chromeOptions.addArguments("--start-maximized");
+
             return (WebDriver) new RemoteWebDriver(
                 new URL("http://" + webDriverServiceUrl + ":4444/wd/hub"),
-                new ChromeOptions()
+                chromeOptions
             );
         } else {
             System.out.println("======PRODUCTION MODE======");
-
-            final ChromeOptions chromeOptions = new ChromeOptions();
 
             // use headless mode to improve performance
             chromeOptions.addArguments("--headless");
