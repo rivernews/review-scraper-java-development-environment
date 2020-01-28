@@ -41,6 +41,7 @@ public class S3Service {
             throw e;
         } catch (Exception e) {
             Logger.info("Unknown error occured while using the bucket name " + bucketName);
+            throw e;
         }
     }
 
