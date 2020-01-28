@@ -16,6 +16,8 @@ public final class Configuration {
 
     public static String TEST_COMPANY_INFORMATION_STRING = System.getenv("TEST_COMPANY_INFORMATION_STRING") != null ? System.getenv("TEST_COMPANY_INFORMATION_STRING") : null;
 
+    public static String AWS_S3_ARCHIVE_BUCKET_NAME = System.getenv("AWS_S3_ARCHIVE_BUCKET_NAME") != null ? System.getenv("AWS_S3_ARCHIVE_BUCKET_NAME") : "shaungc-qualitative-org-review-data";
+
     static {
         if (DEBUG) {
             System.out.println("\nConfiguration:GLASSDOOR_USERNAME = " + GLASSDOOR_USERNAME);

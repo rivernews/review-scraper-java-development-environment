@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.shaungc.dataTypes.EmployeeReviewData;
-import com.shaungc.dataTypes.GlassdoorCompanyParsedData;
+import com.shaungc.dataTypes.GlassdoorCompanyReviewParsedData;
 import com.shaungc.dataTypes.EmployeeReviewTextData;
 import com.shaungc.javadev.Configuration;
 
@@ -21,7 +21,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  * ScrapeReviewFromCompanyReviewPage
  */
 public class ScrapeReviewFromCompanyReviewPage
-        extends AScraperEvent<GlassdoorCompanyParsedData, GlassdoorCompanyParsedData> {
+        extends AScraperEvent<GlassdoorCompanyReviewParsedData, GlassdoorCompanyReviewParsedData> {
 
     private final WebDriverWait wait;
 
@@ -74,11 +74,11 @@ public class ScrapeReviewFromCompanyReviewPage
     }
 
     @Override
-    protected GlassdoorCompanyParsedData parser(final List<WebElement> locatedElements) {
+    protected GlassdoorCompanyReviewParsedData parser(final List<WebElement> locatedElements) {
         final WebElement reviewPanelElement = locatedElements.get(0);
 
         // initialize data pack to store review data
-        final GlassdoorCompanyParsedData glassdoorCompanyParsedData = new GlassdoorCompanyParsedData();
+        final GlassdoorCompanyReviewParsedData glassdoorCompanyParsedData = new GlassdoorCompanyReviewParsedData();
 
         // scrape overall rating value
         final WebElement overallRatingElement = reviewPanelElement.findElement(By.cssSelector("div[class*=ratingNum]"));
@@ -132,7 +132,7 @@ public class ScrapeReviewFromCompanyReviewPage
     }
 
     private void scrapeReviewCount(WebElement reviewPanelElement,
-            GlassdoorCompanyParsedData glassdoorCompanyDataStore) {
+            GlassdoorCompanyReviewParsedData glassdoorCompanyDataStore) {
         try {
             List<WebElement> countElements = reviewPanelElement
                     .findElements(By.cssSelector("div[class*=ReviewsPageContainer] div.mt:last-child span strong"));
@@ -380,7 +380,7 @@ public class ScrapeReviewFromCompanyReviewPage
     }
 
     @Override
-    protected void postAction(final GlassdoorCompanyParsedData parsedData) {
+    protected void postAction(final GlassdoorCompanyReviewParsedData parsedData) {
         System.out.println("\n\nINFO: Total reviews processed: " + parsedData.employeeReviewDataList.size());
         this.sideEffect = parsedData;
     }

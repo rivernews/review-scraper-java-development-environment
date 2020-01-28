@@ -43,6 +43,10 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
 
         System.out.println("\n\n\nlocated elements get!");
 
+        // parse company name
+        String companyName = "";
+        companyName = companyHeader.findElement(By.cssSelector("div.header.info h1")).getAttribute("data-company").strip();
+
         // parse logo image
         String companyLogoImageUrl = "";
         try {
@@ -75,7 +79,7 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
         System.out.println("\n\n\nall parsing completed!");
 
         return new BasicParsedData(companyLogoImageUrl, reviewNumberText, companySizeText, companyFoundYearText,
-                companyLocationText, companyWebsiteUrl);
+                companyLocationText, companyWebsiteUrl, companyName);
     }
 
     @Override

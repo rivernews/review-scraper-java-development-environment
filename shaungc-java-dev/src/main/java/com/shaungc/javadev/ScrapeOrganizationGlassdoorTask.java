@@ -2,6 +2,8 @@ package com.shaungc.javadev;
 
 import java.net.URL;
 
+import com.shaungc.dataTypes.BasicParsedData;
+import com.shaungc.dataTypes.GlassdoorCompanyReviewParsedData;
 import com.shaungc.events.JudgeQueryCompanyPageEvent;
 import com.shaungc.events.ScrapeBasicDataFromCompanyNamePage;
 import com.shaungc.events.ScrapeReviewFromCompanyReviewPage;
@@ -16,6 +18,9 @@ public class ScrapeOrganizationGlassdoorTask {
     private final WebDriver driver;
     final private String searchCompanyName;
     final private URL companyOverviewPageUrl;
+
+    public GlassdoorCompanyReviewParsedData scrapedReviewData = null;
+    public BasicParsedData scrapedBasicData = null;
 
     public ScrapeOrganizationGlassdoorTask(final WebDriver driver, final String companyName) {
         this.driver = driver;
@@ -64,6 +69,8 @@ public class ScrapeOrganizationGlassdoorTask {
         final ScrapeBasicDataFromCompanyNamePage scrapeBasicDataFromCompanyNamePage = new ScrapeBasicDataFromCompanyNamePage(
                 this.driver);
         scrapeBasicDataFromCompanyNamePage.run();
+        
+        // short circuit if no review data
         if (scrapeBasicDataFromCompanyNamePage.sideEffect.reviewNumberText == "==") {
             System.out.println("Review number is -- so no need to scrape review page.");
             return;
@@ -73,6 +80,10 @@ public class ScrapeOrganizationGlassdoorTask {
         final ScrapeReviewFromCompanyReviewPage scrapeReviewFromCompanyReviewPage = new ScrapeReviewFromCompanyReviewPage(
                 driver);
         scrapeReviewFromCompanyReviewPage.run();
+        
+        // expose data pack
+        this.scrapedBasicData = scrapeBasicDataFromCompanyNamePage.sideEffect;
+        this.scrapedReviewData = scrapeReviewFromCompanyReviewPage.sideEffect;
 
         // extract company basic info
         System.out.println("Success!");

@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * ReviewData
  */
-public class GlassdoorCompanyParsedData {
+public class GlassdoorCompanyReviewParsedData {
     public Float overallRating = Float.valueOf(-1);
     public Integer localReviewCount = 0;
     public Integer reviewCount = 0;

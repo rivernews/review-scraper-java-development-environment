@@ -3,6 +3,7 @@ package com.shaungc.dataTypes;
 public class BasicParsedData {
     public String companyLogoUrl;
     public String reviewNumberText;
+    public String companyName;
 
     public String companySizeText;
     public String companyFoundYearText;
@@ -10,9 +11,10 @@ public class BasicParsedData {
     public String companyWebsiteUrl;
 
     public BasicParsedData(String pCompanyLogoUrl, String pReviewNumberText, String pCompanySizeText,
-            String pCompanyFoundYearText, String pCompanyLocationText, String pCompanyWebsiteUrl) {
+            String pCompanyFoundYearText, String pCompanyLocationText, String pCompanyWebsiteUrl, String pCompanyName) {
         this.companyLogoUrl = pCompanyLogoUrl;
         this.reviewNumberText = pReviewNumberText;
+        this.companyName = pCompanyName;
 
         this.companySizeText = pCompanySizeText;
         this.companyFoundYearText = pCompanyFoundYearText;
@@ -21,6 +23,7 @@ public class BasicParsedData {
     }
 
     public void debugPrintAllFields() {
+        System.out.println("companyName " + this.companyName);
         System.out.println("companyLogoUrl " + this.companyLogoUrl);
         System.out.println("reviewNumber " + this.reviewNumberText);
 
