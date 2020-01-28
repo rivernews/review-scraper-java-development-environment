@@ -13,7 +13,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
+
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -50,12 +50,14 @@ public class ScrapeReviewFromCompanyReviewPage
         // TODO: filter by engineering category
 
         // locate sort dropdown list
-        final WebElement sortDropdownElement = this.driver.findElement(
-                By.cssSelector("body div#PageContent article[id=MainCol] .filterSorts select[name=filterSorts]"));
+        final String sortDropdownElementCssSelector = "body div#PageContent article[id=MainCol] .filterSorts select[name=filterSorts]";
+        this.driver.findElement(
+                By.cssSelector(sortDropdownElementCssSelector)).click();
 
         // sort by most recent
-        sortDropdownElement.click();
-        sortDropdownElement.findElement(By.cssSelector("option[value=DATE]")).click();
+        // use absolute css selector based on this.driver to avoid click() interrupted by element structure changed
+        this.driver.findElement(
+                By.cssSelector(sortDropdownElementCssSelector + " option[value=DATE]")).click();;
 
         // wait for loading sort
         this.waitForReviewPanelLoading();
