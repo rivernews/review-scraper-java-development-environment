@@ -4,6 +4,7 @@ import com.shaungc.javadev.Logger;
 
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.BucketAlreadyExistsException;
 import software.amazon.awssdk.services.s3.model.BucketAlreadyOwnedByYouException;
 import software.amazon.awssdk.services.s3.model.BucketCannedACL;
 import software.amazon.awssdk.services.s3.model.CreateBucketConfiguration;
@@ -35,6 +36,9 @@ public class S3Service {
             Logger.info("Bucket created using default configuration: " + bucketName);
         } catch (BucketAlreadyOwnedByYouException e) {
             Logger.info("Bucket already own by you, will do nothing");
+        } catch (BucketAlreadyExistsException e) {
+            Logger.info("Bucket name used by others and must be corrected first: " + bucketName);
+            throw e;
         }
     }
 
