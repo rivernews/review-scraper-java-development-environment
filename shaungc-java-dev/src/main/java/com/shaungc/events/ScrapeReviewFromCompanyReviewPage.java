@@ -57,7 +57,7 @@ public class ScrapeReviewFromCompanyReviewPage
         // sort by most recent
         // use absolute css selector based on this.driver to avoid click() interrupted by element structure changed
         this.driver.findElement(
-                By.cssSelector(sortDropdownElementCssSelector + " option[value=DATE]")).click();;
+                By.cssSelector(sortDropdownElementCssSelector + " option[value=DATE]")).click();
 
         // wait for loading sort
         this.waitForReviewPanelLoading();

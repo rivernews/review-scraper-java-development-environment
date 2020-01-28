@@ -18,6 +18,8 @@ public final class Configuration {
 
     public static String AWS_S3_ARCHIVE_BUCKET_NAME = System.getenv("AWS_S3_ARCHIVE_BUCKET_NAME") != null ? System.getenv("AWS_S3_ARCHIVE_BUCKET_NAME") : "shaungc-qualitative-org-review-data";
 
+    public static Integer LOGGER_LEVEL = System.getenv("LOGGER_LEVEL") != null ? Integer.parseInt(System.getenv("LOGGER_LEVEL")) : 2;
+
     static {
         Logger.info("S3 bucket name is " + Configuration.AWS_S3_ARCHIVE_BUCKET_NAME);
     }
