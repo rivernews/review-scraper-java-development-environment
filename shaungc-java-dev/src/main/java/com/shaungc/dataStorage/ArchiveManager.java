@@ -30,6 +30,6 @@ public class ArchiveManager {
 
         Logger.info("JSON dumped to path " + pathUntilFilename);
 
-        Logger.info("dumped data:\n" + dumpString.substring(0, 500) + "...\n");
+        Logger.info("dumped data:\n" + dumpString.substring(0, Math.min(dumpString.length(), 500)) + "...\n");
     }
 }
