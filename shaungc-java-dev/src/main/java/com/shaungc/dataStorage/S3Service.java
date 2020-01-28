@@ -39,6 +39,8 @@ public class S3Service {
         } catch (BucketAlreadyExistsException e) {
             Logger.info("Bucket name used by others and must be corrected first: " + bucketName);
             throw e;
+        } catch (Exception e) {
+            Logger.info("Unknown error occured while using the bucket name " + bucketName);
         }
     }
 
