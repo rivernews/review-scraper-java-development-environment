@@ -1,5 +1,7 @@
 package com.shaungc.dataTypes;
 
+import java.util.Date;
+
 public class BasicParsedData {
     public String companyLogoUrl;
     public String reviewNumberText;
@@ -9,6 +11,8 @@ public class BasicParsedData {
     public String companyFoundYearText;
     public String companyLocationText;
     public String companyWebsiteUrl;
+
+    public Date scrapedTimestamp;
 
     public BasicParsedData(String pCompanyLogoUrl, String pReviewNumberText, String pCompanySizeText,
             String pCompanyFoundYearText, String pCompanyLocationText, String pCompanyWebsiteUrl, String pCompanyName) {

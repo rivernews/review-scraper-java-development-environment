@@ -1,6 +1,7 @@
 package com.shaungc.events;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.shaungc.dataTypes.BasicParsedData;
@@ -84,6 +85,7 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
 
     @Override
     protected void postAction(final BasicParsedData parsedData) {
+        parsedData.scrapedTimestamp = new Date();
         this.sideEffect = parsedData;
         parsedData.debugPrintAllFields();
     }
