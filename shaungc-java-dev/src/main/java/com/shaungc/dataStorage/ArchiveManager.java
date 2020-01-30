@@ -32,4 +32,8 @@ public class ArchiveManager {
 
         Logger.info("Dumped data:\n" + dumpString.substring(0, Math.min(dumpString.length(), 500)) + "...\n");
     }
+
+    public Boolean doesObjectExist(String fullPath) {
+        return this.s3Service.doesObjectExist(ArchiveManager.BUCKET_NAME, fullPath);
+    }
 }

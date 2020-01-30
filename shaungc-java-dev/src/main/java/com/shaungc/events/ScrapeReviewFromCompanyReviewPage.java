@@ -1,6 +1,7 @@
 package com.shaungc.events;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.shaungc.dataTypes.EmployeeReviewData;
@@ -16,6 +17,9 @@ import org.openqa.selenium.WebElement;
 
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import com.shaungc.javadev.Logger;
+
 
 /**
  * ScrapeReviewFromCompanyReviewPage
@@ -99,15 +103,17 @@ public class ScrapeReviewFromCompanyReviewPage
             final List<WebElement> employeeReviewElements = reviewPanelElement
                     .findElements(By.cssSelector(this.employeeReviewElementsLocalCssSelector));
             
-            System.out.println("\n\nINFO: on this page presents " + employeeReviewElements.size() + " review element(s): \n");
+            Logger.info("\n\non this page presents " + employeeReviewElements.size() + " review element(s): \n");
 
             for (final WebElement employeeReviewElement : employeeReviewElements) {
                 final EmployeeReviewData employeeReviewData = new EmployeeReviewData();
+
                 this.scrapeEmployeeReview(employeeReviewElement, employeeReviewData);
+                employeeReviewData.scrapedTimestamp = new Date();
 
                 glassdoorCompanyParsedData.employeeReviewDataList.add(employeeReviewData);
 
-                System.out.println("\n\n");
+                Logger.info("\n\n");
                 employeeReviewData.debug(messageNumberOffset);
 
                 messageNumberOffset++;
@@ -224,7 +230,7 @@ public class ScrapeReviewFromCompanyReviewPage
                             .getAttribute("title").strip());
         } catch (NoSuchElementException e) {
             if (Configuration.DEBUG) {
-                System.out.println("WARN: cannot scrape rating metrics - work & life balance");
+                Logger.info("WARN: cannot scrape rating metrics - work & life balance");
             }
         }
 
@@ -235,7 +241,7 @@ public class ScrapeReviewFromCompanyReviewPage
                             .getAttribute("title").strip());
         } catch (NoSuchElementException e) {
             if (Configuration.DEBUG) {
-                System.out.println("WARN: cannot scrape rating metrics - culture & values");
+                Logger.info("WARN: cannot scrape rating metrics - culture & values");
             }
         }
 
@@ -246,7 +252,7 @@ public class ScrapeReviewFromCompanyReviewPage
                             .getAttribute("title").strip());
         } catch (NoSuchElementException e) {
             if (Configuration.DEBUG) {
-                System.out.println("WARN: cannot scrape rating metrics - career opportunities");
+                Logger.info("WARN: cannot scrape rating metrics - career opportunities");
             }
         }
 
@@ -257,7 +263,7 @@ public class ScrapeReviewFromCompanyReviewPage
                             .getAttribute("title").strip());
         } catch (NoSuchElementException e) {
             if (Configuration.DEBUG) {
-                System.out.println("WARN: cannot scrape rating metrics - compensation & benefits");
+                Logger.info("WARN: cannot scrape rating metrics - compensation & benefits");
             }
         }
 
@@ -268,7 +274,7 @@ public class ScrapeReviewFromCompanyReviewPage
                             .getAttribute("title").strip());
         } catch (NoSuchElementException e) {
             if (Configuration.DEBUG) {
-                System.out.println("WARN: cannot scrape rating metrics - senior management");
+                Logger.info("WARN: cannot scrape rating metrics - senior management");
             }
         }
 
@@ -307,16 +313,16 @@ public class ScrapeReviewFromCompanyReviewPage
         final String javascriptCommand = this.getRatingMetricsElementDisplayJavascriptCommand(reviewId, styleDisplayString);
 
         if (Configuration.DEBUG) {
-            System.out.println("\n\nINFO: about to execute javascript: rating metric elements: change display style to " + styleDisplayString);
+            Logger.info("\n\nabout to execute javascript: rating metric elements: change display style to " + styleDisplayString);
             
-            System.out.println(String.format(
+            Logger.info(String.format(
                 "\nJavascript command:\n%s",
                 javascriptCommand
             ));
         }
         javascriptExecutor.executeScript(javascriptCommand);
         if (Configuration.DEBUG) {
-            System.out.println("INFO: finished executing javascript.");
+            Logger.info("finished executing javascript.");
         }
 
         // verify changes applied in UI
@@ -331,7 +337,7 @@ public class ScrapeReviewFromCompanyReviewPage
         }
 
         if (Configuration.DEBUG) {
-            System.out.println("INFO: confirmed UI applied.");
+            Logger.info("confirmed UI applied.");
         }
 
         return ratingMetricsElement;
@@ -383,7 +389,8 @@ public class ScrapeReviewFromCompanyReviewPage
 
     @Override
     protected void postAction(final GlassdoorCompanyReviewParsedData parsedData) {
-        System.out.println("\n\nINFO: Total reviews processed: " + parsedData.employeeReviewDataList.size());
+        parsedData.scrapedTimestamp = new Date();
         this.sideEffect = parsedData;
+        Logger.info("\nTotal reviews processed: " + parsedData.employeeReviewDataList.size());
     }
 }

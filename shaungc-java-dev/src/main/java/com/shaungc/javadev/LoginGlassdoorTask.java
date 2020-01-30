@@ -51,9 +51,9 @@ public class LoginGlassdoorTask {
 
         // confirm that login succeed
         final String judgeLoginSuccessElementXPath = "//*[@id=\"sc.keyword\"]";
-        System.out.println("WARN: waiting for login success page...");
+        Logger.info("WARN: waiting for login success page...");
         this.wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(judgeLoginSuccessElementXPath)));
 
-        System.out.println("\nOK, login complete!");
+        Logger.info("\nOK, login complete!");
     }
 }

@@ -37,7 +37,7 @@ public class App {
 
             driver.quit();
         } catch (Exception e) {
-            System.out.println("\n\nERROR: program ended in exception block...!\n\n\n");
+            Logger.info("\n\nERROR: program ended in exception block...!\n\n\n");
 
             if (driver != null) {
                 driver.quit();

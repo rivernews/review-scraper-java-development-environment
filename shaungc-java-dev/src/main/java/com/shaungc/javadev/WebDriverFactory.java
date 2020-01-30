@@ -22,7 +22,7 @@ public class WebDriverFactory {
         final ChromeOptions chromeOptions = new ChromeOptions();
 
         if (Configuration.DEBUG) {
-            System.out.println("======DEBUG MODE======");
+            Logger.info("======DEBUG MODE======");
 
             String webDriverServiceUrl = Configuration.RUNNING_FROM_CONTAINER ? "host.docker.internal" : "localhost";
 
@@ -34,7 +34,7 @@ public class WebDriverFactory {
                 chromeOptions
             );
         } else {
-            System.out.println("======PRODUCTION MODE======");
+            Logger.info("======PRODUCTION MODE======");
 
             // use headless mode to improve performance
             chromeOptions.addArguments("--headless");

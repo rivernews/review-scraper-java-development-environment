@@ -9,7 +9,10 @@ import software.amazon.awssdk.services.s3.model.BucketAlreadyOwnedByYouException
 import software.amazon.awssdk.services.s3.model.BucketCannedACL;
 import software.amazon.awssdk.services.s3.model.CreateBucketConfiguration;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 /**
  * S3Service
@@ -50,5 +53,18 @@ public class S3Service {
         // Put Object
         this.s3.putObject(PutObjectRequest.builder().bucket(bucketName).key(key).build(),
                 RequestBody.fromString(content));
+    }
+
+    protected Boolean doesObjectExist(String bucketName, String key) {
+        try {
+            this.s3.headObject(HeadObjectRequest.builder().bucket(bucketName).key(key).build());
+        } catch (S3Exception e) {
+            if (e.statusCode() == 404) {
+                return false;
+            }
+            throw e;
+        }
+        
+        return true;
     }
 }

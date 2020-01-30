@@ -3,6 +3,9 @@ package com.shaungc.dataTypes;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.shaungc.javadev.Logger;
+
+
 /**
  * ReviewTextData
  */
@@ -13,9 +16,9 @@ public class EmployeeReviewTextData {
     public String conText = "";
 
     public void debug() {
-        // System.out.println("mainText:" + mainText);
-        // System.out.println("proText:" + proText);
-        // System.out.println("conText:" + conText);
-        System.out.println("rawParagraphs:" + rawParagraphs);
+        // Logger.info("mainText:" + mainText);
+        // Logger.info("proText:" + proText);
+        // Logger.info("conText:" + conText);
+        Logger.info("rawParagraphs:" + rawParagraphs);
     }
 }

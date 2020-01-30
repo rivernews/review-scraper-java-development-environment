@@ -47,7 +47,7 @@ public class ScrapeOrganizationGlassdoorTask {
                     "https://www.glassdoor.com/Reviews/company-reviews.htm?suggestCount=10&suggestChosen=false&clickSource=searchBtn&typedKeyword=%s&sc.keyword=%s&locT=C&locId=&jobType=",
                     this.searchCompanyName, this.searchCompanyName));
         } else {
-            System.out.println("WARN: no company overview url or name provided, will not scrape for this company.");
+            Logger.info("WARN: no company overview url or name provided, will not scrape for this company.");
             return;
         }
 
@@ -57,7 +57,7 @@ public class ScrapeOrganizationGlassdoorTask {
         final JudgeQueryCompanyPageEvent judgeQueryCompanyPageEvent = new JudgeQueryCompanyPageEvent(this.driver);
         judgeQueryCompanyPageEvent.run();
         if (!judgeQueryCompanyPageEvent.sideEffect) {
-            System.out.println(
+            Logger.info(
                     "Either having multiple results or no result. Please check the webpage, and modify company name if necesary. There's also chance where the company has no review yet; or indeed there's no such company in Glassdoor yet.\n\n"
                             + "Searching company name: " + this.searchCompanyName + "\nScraper looking at: "
                             + this.driver.getCurrentUrl());
@@ -72,7 +72,7 @@ public class ScrapeOrganizationGlassdoorTask {
         
         // short circuit if no review data
         if (scrapeBasicDataFromCompanyNamePage.sideEffect.reviewNumberText == "==") {
-            System.out.println("Review number is -- so no need to scrape review page.");
+            Logger.info("Review number is -- so no need to scrape review page.");
             return;
         }
 
@@ -86,6 +86,6 @@ public class ScrapeOrganizationGlassdoorTask {
         this.scrapedReviewData = scrapeReviewFromCompanyReviewPage.sideEffect;
 
         // extract company basic info
-        System.out.println("Success!");
+        Logger.info("Success!");
     }
 }
