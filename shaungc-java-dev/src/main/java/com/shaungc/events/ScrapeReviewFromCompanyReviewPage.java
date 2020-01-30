@@ -111,18 +111,12 @@ public class ScrapeReviewFromCompanyReviewPage
 
         // foreach review
         Integer processedReviewPages = 0;
+        final Integer reviewReportTime = 4;
+        final Integer reportingRate = (Integer)(glassdoorCompanyParsedData.reviewMetadata.localReviewCount / reviewReportTime);
         while (true) {
             // pull out review elements
             final List<WebElement> employeeReviewElements = reviewPanelElement
                     .findElements(By.cssSelector(this.employeeReviewElementsLocalCssSelector));
-
-            // send message per 50 reviews (5 page, each around 10 reviews)
-            if (processedReviewPages % 5 == 0) {
-                Logger.infoAlsoSlack(
-                    "So far processed " + this.processedReviewsCount + " reviews\n" +
-                    "On this page presents " + employeeReviewElements.size() + " review element(s):\n" + this.driver.getCurrentUrl()
-                );
-            }
 
             for (final WebElement employeeReviewElement : employeeReviewElements) {
                 final EmployeeReviewData employeeReviewData = new EmployeeReviewData();
@@ -138,13 +132,31 @@ public class ScrapeReviewFromCompanyReviewPage
                     break;
                 }
                 
+                // TODO: remove this if not needed, since we write each review to s3 right after we parsed it, so collecting all reviews here seems unecessary
                 glassdoorCompanyParsedData.employeeReviewDataList.add(employeeReviewData);
 
-                // Logger.info("\n\n");
-                // employeeReviewData.debug(messageNumberOffset);
+                // send message per 50 reviews (5 page, each around 10 reviews)
+                if (this.processedReviewsCount % (reportingRate) == 0) {
+                    Logger.infoAlsoSlack(
+                        String.format(
+                            "%s\nOn this page presents %d elements\nSo far processed %d/%d reviews, keep processing for the next %d reviews ... (processed page count %d)\n",
+                            this.driver.getCurrentUrl(),
+                            employeeReviewElements.size(),
 
-                processedReviewPages++;
+                            this.processedReviewsCount,
+                            glassdoorCompanyParsedData.reviewMetadata.localReviewCount,
+
+                            reportingRate,
+                            processedReviewPages
+                        )
+                    );
+                }
+
+                // Logger.info("\n\n");
+                // employeeReviewData.debug(processedReviewsCount);
             }
+
+            processedReviewPages++;
 
             // click next page
             Boolean noNextPageLink = false;

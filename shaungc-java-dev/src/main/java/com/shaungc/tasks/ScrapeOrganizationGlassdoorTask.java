@@ -36,7 +36,7 @@ public class ScrapeOrganizationGlassdoorTask {
         this.searchCompanyName = companyName;
         this.companyOverviewPageUrl = null;
 
-        SlackService.asyncSendMessage("scraper task started by company name: " + companyName);
+        SlackService.asyncSendMessage("Scraper task started by company name: " + companyName);
 
         this.launchScraper();
     }
@@ -46,7 +46,7 @@ public class ScrapeOrganizationGlassdoorTask {
         this.searchCompanyName = null;
         this.companyOverviewPageUrl = companyOverviewPageUrl;
 
-        SlackService.asyncSendMessage("scraper task started by url: " + companyOverviewPageUrl);
+        SlackService.asyncSendMessage("Scraper task started by url: " + companyOverviewPageUrl);
 
         this.launchScraper();
     }
@@ -106,8 +106,8 @@ public class ScrapeOrganizationGlassdoorTask {
         this.scrapedReviewData = scrapeReviewFromCompanyReviewPage.sideEffect;
 
         // extract company basic info
-        Logger.infoAlsoSlack("Success!" + 
-            "\nProcessed reviews count: " + this.scrapedReviewData.reviewMetadata.localReviewCount +
+        Logger.infoAlsoSlack("======= Success! =======" + 
+            "\nProcessed reviews count: " + scrapeReviewFromCompanyReviewPage.processedReviewsCount +
             "\nDuration: " + scraperTaskTimer.getElapseDurationString());
     }
 }
