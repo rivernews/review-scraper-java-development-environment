@@ -34,6 +34,8 @@ public class ScrapeReviewFromCompanyReviewPage
     private final String employeeReviewElementsLocalCssSelector = "div#ReviewsFeed ol > li";
     private final String employeeReviewElementsCssSelector = reviewPanelElementCssSelector
             + employeeReviewElementsLocalCssSelector;
+    
+    public Integer processedReviewsCount = 0;
 
     public ScrapeReviewFromCompanyReviewPage(final WebDriver driver) {
         super(driver);
@@ -108,15 +110,18 @@ public class ScrapeReviewFromCompanyReviewPage
         this.archiveManager.writeGlassdoorOrganizationReviewsMetadata(glassdoorCompanyParsedData.reviewMetadata);
 
         // foreach review
-        Integer messageNumberOffset = 0;
+        Integer processedReviewPages = 0;
         while (true) {
             // pull out review elements
             final List<WebElement> employeeReviewElements = reviewPanelElement
                     .findElements(By.cssSelector(this.employeeReviewElementsLocalCssSelector));
 
             // send message per 50 reviews (5 page, each around 10 reviews)
-            if (messageNumberOffset % 5 == 0) {
-                Logger.infoAlsoSlack("On this page presents " + employeeReviewElements.size() + " review element(s): \n" + this.driver.getCurrentUrl());
+            if (processedReviewPages % 5 == 0) {
+                Logger.infoAlsoSlack(
+                    "So far processed " + this.processedReviewsCount + " reviews\n" +
+                    "On this page presents " + employeeReviewElements.size() + " review element(s):\n" + this.driver.getCurrentUrl()
+                );
             }
 
             for (final WebElement employeeReviewElement : employeeReviewElements) {
@@ -127,6 +132,7 @@ public class ScrapeReviewFromCompanyReviewPage
                 // write out review data
                 if (!this.archiveManager.doesGlassdoorOrganizationReviewExist(employeeReviewData.reviewId)) {
                     this.archiveManager.writeGlassdoorOrganizationReviewData(employeeReviewData);
+                    processedReviewsCount++;
                 } else {
                     Logger.infoAlsoSlack("Review already existed in our archive, will not proceed with the rest of reviews since they should already ben archived based on the most-recent ordering.");
                     break;
@@ -137,7 +143,7 @@ public class ScrapeReviewFromCompanyReviewPage
                 // Logger.info("\n\n");
                 // employeeReviewData.debug(messageNumberOffset);
 
-                messageNumberOffset++;
+                processedReviewPages++;
             }
 
             // click next page
