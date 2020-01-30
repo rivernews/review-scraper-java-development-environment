@@ -5,6 +5,7 @@ import java.util.Date;
 import com.shaungc.javadev.Logger;
 
 public class BasicParsedData {
+    public String companyId;
     public String companyLogoUrl;
     public String reviewNumberText;
     public String companyName;
@@ -16,8 +17,9 @@ public class BasicParsedData {
 
     public Date scrapedTimestamp;
 
-    public BasicParsedData(String pCompanyLogoUrl, String pReviewNumberText, String pCompanySizeText,
+    public BasicParsedData(String pCompanyId, String pCompanyLogoUrl, String pReviewNumberText, String pCompanySizeText,
             String pCompanyFoundYearText, String pCompanyLocationText, String pCompanyWebsiteUrl, String pCompanyName) {
+        this.companyId = pCompanyId;
         this.companyLogoUrl = pCompanyLogoUrl;
         this.reviewNumberText = pReviewNumberText;
         this.companyName = pCompanyName;
@@ -29,6 +31,7 @@ public class BasicParsedData {
     }
 
     public void debugPrintAllFields() {
+        Logger.info("companyId " + this.companyId);
         Logger.info("companyName " + this.companyName);
         Logger.info("companyLogoUrl " + this.companyLogoUrl);
         Logger.info("reviewNumber " + this.reviewNumberText);

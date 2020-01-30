@@ -8,6 +8,7 @@ import com.shaungc.dataStorage.ArchiveManager;
 import com.shaungc.dataTypes.BasicParsedData;
 import com.shaungc.events.AScraperEvent;
 import com.shaungc.javadev.Logger;
+import com.shaungc.javadev.ScraperException;
 
 import org.openqa.selenium.WebElement;
 
@@ -43,9 +44,16 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
     }
 
     @Override
-    protected BasicParsedData parser(final List<WebElement> locatedElements) {
+    protected BasicParsedData parser(final List<WebElement> locatedElements) throws ScraperException {
         final WebElement companyHeader = locatedElements.get(0);
         final WebElement companyOverview = locatedElements.get(1);
+
+        // parse company id
+        String companyId = companyHeader.findElement(By.cssSelector("div#EmpHero")).getAttribute("data-employer-id").strip();
+        if (companyId == "") {
+            Logger.warn("Failed to scrape companyId in header. HTML content:\n" + companyHeader.getText());
+            throw new ScraperException("Cannot scrape company id, so we shall not proceed. The `companyHeader`'s HTML text is logged above.'");
+        }
 
         // parse company name
         String companyName = "";
@@ -82,7 +90,7 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
 
         Logger.info("Basic data parsing completed!");
 
-        return new BasicParsedData(companyLogoImageUrl, reviewNumberText, companySizeText, companyFoundYearText,
+        return new BasicParsedData(companyId, companyLogoImageUrl, reviewNumberText, companySizeText, companyFoundYearText,
                 companyLocationText, companyWebsiteUrl, companyName);
     }
 
@@ -92,6 +100,7 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
         parsedData.scrapedTimestamp = new Date();
         // store org name, also for later other event use
         this.archiveManager.orgName = parsedData.companyName;
+        this.archiveManager.orgId = parsedData.companyId;
         this.archiveManager.writeGlassdoorOrganizationMetadata(parsedData);
 
         this.sideEffect = parsedData;

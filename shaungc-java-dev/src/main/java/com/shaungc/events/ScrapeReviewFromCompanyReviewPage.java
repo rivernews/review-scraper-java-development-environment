@@ -105,7 +105,7 @@ public class ScrapeReviewFromCompanyReviewPage
             final List<WebElement> employeeReviewElements = reviewPanelElement
                     .findElements(By.cssSelector(this.employeeReviewElementsLocalCssSelector));
 
-            Logger.info("\n\non this page presents " + employeeReviewElements.size() + " review element(s): \n");
+            Logger.info("On this page presents " + employeeReviewElements.size() + " review element(s): \n");
 
             for (final WebElement employeeReviewElement : employeeReviewElements) {
                 final EmployeeReviewData employeeReviewData = new EmployeeReviewData();
@@ -113,8 +113,13 @@ public class ScrapeReviewFromCompanyReviewPage
                 this.scrapeEmployeeReview(employeeReviewElement, employeeReviewData);
 
                 // write out review data
-                this.archiveManager.writeGlassdoorOrganizationReviewData(employeeReviewData);
-
+                if (!this.archiveManager.doesGlassdoorOrganizationReviewExist(employeeReviewData.reviewId)) {
+                    this.archiveManager.writeGlassdoorOrganizationReviewData(employeeReviewData);
+                } else {
+                    Logger.info("Review already existed in our archive, will not proceed with the rest of reviews since they should already ben archived based on the most-recent ordering.");
+                    break;
+                }
+                
                 glassdoorCompanyParsedData.employeeReviewDataList.add(employeeReviewData);
 
                 Logger.info("\n\n");
@@ -338,14 +343,14 @@ public class ScrapeReviewFromCompanyReviewPage
                 styleDisplayString);
 
         if (Configuration.DEBUG) {
-            Logger.info("\n\nabout to execute javascript: rating metric elements: change display style to "
+            Logger.info("About to execute javascript: rating metric elements: change display style to "
                     + styleDisplayString);
 
-            Logger.info(String.format("\nJavascript command:\n%s", javascriptCommand));
+            Logger.info(String.format("Javascript command:\n%s", javascriptCommand));
         }
         javascriptExecutor.executeScript(javascriptCommand);
         if (Configuration.DEBUG) {
-            Logger.info("finished executing javascript.");
+            Logger.info("Finished executing javascript.");
         }
 
         // verify changes applied in UI
@@ -358,7 +363,7 @@ public class ScrapeReviewFromCompanyReviewPage
         }
 
         if (Configuration.DEBUG) {
-            Logger.info("confirmed UI applied.");
+            Logger.info("Confirmed UI applied.");
         }
 
         return ratingMetricsElement;
@@ -411,6 +416,6 @@ public class ScrapeReviewFromCompanyReviewPage
     @Override
     protected void postAction(final GlassdoorCompanyReviewParsedData parsedData) {
         this.sideEffect = parsedData;
-        Logger.info("\nTotal reviews processed: " + parsedData.employeeReviewDataList.size());
+        Logger.info("Total reviews processed: " + parsedData.employeeReviewDataList.size());
     }
 }

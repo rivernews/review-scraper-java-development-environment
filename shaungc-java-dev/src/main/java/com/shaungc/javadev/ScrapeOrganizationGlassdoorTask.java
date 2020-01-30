@@ -23,7 +23,7 @@ public class ScrapeOrganizationGlassdoorTask {
     public GlassdoorCompanyReviewParsedData scrapedReviewData = null;
     public BasicParsedData scrapedBasicData = null;
 
-    public ScrapeOrganizationGlassdoorTask(final WebDriver driver, final String companyName) {
+    public ScrapeOrganizationGlassdoorTask(final WebDriver driver, final String companyName) throws ScraperException {
         this.driver = driver;
         this.searchCompanyName = companyName;
         this.companyOverviewPageUrl = null;
@@ -31,7 +31,7 @@ public class ScrapeOrganizationGlassdoorTask {
         this.launchScraper();
     }
 
-    public ScrapeOrganizationGlassdoorTask(final WebDriver driver, final URL companyOverviewPageUrl) {
+    public ScrapeOrganizationGlassdoorTask(final WebDriver driver, final URL companyOverviewPageUrl) throws ScraperException {
         this.driver = driver;
         this.searchCompanyName = null;
         this.companyOverviewPageUrl = companyOverviewPageUrl;
@@ -39,7 +39,7 @@ public class ScrapeOrganizationGlassdoorTask {
         this.launchScraper();
     }
 
-    private void launchScraper() {
+    private void launchScraper() throws ScraperException {
         // Access company overview page
         if (this.companyOverviewPageUrl != null) {
             this.driver.get(this.companyOverviewPageUrl.toString());

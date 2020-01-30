@@ -36,21 +36,17 @@ public class App {
             }
 
             driver.quit();
+        } catch (ScraperException e) {
+            Logger.info(e.getMessage());
+            Logger.error("A scraper exception is raised and its message is logged above; which is not an error of the program, but more of the webpage the scraper is dealing with. There is something special with the webpage. Refer to the current url of the scraper to investigate more: " + driver.getCurrentUrl());
         } catch (Exception e) {
-            Logger.info("\n\nERROR: program ended in exception block...!\n\n\n");
+            Logger.error("Program ended in exception block...!\n\n");
 
             if (driver != null) {
                 driver.quit();
             }
             
             throw e;
-        }
-
-        // data archiving
-        if (scrapeCompanyTask != null) {
-            ArchiveManager archiveManager = new ArchiveManager();
-            archiveManager.jsonDump(scrapeCompanyTask.scrapedBasicData.companyName, scrapeCompanyTask.scrapedBasicData);
-            archiveManager.jsonDump(scrapeCompanyTask.scrapedBasicData.companyName + " Reviews", scrapeCompanyTask.scrapedReviewData);
         }
 
         return;

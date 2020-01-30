@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.shaungc.dataStorage.ArchiveManager;
+import com.shaungc.javadev.ScraperException;
 
 
 public abstract class AScraperEvent<TParsedData, TPostActionSideEffect> {
@@ -40,11 +41,11 @@ public abstract class AScraperEvent<TParsedData, TPostActionSideEffect> {
         return locate(this.cssSelector);
     }
 
-    abstract protected TParsedData parser(List<WebElement> locatedElements);
+    abstract protected TParsedData parser(List<WebElement> locatedElements) throws ScraperException;
 
     abstract protected void postAction(TParsedData parsedData);
 
-    public void run() {
+    public void run() throws ScraperException {
         List<WebElement> webElements = locate();
         TParsedData parsedData = parser(webElements);
         postAction(parsedData);
