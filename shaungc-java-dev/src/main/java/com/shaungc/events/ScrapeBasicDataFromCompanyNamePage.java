@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.shaungc.dataStorage.ArchiveManager;
 import com.shaungc.dataTypes.BasicParsedData;
 import com.shaungc.events.AScraperEvent;
 import com.shaungc.javadev.Logger;
@@ -24,6 +25,9 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
 
     public ScrapeBasicDataFromCompanyNamePage(final WebDriver webDriver) {
         super(webDriver);
+    }
+    public ScrapeBasicDataFromCompanyNamePage(final WebDriver webDriver, ArchiveManager archiveManager) {
+        super(webDriver, archiveManager);
     }
 
     @Override
@@ -84,7 +88,12 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
 
     @Override
     protected void postAction(final BasicParsedData parsedData) {
+        // write data to archive
         parsedData.scrapedTimestamp = new Date();
+        // store org name, also for later other event use
+        this.archiveManager.orgName = parsedData.companyName;
+        this.archiveManager.writeGlassdoorOrganizationMetadata(parsedData);
+
         this.sideEffect = parsedData;
         parsedData.debugPrintAllFields();
     }

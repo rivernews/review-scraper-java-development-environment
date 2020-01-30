@@ -2,6 +2,7 @@ package com.shaungc.javadev;
 
 import java.net.URL;
 
+import com.shaungc.dataStorage.ArchiveManager;
 import com.shaungc.dataTypes.BasicParsedData;
 import com.shaungc.dataTypes.GlassdoorCompanyReviewParsedData;
 import com.shaungc.events.JudgeQueryCompanyPageEvent;
@@ -65,10 +66,14 @@ public class ScrapeOrganizationGlassdoorTask {
             return;
         }
 
+        // prepare to write data
+        ArchiveManager archiveManager = new ArchiveManager();
+
         // scrape company basic info
         final ScrapeBasicDataFromCompanyNamePage scrapeBasicDataFromCompanyNamePage = new ScrapeBasicDataFromCompanyNamePage(
-                this.driver);
+                this.driver, archiveManager);
         scrapeBasicDataFromCompanyNamePage.run();
+
         
         // short circuit if no review data
         if (scrapeBasicDataFromCompanyNamePage.sideEffect.reviewNumberText == "==") {
@@ -78,7 +83,7 @@ public class ScrapeOrganizationGlassdoorTask {
 
         // scrape review page
         final ScrapeReviewFromCompanyReviewPage scrapeReviewFromCompanyReviewPage = new ScrapeReviewFromCompanyReviewPage(
-                driver);
+                driver, archiveManager);
         scrapeReviewFromCompanyReviewPage.run();
         
         // expose data pack

@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.shaungc.dataStorage.ArchiveManager;
 import com.shaungc.dataTypes.EmployeeReviewData;
 import com.shaungc.dataTypes.GlassdoorCompanyReviewParsedData;
+import com.shaungc.dataTypes.GlassdoorReviewMetadata;
 import com.shaungc.dataTypes.EmployeeReviewTextData;
 import com.shaungc.javadev.Configuration;
 
@@ -20,7 +22,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.shaungc.javadev.Logger;
 
-
 /**
  * ScrapeReviewFromCompanyReviewPage
  */
@@ -32,10 +33,16 @@ public class ScrapeReviewFromCompanyReviewPage
     /** element locating resources */
     private final String reviewPanelElementCssSelector = "article[id*=MainCol] main";
     private final String employeeReviewElementsLocalCssSelector = "div#ReviewsFeed ol > li";
-    private final String employeeReviewElementsCssSelector = reviewPanelElementCssSelector + employeeReviewElementsLocalCssSelector;
+    private final String employeeReviewElementsCssSelector = reviewPanelElementCssSelector
+            + employeeReviewElementsLocalCssSelector;
 
     public ScrapeReviewFromCompanyReviewPage(final WebDriver driver) {
         super(driver);
+
+        this.wait = new WebDriverWait(this.driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND);
+    }
+    public ScrapeReviewFromCompanyReviewPage(final WebDriver driver, ArchiveManager archiveManager) {
+        super(driver, archiveManager);
 
         this.wait = new WebDriverWait(this.driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND);
     }
@@ -55,13 +62,12 @@ public class ScrapeReviewFromCompanyReviewPage
 
         // locate sort dropdown list
         final String sortDropdownElementCssSelector = "body div#PageContent article[id=MainCol] .filterSorts select[name=filterSorts]";
-        this.driver.findElement(
-                By.cssSelector(sortDropdownElementCssSelector)).click();
+        this.driver.findElement(By.cssSelector(sortDropdownElementCssSelector)).click();
 
         // sort by most recent
-        // use absolute css selector based on this.driver to avoid click() interrupted by element structure changed
-        this.driver.findElement(
-                By.cssSelector(sortDropdownElementCssSelector + " option[value=DATE]")).click();
+        // use absolute css selector based on this.driver to avoid click() interrupted
+        // by element structure changed
+        this.driver.findElement(By.cssSelector(sortDropdownElementCssSelector + " option[value=DATE]")).click();
 
         // wait for loading sort
         this.waitForReviewPanelLoading();
@@ -86,15 +92,11 @@ public class ScrapeReviewFromCompanyReviewPage
         // initialize data pack to store review data
         final GlassdoorCompanyReviewParsedData glassdoorCompanyParsedData = new GlassdoorCompanyReviewParsedData();
 
-        // scrape overall rating value
-        final WebElement overallRatingElement = reviewPanelElement.findElement(By.cssSelector("div[class*=ratingNum]"));
-        try {
-            glassdoorCompanyParsedData.overallRating = Float.parseFloat(overallRatingElement.getText().strip());
-        } catch (final NumberFormatException e) {
-        }
+        // scrape for review metadata
+        this.scrapeReviewMetadata(reviewPanelElement, glassdoorCompanyParsedData.reviewMetadata);
 
-        // scrape ovwerall review counts
-        this.scrapeReviewCount(reviewPanelElement, glassdoorCompanyParsedData);
+        // write out review metadata
+        this.archiveManager.writeGlassdoorOrganizationReviewsMetadata(glassdoorCompanyParsedData.reviewMetadata);
 
         // foreach review
         Integer messageNumberOffset = 0;
@@ -102,14 +104,16 @@ public class ScrapeReviewFromCompanyReviewPage
             // pull out review elements
             final List<WebElement> employeeReviewElements = reviewPanelElement
                     .findElements(By.cssSelector(this.employeeReviewElementsLocalCssSelector));
-            
+
             Logger.info("\n\non this page presents " + employeeReviewElements.size() + " review element(s): \n");
 
             for (final WebElement employeeReviewElement : employeeReviewElements) {
                 final EmployeeReviewData employeeReviewData = new EmployeeReviewData();
 
                 this.scrapeEmployeeReview(employeeReviewElement, employeeReviewData);
-                employeeReviewData.scrapedTimestamp = new Date();
+
+                // write out review data
+                this.archiveManager.writeGlassdoorOrganizationReviewData(employeeReviewData);
 
                 glassdoorCompanyParsedData.employeeReviewDataList.add(employeeReviewData);
 
@@ -123,12 +127,12 @@ public class ScrapeReviewFromCompanyReviewPage
             Boolean noNextPageLink = false;
             try {
                 this.driver
-                    .findElement(By.cssSelector("ul[class^=pagination] li[class$=next] a:not([class$=disabled])"))
-                    .click();
+                        .findElement(By.cssSelector("ul[class^=pagination] li[class$=next] a:not([class$=disabled])"))
+                        .click();
             } catch (NoSuchElementException e) {
                 noNextPageLink = true;
             }
-            
+
             if (noNextPageLink) {
                 break;
             }
@@ -139,17 +143,34 @@ public class ScrapeReviewFromCompanyReviewPage
         return glassdoorCompanyParsedData;
     }
 
+    private void scrapeReviewMetadata(WebElement reviewPanelElement,
+            GlassdoorReviewMetadata glassdoorReviewMetadataStore) {
+        // scrape overall rating value
+        final WebElement overallRatingElement = reviewPanelElement.findElement(By.cssSelector("div[class*=ratingNum]"));
+        try {
+            glassdoorReviewMetadataStore.overallRating = Float
+                    .parseFloat(overallRatingElement.getText().strip());
+        } catch (final NumberFormatException e) {
+        }
+
+        // scrape ovwerall review counts
+        this.scrapeReviewCount(reviewPanelElement, glassdoorReviewMetadataStore);
+
+        // write out data
+        glassdoorReviewMetadataStore.scrapedTimestamp = new Date();
+    }
+
     private void scrapeReviewCount(WebElement reviewPanelElement,
-            GlassdoorCompanyReviewParsedData glassdoorCompanyDataStore) {
+    GlassdoorReviewMetadata glassdoorReviewMetadataStore) {
         try {
             List<WebElement> countElements = reviewPanelElement
                     .findElements(By.cssSelector("div[class*=ReviewsPageContainer] div.mt:last-child span strong"));
 
             if (countElements.size() == 2) {
-                glassdoorCompanyDataStore.localReviewCount = Integer
+                glassdoorReviewMetadataStore.localReviewCount = Integer
                         .parseInt(countElements.get(0).getText().strip().replaceAll("\\D+", ""));
 
-                glassdoorCompanyDataStore.reviewCount = Integer
+                glassdoorReviewMetadataStore.reviewCount = Integer
                         .parseInt(countElements.get(1).getText().strip().replaceAll("\\D+", ""));
             }
         } catch (NoSuchElementException e) {
@@ -186,8 +207,10 @@ public class ScrapeReviewFromCompanyReviewPage
 
         // scrape location
         try {
-            reviewDataStore.reviewEmployeeLocation = employeeReviewLiElement.findElement(By.cssSelector("div.author span.authorInfo span.authorLocation")).getText().strip();
-        } catch (NoSuchElementException e) {}
+            reviewDataStore.reviewEmployeeLocation = employeeReviewLiElement
+                    .findElement(By.cssSelector("div.author span.authorInfo span.authorLocation")).getText().strip();
+        } catch (NoSuchElementException e) {
+        }
 
         // TODO: scrape text
         final EmployeeReviewTextData reviewTextData = null;
@@ -212,15 +235,19 @@ public class ScrapeReviewFromCompanyReviewPage
             // if has dropdown icon, means that it has rating metrics data
             employeeReviewLiElement.findElement(By.cssSelector("span.gdRatings i.subRatingsDrop"));
             this.parseReviewRatingMetrics(employeeReviewLiElement, reviewDataStore);
-        } catch (NoSuchElementException e) {}
+        } catch (NoSuchElementException e) {
+        }
+
+        reviewDataStore.scrapedTimestamp = new Date();
 
         return;
     }
 
     private void parseReviewRatingMetrics(final WebElement employeeReviewLiElement,
             final EmployeeReviewData reviewDataStore) {
-        
-        // pre-processing - show rating metric element (the hover-dropdown tooltips that displays subratings in each review are hidden at first)
+
+        // pre-processing - show rating metric element (the hover-dropdown tooltips that
+        // displays subratings in each review are hidden at first)
         WebElement ratingMetricsElement = this.showRatingMetricsElement(reviewDataStore.reviewId);
 
         // scrape work life balance rating
@@ -278,47 +305,43 @@ public class ScrapeReviewFromCompanyReviewPage
             }
         }
 
-        // hide so that it won't overlap other elements, which can cause click() on other elements not working
+        // hide so that it won't overlap other elements, which can cause click() on
+        // other elements not working
         this.hideRatingMetricsElement(reviewDataStore.reviewId);
     }
 
     private String getRatingMetricsElementCssSelector(String reviewId) {
-        // example resulting css selector: 
-        //     "article[id*=MainCol] 
-        //     main div#ReviewsFeed ol > li[id$='reviewId']
-        //     div.mt span.gdRatings div.subRatings"
-        return this.reviewPanelElementCssSelector + 
-        String.format(" %s[id$='%s']", this.employeeReviewElementsLocalCssSelector, reviewId) +
-        " div.mt span.gdRatings div.subRatings";
+        // example resulting css selector:
+        // "article[id*=MainCol]
+        // main div#ReviewsFeed ol > li[id$='reviewId']
+        // div.mt span.gdRatings div.subRatings"
+        return this.reviewPanelElementCssSelector
+                + String.format(" %s[id$='%s']", this.employeeReviewElementsLocalCssSelector, reviewId)
+                + " div.mt span.gdRatings div.subRatings";
     }
 
     private String getRatingMetricsElementDisplayJavascriptCommand(String reviewId, String styleDisplayString) {
-        return String.format(
-            "const metricElements = document.querySelectorAll(\"%1$s\"); %2$s;",
+        return String.format("const metricElements = document.querySelectorAll(\"%1$s\"); %2$s;",
 
-            this.getRatingMetricsElementCssSelector(reviewId),
+                this.getRatingMetricsElementCssSelector(reviewId),
 
-            String.format(
-                "for (let metricElement of metricElements) { metricElement.style.display = \"%s\"; }",
-                styleDisplayString
-            )
-        );
+                String.format("for (let metricElement of metricElements) { metricElement.style.display = \"%s\"; }",
+                        styleDisplayString));
     }
 
     private WebElement changeDisplayRatingMetricsElement(String reviewId, String styleDisplayString) {
         WebElement ratingMetricsElement = null;
 
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) this.driver;
-        
-        final String javascriptCommand = this.getRatingMetricsElementDisplayJavascriptCommand(reviewId, styleDisplayString);
+
+        final String javascriptCommand = this.getRatingMetricsElementDisplayJavascriptCommand(reviewId,
+                styleDisplayString);
 
         if (Configuration.DEBUG) {
-            Logger.info("\n\nabout to execute javascript: rating metric elements: change display style to " + styleDisplayString);
-            
-            Logger.info(String.format(
-                "\nJavascript command:\n%s",
-                javascriptCommand
-            ));
+            Logger.info("\n\nabout to execute javascript: rating metric elements: change display style to "
+                    + styleDisplayString);
+
+            Logger.info(String.format("\nJavascript command:\n%s", javascriptCommand));
         }
         javascriptExecutor.executeScript(javascriptCommand);
         if (Configuration.DEBUG) {
@@ -327,13 +350,11 @@ public class ScrapeReviewFromCompanyReviewPage
 
         // verify changes applied in UI
         if (styleDisplayString != "none") {
-            ratingMetricsElement = this.wait.until(
-                ExpectedConditions.visibilityOfElementLocated(By.cssSelector(this.getRatingMetricsElementCssSelector(reviewId)))
-            );
+            ratingMetricsElement = this.wait.until(ExpectedConditions
+                    .visibilityOfElementLocated(By.cssSelector(this.getRatingMetricsElementCssSelector(reviewId))));
         } else {
-            this.wait.until(
-                ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(this.getRatingMetricsElementCssSelector(reviewId)))
-            );
+            this.wait.until(ExpectedConditions
+                    .invisibilityOfElementLocated(By.cssSelector(this.getRatingMetricsElementCssSelector(reviewId))));
         }
 
         if (Configuration.DEBUG) {
@@ -389,7 +410,6 @@ public class ScrapeReviewFromCompanyReviewPage
 
     @Override
     protected void postAction(final GlassdoorCompanyReviewParsedData parsedData) {
-        parsedData.scrapedTimestamp = new Date();
         this.sideEffect = parsedData;
         Logger.info("\nTotal reviews processed: " + parsedData.employeeReviewDataList.size());
     }

@@ -7,6 +7,8 @@ import org.openqa.selenium.WebElement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.shaungc.dataStorage.ArchiveManager;
+
 
 public abstract class AScraperEvent<TParsedData, TPostActionSideEffect> {
     protected String cssSelector;
@@ -15,8 +17,15 @@ public abstract class AScraperEvent<TParsedData, TPostActionSideEffect> {
     // let class caller access values emit by postAction
     public TPostActionSideEffect sideEffect;
 
+    final protected ArchiveManager archiveManager;
+
     public AScraperEvent(WebDriver passedInRemoteWebDriver) {
         this.driver = passedInRemoteWebDriver;
+        this.archiveManager = null;
+    }
+    public AScraperEvent(WebDriver passedInRemoteWebDriver, ArchiveManager archiveManager) {
+        this.driver = passedInRemoteWebDriver;
+        this.archiveManager = archiveManager;
     }
 
     protected List<WebElement> locate(String passedInCssSelector) {
