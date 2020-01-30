@@ -5,7 +5,7 @@ import com.shaungc.dataTypes.BasicParsedData;
 import com.shaungc.dataTypes.EmployeeReviewData;
 import com.shaungc.dataTypes.GlassdoorReviewMetadata;
 import com.shaungc.javadev.Configuration;
-import com.shaungc.javadev.Logger;
+import com.shaungc.utilities.Logger;
 
 
 /**
@@ -18,7 +18,7 @@ public class ArchiveManager {
     private static String BUCKET_NAME = Configuration.AWS_S3_ARCHIVE_BUCKET_NAME;
     
     // https://github.com/google/gson
-    private static Gson GSON_TOOL = new Gson();
+    public static Gson GSON_TOOL = new Gson();
 
     static {
         ArchiveManager.s3Service.createBucket(ArchiveManager.BUCKET_NAME);
@@ -65,7 +65,7 @@ public class ArchiveManager {
     // write out functions
 
     static public void jsonDump(String pathUntilFilename, Object object) {
-        String dumpString = ArchiveManager.GSON_TOOL.toJson(object);
+        String dumpString = ArchiveManager.serializeJavaObject(object);
 
         ArchiveManager.s3Service.putObjectOfString(ArchiveManager.BUCKET_NAME, ArchiveManager.getFullPath(pathUntilFilename), dumpString);
 
@@ -96,5 +96,7 @@ public class ArchiveManager {
     }
 
     // misc helper functions
-    
+    static public String serializeJavaObject(Object object) {
+        return ArchiveManager.GSON_TOOL.toJson(object);
+    }
 }

@@ -2,7 +2,7 @@ package com.shaungc.dataTypes;
 
 import java.util.Date;
 
-import com.shaungc.javadev.Logger;
+import com.shaungc.utilities.Logger;
 
 public class BasicParsedData {
     public String companyId;

@@ -3,7 +3,10 @@ package com.shaungc.javadev;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import com.shaungc.dataStorage.ArchiveManager;
+import com.shaungc.exceptions.ScraperException;
+import com.shaungc.tasks.LoginGlassdoorTask;
+import com.shaungc.tasks.ScrapeOrganizationGlassdoorTask;
+import com.shaungc.utilities.Logger;
 
 import org.openqa.selenium.WebDriver;
 
@@ -12,7 +15,7 @@ import org.openqa.selenium.WebDriver;
  *
  */
 public class App {
-    public static void main(String[] args) throws MalformedURLException {
+    public static void main(String[] args) {
         WebDriver driver = null;
         ScrapeOrganizationGlassdoorTask scrapeCompanyTask = null;
         try {
@@ -38,7 +41,7 @@ public class App {
             driver.quit();
         } catch (ScraperException e) {
             Logger.info(e.getMessage());
-            Logger.error("A scraper exception is raised and its message is logged above; which is not an error of the program, but more of the webpage the scraper is dealing with. There is something special with the webpage. Refer to the current url of the scraper to investigate more: " + driver.getCurrentUrl());
+            Logger.errorAlsoSlack("A scraper exception is raised and its message is logged above; which is not an error of the program, but more of the webpage the scraper is dealing with. There is something special with the webpage. Refer to the current url of the scraper to investigate more: " + driver.getCurrentUrl());
         } catch (Exception e) {
             Logger.error("Program ended in exception block...!\n\n");
 

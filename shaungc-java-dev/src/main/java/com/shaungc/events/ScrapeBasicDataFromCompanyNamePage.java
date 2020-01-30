@@ -7,8 +7,8 @@ import java.util.List;
 import com.shaungc.dataStorage.ArchiveManager;
 import com.shaungc.dataTypes.BasicParsedData;
 import com.shaungc.events.AScraperEvent;
-import com.shaungc.javadev.Logger;
-import com.shaungc.javadev.ScraperException;
+import com.shaungc.exceptions.ScraperException;
+import com.shaungc.utilities.Logger;
 
 import org.openqa.selenium.WebElement;
 
@@ -67,7 +67,7 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
 
             companyLogoImageUrl = companyLogoImgElement.getAttribute("src");
         } catch (final NoSuchElementException e) {
-            Logger.info("WARN: cannot parse company logo: " + e.getMessage());
+            Logger.warn("Cannot parse company logo: " + e.getMessage());
         }
 
         // parse review #
@@ -84,11 +84,7 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
         try {
             companyWebsiteUrl = companyOverviewEntityElements.get(0).findElement(By.cssSelector("a.link"))
                     .getAttribute("href");
-        } catch (final NoSuchElementException e) {
-
-        }
-
-        Logger.info("Basic data parsing completed!");
+        } catch (final NoSuchElementException e) {}
 
         return new BasicParsedData(companyId, companyLogoImageUrl, reviewNumberText, companySizeText, companyFoundYearText,
                 companyLocationText, companyWebsiteUrl, companyName);

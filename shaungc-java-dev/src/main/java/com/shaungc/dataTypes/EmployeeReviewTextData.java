@@ -3,7 +3,7 @@ package com.shaungc.dataTypes;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.shaungc.javadev.Logger;
+import com.shaungc.utilities.Logger;
 
 
 /**

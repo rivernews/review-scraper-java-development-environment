@@ -1,6 +1,10 @@
-package com.shaungc.javadev;
+package com.shaungc.tasks;
 
 import java.net.URL;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.temporal.Temporal;
+import java.util.Date;
 
 import com.shaungc.dataStorage.ArchiveManager;
 import com.shaungc.dataTypes.BasicParsedData;
@@ -8,6 +12,10 @@ import com.shaungc.dataTypes.GlassdoorCompanyReviewParsedData;
 import com.shaungc.events.JudgeQueryCompanyPageEvent;
 import com.shaungc.events.ScrapeBasicDataFromCompanyNamePage;
 import com.shaungc.events.ScrapeReviewFromCompanyReviewPage;
+import com.shaungc.exceptions.ScraperException;
+import com.shaungc.utilities.Logger;
+import com.shaungc.utilities.SlackService;
+import com.shaungc.utilities.Timer;
 
 import org.openqa.selenium.WebDriver;
 
@@ -28,6 +36,8 @@ public class ScrapeOrganizationGlassdoorTask {
         this.searchCompanyName = companyName;
         this.companyOverviewPageUrl = null;
 
+        SlackService.asyncSendMessage("scraper task started by company name: " + companyName);
+
         this.launchScraper();
     }
 
@@ -36,10 +46,14 @@ public class ScrapeOrganizationGlassdoorTask {
         this.searchCompanyName = null;
         this.companyOverviewPageUrl = companyOverviewPageUrl;
 
+        SlackService.asyncSendMessage("scraper task started by url: " + companyOverviewPageUrl);
+
         this.launchScraper();
     }
 
     private void launchScraper() throws ScraperException {
+        Timer scraperTaskTimer = new Timer();
+
         // Access company overview page
         if (this.companyOverviewPageUrl != null) {
             this.driver.get(this.companyOverviewPageUrl.toString());
@@ -58,7 +72,7 @@ public class ScrapeOrganizationGlassdoorTask {
         final JudgeQueryCompanyPageEvent judgeQueryCompanyPageEvent = new JudgeQueryCompanyPageEvent(this.driver);
         judgeQueryCompanyPageEvent.run();
         if (!judgeQueryCompanyPageEvent.sideEffect) {
-            Logger.info(
+            Logger.infoAlsoSlack(
                     "Either having multiple results or no result. Please check the webpage, and modify company name if necesary. There's also chance where the company has no review yet; or indeed there's no such company in Glassdoor yet.\n\n"
                             + "Searching company name: " + this.searchCompanyName + "\nScraper looking at: "
                             + this.driver.getCurrentUrl());
@@ -74,10 +88,11 @@ public class ScrapeOrganizationGlassdoorTask {
                 this.driver, archiveManager);
         scrapeBasicDataFromCompanyNamePage.run();
 
+        Logger.infoAlsoSlack("Basic data parsing completed, elasped time:\n" + scraperTaskTimer.getElapseDurationString());
         
         // short circuit if no review data
         if (scrapeBasicDataFromCompanyNamePage.sideEffect.reviewNumberText == "==") {
-            Logger.info("Review number is -- so no need to scrape review page.");
+            Logger.infoAlsoSlack("Review number is -- so no need to scrape review page.");
             return;
         }
 
@@ -91,6 +106,8 @@ public class ScrapeOrganizationGlassdoorTask {
         this.scrapedReviewData = scrapeReviewFromCompanyReviewPage.sideEffect;
 
         // extract company basic info
-        Logger.info("Success!");
+        Logger.infoAlsoSlack("Success!" + 
+            "\nProcessed reviews count: " + this.scrapedReviewData.reviewMetadata.localReviewCount +
+            "\nDuration: " + scraperTaskTimer.getElapseDurationString());
     }
 }

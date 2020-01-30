@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.shaungc.dataStorage.ArchiveManager;
-import com.shaungc.javadev.ScraperException;
+import com.shaungc.exceptions.ScraperException;
 
 
 public abstract class AScraperEvent<TParsedData, TPostActionSideEffect> {

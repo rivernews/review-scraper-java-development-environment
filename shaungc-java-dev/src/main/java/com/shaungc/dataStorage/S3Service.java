@@ -1,6 +1,6 @@
 package com.shaungc.dataStorage;
 
-import com.shaungc.javadev.Logger;
+import com.shaungc.utilities.Logger;
 
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;

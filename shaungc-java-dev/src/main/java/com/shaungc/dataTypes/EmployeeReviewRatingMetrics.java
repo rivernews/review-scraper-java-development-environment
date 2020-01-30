@@ -1,7 +1,7 @@
 package com.shaungc.dataTypes;
 
 
-import com.shaungc.javadev.Logger;
+import com.shaungc.utilities.Logger;
 
 
 /**

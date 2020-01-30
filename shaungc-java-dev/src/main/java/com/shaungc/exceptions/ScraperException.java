@@ -1,5 +1,6 @@
-package com.shaungc.javadev;
+package com.shaungc.exceptions;
 
+import com.shaungc.utilities.SlackService;
 
 /**
  * ScraperException
@@ -11,8 +12,10 @@ public class ScraperException extends Exception {
 
     public ScraperException(String errorMessage) {
         super(errorMessage);
+        SlackService.asyncSendMessage(errorMessage);
     }
     public ScraperException(String errorMessage, Throwable originalError) {
         super(errorMessage, originalError);
+        SlackService.asyncSendMessage(errorMessage + "\nOriginal Error:\n" + originalError.toString());
     }
 }

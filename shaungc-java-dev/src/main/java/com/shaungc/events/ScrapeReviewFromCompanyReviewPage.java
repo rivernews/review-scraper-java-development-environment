@@ -10,6 +10,7 @@ import com.shaungc.dataTypes.GlassdoorCompanyReviewParsedData;
 import com.shaungc.dataTypes.GlassdoorReviewMetadata;
 import com.shaungc.dataTypes.EmployeeReviewTextData;
 import com.shaungc.javadev.Configuration;
+import com.shaungc.utilities.Logger;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -19,8 +20,6 @@ import org.openqa.selenium.WebElement;
 
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
-import com.shaungc.javadev.Logger;
 
 /**
  * ScrapeReviewFromCompanyReviewPage
@@ -60,14 +59,24 @@ public class ScrapeReviewFromCompanyReviewPage
 
         // TODO: filter by engineering category
 
-        // locate sort dropdown list
-        final String sortDropdownElementCssSelector = "body div#PageContent article[id=MainCol] .filterSorts select[name=filterSorts]";
-        this.driver.findElement(By.cssSelector(sortDropdownElementCssSelector)).click();
-
+        // use wait which is based on this.driver to avoid click() interrupted by element structure changed, or "element not attach to page document" error
         // sort by most recent
-        // use absolute css selector based on this.driver to avoid click() interrupted
-        // by element structure changed
-        this.driver.findElement(By.cssSelector(sortDropdownElementCssSelector + " option[value=DATE]")).click();
+        final String sortDropdownElementCssSelector = "body div#PageContent article[id=MainCol] .filterSorts select[name=filterSorts]";
+        
+        // locate sort dropdown list
+        this.wait.until(
+            ExpectedConditions.elementToBeClickable(
+                By.cssSelector(sortDropdownElementCssSelector)
+            )
+        ).click();
+        
+        this.wait.until(
+            ExpectedConditions.elementToBeClickable(
+                By.cssSelector(
+                    sortDropdownElementCssSelector + " option[value=DATE]"
+                )
+            )
+        ).click();
 
         // wait for loading sort
         this.waitForReviewPanelLoading();
@@ -105,7 +114,7 @@ public class ScrapeReviewFromCompanyReviewPage
             final List<WebElement> employeeReviewElements = reviewPanelElement
                     .findElements(By.cssSelector(this.employeeReviewElementsLocalCssSelector));
 
-            Logger.info("On this page presents " + employeeReviewElements.size() + " review element(s): \n");
+            Logger.infoAlsoSlack("On this page presents " + employeeReviewElements.size() + " review element(s): \n" + this.driver.getCurrentUrl());
 
             for (final WebElement employeeReviewElement : employeeReviewElements) {
                 final EmployeeReviewData employeeReviewData = new EmployeeReviewData();
@@ -116,7 +125,7 @@ public class ScrapeReviewFromCompanyReviewPage
                 if (!this.archiveManager.doesGlassdoorOrganizationReviewExist(employeeReviewData.reviewId)) {
                     this.archiveManager.writeGlassdoorOrganizationReviewData(employeeReviewData);
                 } else {
-                    Logger.info("Review already existed in our archive, will not proceed with the rest of reviews since they should already ben archived based on the most-recent ordering.");
+                    Logger.infoAlsoSlack("Review already existed in our archive, will not proceed with the rest of reviews since they should already ben archived based on the most-recent ordering.");
                     break;
                 }
                 

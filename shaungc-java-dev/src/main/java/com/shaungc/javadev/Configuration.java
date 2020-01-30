@@ -1,5 +1,10 @@
 package com.shaungc.javadev;
 
+import java.net.URI;
+
+import com.shaungc.utilities.Logger;
+import com.shaungc.utilities.RequestAddressValidator;
+
 /**
  * Configuration
  */
@@ -11,6 +16,10 @@ public final class Configuration {
     
     public static String GLASSDOOR_USERNAME = System.getenv("GLASSDOOR_USERNAME") != null ? System.getenv("GLASSDOOR_USERNAME") : System.getProperty("GLASSDOOR_USERNAME");
     public static String GLASSDOOR_PASSWORD = System.getenv("GLASSDOOR_PASSWORD") != null ? System.getenv("GLASSDOOR_PASSWORD") : System.getProperty("GLASSDOOR_PASSWORD");
+    
+    public static URI SLACK_WEBHOOK_URL = RequestAddressValidator.toURI(
+        System.getenv("SLACK_WEBHOOK_URL")
+    );
 
     public static Boolean RUNNING_FROM_CONTAINER = System.getenv("RUNNING_FROM_CONTAINER") != null ? Boolean.parseBoolean(System.getenv("RUNNING_FROM_CONTAINER")) : true;
 
