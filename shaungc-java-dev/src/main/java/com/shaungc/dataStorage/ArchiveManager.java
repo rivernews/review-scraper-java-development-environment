@@ -71,7 +71,7 @@ public class ArchiveManager {
 
         Logger.info("JSON dumped to path " + pathUntilFilename);
 
-        Logger.info("Dumped data:\n" + dumpString.substring(0, Math.min(dumpString.length(), 500)) + "...\n");
+        Logger.info("Dumped data:\n" + dumpString.substring(0, Math.min(dumpString.length(), 100)) + "...\n");
     }
 
     static public void writeGlassdoorOrganizationMetadata(String orgId, String orgName, BasicParsedData orgMetadata) {
@@ -85,6 +85,7 @@ public class ArchiveManager {
         ArchiveManager.jsonDump(ArchiveManager.getOrganizationDirectory(orgId, orgName) + "/reviews-meta/" + reviewMetadata.scrapedTimestamp, reviewMetadata);
     }
     public void writeGlassdoorOrganizationReviewsMetadata(GlassdoorReviewMetadata reviewMetadata) {
+        Logger.infoAlsoSlack("Local review count is " + reviewMetadata.localReviewCount + ", we will scrape within these reviews.");
         ArchiveManager.jsonDump(this.getOrganizationDirectory() + "/reviews-meta/" + reviewMetadata.scrapedTimestamp, reviewMetadata);
     }
 

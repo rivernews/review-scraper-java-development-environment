@@ -114,7 +114,10 @@ public class ScrapeReviewFromCompanyReviewPage
             final List<WebElement> employeeReviewElements = reviewPanelElement
                     .findElements(By.cssSelector(this.employeeReviewElementsLocalCssSelector));
 
-            Logger.infoAlsoSlack("On this page presents " + employeeReviewElements.size() + " review element(s): \n" + this.driver.getCurrentUrl());
+            // send message per 50 reviews (5 page, each around 10 reviews)
+            if (messageNumberOffset % 5 == 0) {
+                Logger.infoAlsoSlack("On this page presents " + employeeReviewElements.size() + " review element(s): \n" + this.driver.getCurrentUrl());
+            }
 
             for (final WebElement employeeReviewElement : employeeReviewElements) {
                 final EmployeeReviewData employeeReviewData = new EmployeeReviewData();
@@ -131,8 +134,8 @@ public class ScrapeReviewFromCompanyReviewPage
                 
                 glassdoorCompanyParsedData.employeeReviewDataList.add(employeeReviewData);
 
-                Logger.info("\n\n");
-                employeeReviewData.debug(messageNumberOffset);
+                // Logger.info("\n\n");
+                // employeeReviewData.debug(messageNumberOffset);
 
                 messageNumberOffset++;
             }
