@@ -73,7 +73,7 @@ public class ScrapeOrganizationGlassdoorTask {
         judgeQueryCompanyPageEvent.run();
         if (!judgeQueryCompanyPageEvent.sideEffect) {
             Logger.infoAlsoSlack(
-                    "Either having multiple results or no result. Please check the webpage, and modify company name if necesary. There's also chance where the company has no review yet; or indeed there's no such company in Glassdoor yet.\n\n"
+                    "Either having multiple results or no result. Please check the webpage, and modify company name if necesary. **If you provided an url, make sure it is the OVERVIEW page not the REVIEW page.** There's also chance where the company has no review yet; or indeed there's no such company in Glassdoor yet.\n\n"
                             + "Searching company name: " + this.searchCompanyName + "\nScraper looking at: "
                             + this.driver.getCurrentUrl());
 

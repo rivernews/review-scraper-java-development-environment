@@ -27,8 +27,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class ScrapeReviewFromCompanyReviewPage
         extends AScraperEvent<GlassdoorCompanyReviewParsedData, GlassdoorCompanyReviewParsedData> {
 
-    private final WebDriverWait wait;
-
     /** element locating resources */
     private final String reviewPanelElementCssSelector = "article[id*=MainCol] main";
     private final String employeeReviewElementsLocalCssSelector = "div#ReviewsFeed ol > li";
@@ -39,13 +37,9 @@ public class ScrapeReviewFromCompanyReviewPage
 
     public ScrapeReviewFromCompanyReviewPage(final WebDriver driver) {
         super(driver);
-
-        this.wait = new WebDriverWait(this.driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND);
     }
     public ScrapeReviewFromCompanyReviewPage(final WebDriver driver, ArchiveManager archiveManager) {
         super(driver, archiveManager);
-
-        this.wait = new WebDriverWait(this.driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND);
     }
 
     @Override
