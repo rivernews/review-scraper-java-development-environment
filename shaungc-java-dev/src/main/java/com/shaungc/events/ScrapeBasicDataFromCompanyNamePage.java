@@ -1,10 +1,14 @@
 package com.shaungc.events;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import com.shaungc.dataStorage.ArchiveManager;
 import com.shaungc.dataTypes.BasicParsedData;
 import com.shaungc.events.AScraperEvent;
+import com.shaungc.exceptions.ScraperException;
+import com.shaungc.utilities.Logger;
 
 import org.openqa.selenium.WebElement;
 
@@ -23,6 +27,9 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
     public ScrapeBasicDataFromCompanyNamePage(final WebDriver webDriver) {
         super(webDriver);
     }
+    public ScrapeBasicDataFromCompanyNamePage(final WebDriver webDriver, ArchiveManager archiveManager) {
+        super(webDriver, archiveManager);
+    }
 
     @Override
     protected List<WebElement> locate() {
@@ -37,11 +44,20 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
     }
 
     @Override
-    protected BasicParsedData parser(final List<WebElement> locatedElements) {
+    protected BasicParsedData parser(final List<WebElement> locatedElements) throws ScraperException {
         final WebElement companyHeader = locatedElements.get(0);
         final WebElement companyOverview = locatedElements.get(1);
 
-        System.out.println("\n\n\nlocated elements get!");
+        // parse company id
+        String companyId = companyHeader.findElement(By.cssSelector("div#EmpHero")).getAttribute("data-employer-id").strip();
+        if (companyId == "") {
+            Logger.warn("Failed to scrape companyId in header. HTML content:\n" + companyHeader.getText());
+            throw new ScraperException("Cannot scrape company id, so we shall not proceed. The `companyHeader`'s HTML text is logged above.'");
+        }
+
+        // parse company name
+        String companyName = "";
+        companyName = companyHeader.findElement(By.cssSelector("div.header.info h1")).getAttribute("data-company").strip();
 
         // parse logo image
         String companyLogoImageUrl = "";
@@ -51,7 +67,7 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
 
             companyLogoImageUrl = companyLogoImgElement.getAttribute("src");
         } catch (final NoSuchElementException e) {
-            System.out.println("WARN: cannot parse company logo: " + e.getMessage());
+            Logger.warn("Cannot parse company logo: " + e.getMessage());
         }
 
         // parse review #
@@ -68,18 +84,21 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
         try {
             companyWebsiteUrl = companyOverviewEntityElements.get(0).findElement(By.cssSelector("a.link"))
                     .getAttribute("href");
-        } catch (final NoSuchElementException e) {
+        } catch (final NoSuchElementException e) {}
 
-        }
-
-        System.out.println("\n\n\nall parsing completed!");
-
-        return new BasicParsedData(companyLogoImageUrl, reviewNumberText, companySizeText, companyFoundYearText,
-                companyLocationText, companyWebsiteUrl);
+        return new BasicParsedData(companyId, companyLogoImageUrl, reviewNumberText, companySizeText, companyFoundYearText,
+                companyLocationText, companyWebsiteUrl, companyName);
     }
 
     @Override
     protected void postAction(final BasicParsedData parsedData) {
+        // write data to archive
+        parsedData.scrapedTimestamp = new Date();
+        // store org name, also for later other event use
+        this.archiveManager.orgName = parsedData.companyName;
+        this.archiveManager.orgId = parsedData.companyId;
+        this.archiveManager.writeGlassdoorOrganizationMetadata(parsedData);
+
         this.sideEffect = parsedData;
         parsedData.debugPrintAllFields();
     }

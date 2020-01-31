@@ -1,5 +1,9 @@
 package com.shaungc.dataTypes;
 
+
+import com.shaungc.utilities.Logger;
+
+
 /**
  * EmployeeReviewRatingMetrics
  */
@@ -31,11 +35,11 @@ public class EmployeeReviewRatingMetrics {
     public EmployeeReviewRatingMetrics() {}
 
     public void debug() {
-        System.out.println("overallRating: " + overallRating);
-        System.out.println("workLifeBalanceRating: " + workLifeBalanceRating);
-        System.out.println("cultureAndValuesRating: " + cultureAndValuesRating);
-        System.out.println("careerOpportunitiesRating: " + careerOpportunitiesRating);
-        System.out.println("compensationAndBenefitsRating: " + compensationAndBenefitsRating);
-        System.out.println("seniorManagementRating: " + seniorManagementRating);
+        Logger.info("overallRating: " + overallRating);
+        Logger.info("workLifeBalanceRating: " + workLifeBalanceRating);
+        Logger.info("cultureAndValuesRating: " + cultureAndValuesRating);
+        Logger.info("careerOpportunitiesRating: " + careerOpportunitiesRating);
+        Logger.info("compensationAndBenefitsRating: " + compensationAndBenefitsRating);
+        Logger.info("seniorManagementRating: " + seniorManagementRating);
     }
 }

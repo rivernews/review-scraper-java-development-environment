@@ -1,5 +1,10 @@
 package com.shaungc.javadev;
 
+import java.net.URI;
+
+import com.shaungc.utilities.Logger;
+import com.shaungc.utilities.RequestAddressValidator;
+
 /**
  * Configuration
  */
@@ -11,15 +16,20 @@ public final class Configuration {
     
     public static String GLASSDOOR_USERNAME = System.getenv("GLASSDOOR_USERNAME") != null ? System.getenv("GLASSDOOR_USERNAME") : System.getProperty("GLASSDOOR_USERNAME");
     public static String GLASSDOOR_PASSWORD = System.getenv("GLASSDOOR_PASSWORD") != null ? System.getenv("GLASSDOOR_PASSWORD") : System.getProperty("GLASSDOOR_PASSWORD");
+    
+    public static URI SLACK_WEBHOOK_URL = RequestAddressValidator.toURI(
+        System.getenv("SLACK_WEBHOOK_URL")
+    );
 
     public static Boolean RUNNING_FROM_CONTAINER = System.getenv("RUNNING_FROM_CONTAINER") != null ? Boolean.parseBoolean(System.getenv("RUNNING_FROM_CONTAINER")) : true;
 
     public static String TEST_COMPANY_INFORMATION_STRING = System.getenv("TEST_COMPANY_INFORMATION_STRING") != null ? System.getenv("TEST_COMPANY_INFORMATION_STRING") : null;
 
+    public static String AWS_S3_ARCHIVE_BUCKET_NAME = System.getenv("AWS_S3_ARCHIVE_BUCKET_NAME") != null ? System.getenv("AWS_S3_ARCHIVE_BUCKET_NAME") : "shaungc-qualitative-org-review-debug";
+
+    public static Integer LOGGER_LEVEL = System.getenv("LOGGER_LEVEL") != null ? Integer.parseInt(System.getenv("LOGGER_LEVEL")) : 4;
+
     static {
-        if (DEBUG) {
-            System.out.println("\nConfiguration:GLASSDOOR_USERNAME = " + GLASSDOOR_USERNAME);
-            System.out.println("\nConfiguration:GLASSDOOR_PASSWORD = " + GLASSDOOR_PASSWORD);
-        }
+        Logger.info("S3 bucket name is " + Configuration.AWS_S3_ARCHIVE_BUCKET_NAME);
     }
 }

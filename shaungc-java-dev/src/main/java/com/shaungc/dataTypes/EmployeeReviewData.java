@@ -1,5 +1,10 @@
 package com.shaungc.dataTypes;
 
+import java.util.Date;
+
+import com.shaungc.utilities.Logger;
+
+
 /**
  * ReviewParsedData
  */
@@ -13,6 +18,8 @@ public class EmployeeReviewData {
     public EmployeeReviewTextData reviewTextData = new EmployeeReviewTextData();
     public Integer helpfulCount = 0;
     public String reviewDate = "";
+
+    public Date scrapedTimestamp;
     
     public EmployeeReviewData() {
         
@@ -20,14 +27,15 @@ public class EmployeeReviewData {
 
     public void debug(Integer messageNumber) {
         final Integer baseOneIndexMessageNumber = messageNumber + 1;
-        System.out.println("INFO: =========================== " + baseOneIndexMessageNumber);
-        System.out.println("reviewId: " + this.reviewId);
-        System.out.println("reviewHeaderTitle: " + this.reviewHeaderTitle);
+        Logger.info("=========================== " + baseOneIndexMessageNumber);
+        Logger.info("reviewId: " + this.reviewId);
+        Logger.info("reviewHeaderTitle: " + this.reviewHeaderTitle);
         this.reviewRatingMetrics.debug();
-        System.out.println("reviewEmployeePositionText: " + this.reviewEmployeePositionText);
-        System.out.println("reviewEmployeeLocation: " + this.reviewEmployeeLocation);
+        Logger.info("reviewEmployeePositionText: " + this.reviewEmployeePositionText);
+        Logger.info("reviewEmployeeLocation: " + this.reviewEmployeeLocation);
         this.reviewTextData.debug();
-        System.out.println("helpfulCount: " + this.helpfulCount);
-        System.out.println("reviewDate: " + this.reviewDate);
+        Logger.info("helpfulCount: " + this.helpfulCount);
+        Logger.info("reviewDate: " + this.reviewDate);
+        Logger.info("scrapedTimestamp: " + this.scrapedTimestamp);
     }
 }

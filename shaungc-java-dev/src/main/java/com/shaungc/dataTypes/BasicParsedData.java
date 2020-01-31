@@ -1,18 +1,28 @@
 package com.shaungc.dataTypes;
 
+import java.util.Date;
+
+import com.shaungc.utilities.Logger;
+
 public class BasicParsedData {
+    public String companyId;
     public String companyLogoUrl;
     public String reviewNumberText;
+    public String companyName;
 
     public String companySizeText;
     public String companyFoundYearText;
     public String companyLocationText;
     public String companyWebsiteUrl;
 
-    public BasicParsedData(String pCompanyLogoUrl, String pReviewNumberText, String pCompanySizeText,
-            String pCompanyFoundYearText, String pCompanyLocationText, String pCompanyWebsiteUrl) {
+    public Date scrapedTimestamp;
+
+    public BasicParsedData(String pCompanyId, String pCompanyLogoUrl, String pReviewNumberText, String pCompanySizeText,
+            String pCompanyFoundYearText, String pCompanyLocationText, String pCompanyWebsiteUrl, String pCompanyName) {
+        this.companyId = pCompanyId;
         this.companyLogoUrl = pCompanyLogoUrl;
         this.reviewNumberText = pReviewNumberText;
+        this.companyName = pCompanyName;
 
         this.companySizeText = pCompanySizeText;
         this.companyFoundYearText = pCompanyFoundYearText;
@@ -21,12 +31,15 @@ public class BasicParsedData {
     }
 
     public void debugPrintAllFields() {
-        System.out.println("companyLogoUrl " + this.companyLogoUrl);
-        System.out.println("reviewNumber " + this.reviewNumberText);
+        Logger.info("companyId " + this.companyId);
+        Logger.info("companyName " + this.companyName);
+        Logger.info("companyLogoUrl " + this.companyLogoUrl);
+        Logger.info("reviewNumber " + this.reviewNumberText);
 
-        System.out.println("companySizeText " + this.companySizeText);
-        System.out.println("companyFoundYearText " + this.companyFoundYearText);
-        System.out.println("companyLocationText " + this.companyLocationText);
-        System.out.println("companyWebsiteUrl " + this.companyWebsiteUrl);
+        Logger.info("companySizeText " + this.companySizeText);
+        Logger.info("companyFoundYearText " + this.companyFoundYearText);
+        Logger.info("companyLocationText " + this.companyLocationText);
+        Logger.info("companyWebsiteUrl " + this.companyWebsiteUrl);
+        Logger.info("scrapedTimestamp " + this.scrapedTimestamp);
     }
 }

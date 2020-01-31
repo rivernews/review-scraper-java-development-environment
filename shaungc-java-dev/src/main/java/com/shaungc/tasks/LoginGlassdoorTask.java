@@ -1,13 +1,15 @@
-package com.shaungc.javadev;
+package com.shaungc.tasks;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
+import com.shaungc.javadev.Configuration;
+import com.shaungc.utilities.Logger;
+import com.shaungc.utilities.RequestAddressValidator;
+
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WebDriver.Navigation;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -18,16 +20,16 @@ public class LoginGlassdoorTask {
     WebDriver driver;
     WebDriverWait wait;
 
-    public LoginGlassdoorTask(WebDriver driver) throws MalformedURLException {
+    public LoginGlassdoorTask(WebDriver driver) {
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND);
 
         this.launchTask();
     }
 
-    public void launchTask() throws MalformedURLException {
+    public void launchTask() {
         // navigate login page
-        URL loginPageUrl = new URL("https://www.glassdoor.com/profile/joinNow_input.htm");
+        URL loginPageUrl = RequestAddressValidator.toURL("https://www.glassdoor.com/profile/joinNow_input.htm");
         Navigation navigation = this.driver.navigate();
         navigation.to(loginPageUrl);
 
@@ -51,9 +53,9 @@ public class LoginGlassdoorTask {
 
         // confirm that login succeed
         final String judgeLoginSuccessElementXPath = "//*[@id=\"sc.keyword\"]";
-        System.out.println("WARN: waiting for login success page...");
+        Logger.info("Waiting for login success page...");
         this.wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(judgeLoginSuccessElementXPath)));
 
-        System.out.println("\nOK, login complete!");
+        Logger.infoAlsoSlack("OK, glassdoor login complete!");
     }
 }
