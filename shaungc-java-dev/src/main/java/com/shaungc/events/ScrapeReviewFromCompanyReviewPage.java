@@ -123,7 +123,10 @@ public class ScrapeReviewFromCompanyReviewPage
                     processedReviewsCount++;
                 } else {
                     Logger.infoAlsoSlack("Review already existed in our archive, will not proceed with the rest of reviews since they should already ben archived based on the most-recent ordering.");
-                    break;
+
+                    // in order to abort all following review scraping,
+                    // will have to exit the entire function
+                    return glassdoorCompanyParsedData;
                 }
                 
                 // TODO: remove this if not needed, since we write each review to s3 right after we parsed it, so collecting all reviews here seems unecessary
