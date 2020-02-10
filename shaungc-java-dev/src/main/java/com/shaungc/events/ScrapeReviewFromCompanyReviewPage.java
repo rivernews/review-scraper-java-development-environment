@@ -119,13 +119,15 @@ public class ScrapeReviewFromCompanyReviewPage
 
                 // write out review data
                 if (!this.archiveManager.doesGlassdoorOrganizationReviewExist(employeeReviewData.reviewId)) {
+                    Logger.info("Review hasn't existed yet, let's write to bucket.");
                     this.archiveManager.writeGlassdoorOrganizationReviewDataAsJson(employeeReviewData);
                     processedReviewsCount++;
                 } else {
-                    Logger.infoAlsoSlack("🛑 Review already existed in our archive: " + employeeReviewData.reviewId +
+                    Logger.warn("🛑 Review already existed in our archive: " + employeeReviewData.reviewId +
                         "\nAt url: " + this.driver.getCurrentUrl() + 
                         "\nWe will store it in S3 anyway, but please check if it's a duplicated one."
                     );
+                    processedReviewsCount++;
                     this.archiveManager.writeCollidedGlassdoorOrganizationReviewDataAsJson(employeeReviewData);
                 }
                 

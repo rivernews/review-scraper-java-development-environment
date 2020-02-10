@@ -111,7 +111,10 @@ public class ScrapeOrganizationGlassdoorTask {
         if (reviewLostRate >= REVIEW_LOST_RATE_ALERT_THRESHOLD) {
             Logger.warn("Major review data lost: " + scrapeReviewFromCompanyReviewPage.processedReviewsCount + "/" + this.scrapedReviewData.reviewMetadata.localReviewCount + " = " + reviewLostRate);
             final String htmlDumpPath = archiveManager.writeHtml("reviewDataLostWarning", this.driver.getPageSource());
-            SlackService.sendMessage("🛑WARN: major review data lost. Last html is stored at " + htmlDumpPath);
+            SlackService.sendMessage("🛑 WARN: major review data lost rate " + reviewLostRate +
+                ". Last html is stored at " + htmlDumpPath + 
+                "\nYou can also access the last processed webpage at " + this.driver.getCurrentUrl()
+            );
         }
 
         // extract company basic info

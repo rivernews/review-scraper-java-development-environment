@@ -65,10 +65,10 @@ public class ArchiveManager {
     // getter functions
 
     static private String getFullPathAsJson(String fullPathUntilFilename) {
-        return fullPathUntilFilename + FileType.JSON.getExtension();
+        return fullPathUntilFilename + "." + FileType.JSON.getExtension();
     }
     static private String getFullPathAsHtml(String fullPathUntilFilename) {
-        return fullPathUntilFilename + FileType.HTML.getExtension();
+        return fullPathUntilFilename + "." + FileType.HTML.getExtension();
     }
 
     // path generating functions
@@ -132,7 +132,7 @@ public class ArchiveManager {
         ArchiveManager.jsonDump(this.getOrganizationDirectory() + "/reviews/" + reviewData.reviewId, reviewData);
     }
     public void writeCollidedGlassdoorOrganizationReviewDataAsJson(EmployeeReviewData reviewData) {
-        final String filename = "collision." + reviewData.reviewId + "." + new Date();
+        final String filename = "collision." + new Date() + "." + reviewData.reviewId;
         ArchiveManager.jsonDump(this.getOrganizationDirectory() + "/reviews/" + filename, reviewData);
     }
 
