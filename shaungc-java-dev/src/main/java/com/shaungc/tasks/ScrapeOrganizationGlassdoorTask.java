@@ -108,11 +108,13 @@ public class ScrapeOrganizationGlassdoorTask {
         // validate scraper session
         final Float REVIEW_LOST_RATE_ALERT_THRESHOLD = Float.valueOf("0.03");
         final Float reviewLostRate = (float) (this.scrapedReviewData.reviewMetadata.localReviewCount - scrapeReviewFromCompanyReviewPage.processedReviewsCount) / this.scrapedReviewData.reviewMetadata.localReviewCount;
+        final Float reviewLostRatePercentage = reviewLostRate * (float) 100.0;
         if (reviewLostRate >= REVIEW_LOST_RATE_ALERT_THRESHOLD) {
-            Logger.warn("Major review data lost: " + scrapeReviewFromCompanyReviewPage.processedReviewsCount + "/" + this.scrapedReviewData.reviewMetadata.localReviewCount + " = " + reviewLostRate);
             final String htmlDumpPath = archiveManager.writeHtml("reviewDataLostWarning", this.driver.getPageSource());
-            SlackService.sendMessage("🛑 WARN: major review data lost rate " + reviewLostRate +
-                ". Last html is stored at " + htmlDumpPath + 
+            
+            Logger.warnAlsoSlack("🛑 WARN: major review data lost rate " + reviewLostRatePercentage + "% " +
+                "(" + scrapeReviewFromCompanyReviewPage.processedReviewsCount + "/" + this.scrapedReviewData.reviewMetadata.localReviewCount + ")" +
+                ". Last html is stored at `" + htmlDumpPath + "`" +
                 "\nYou can also access the last processed webpage at " + this.driver.getCurrentUrl()
             );
         }
