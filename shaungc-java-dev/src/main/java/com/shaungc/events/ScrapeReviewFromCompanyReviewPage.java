@@ -12,6 +12,7 @@ import com.shaungc.dataTypes.EmployeeReviewTextData;
 import com.shaungc.javadev.Configuration;
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.LoggerLevel;
+import com.shaungc.utilities.Timer;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -34,14 +35,22 @@ public class ScrapeReviewFromCompanyReviewPage
     private final String employeeReviewElementsCssSelector = reviewPanelElementCssSelector
             + employeeReviewElementsLocalCssSelector;
     
+    /** scraper session metadata */
     public Integer processedReviewsCount = 0;
     public Boolean doesCollidedReviewExist = false;
+    final private Timer scraperSessionTimer;
 
     public ScrapeReviewFromCompanyReviewPage(final WebDriver driver) {
         super(driver);
+        this.scraperSessionTimer = null;
     }
     public ScrapeReviewFromCompanyReviewPage(final WebDriver driver, ArchiveManager archiveManager) {
         super(driver, archiveManager);
+        this.scraperSessionTimer = null;
+    }
+    public ScrapeReviewFromCompanyReviewPage(final WebDriver driver, ArchiveManager archiveManager, Timer scraperSessionTimer) {
+        super(driver, archiveManager);
+        this.scraperSessionTimer = scraperSessionTimer;
     }
 
     @Override
@@ -139,9 +148,13 @@ public class ScrapeReviewFromCompanyReviewPage
 
                 // send message per 50 reviews (5 page, each around 10 reviews)
                 if (this.processedReviewsCount % (reportingRate) == 0) {
+                    final String elapsedTimeString = this.scraperSessionTimer != null ? this.scraperSessionTimer.captureElapseDurationString() : "";
                     Logger.infoAlsoSlack(
                         String.format(
-                            "%s\nOn this page presents %d elements\nSo far processed %d/%d reviews, keep processing for the next %d reviews ... (processed page count %d)\n",
+                            "%s%s\nPage presents %d elements\nSo far processed %d/%d reviews, keep processing for the next %d reviews ... (processed page count %d)\n",
+                            
+                            elapsedTimeString != "" ? "(" + elapsedTimeString + ") " : "",
+
                             this.driver.getCurrentUrl(),
                             employeeReviewElements.size(),
 

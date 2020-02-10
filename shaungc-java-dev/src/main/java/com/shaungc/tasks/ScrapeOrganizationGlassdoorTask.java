@@ -46,7 +46,7 @@ public class ScrapeOrganizationGlassdoorTask {
         this.searchCompanyName = null;
         this.companyOverviewPageUrl = companyOverviewPageUrl;
 
-        SlackService.asyncSendMessage("Scraper task started by url: " + companyOverviewPageUrl);
+        Logger.infoAlsoSlack("Scraper task started by url: " + companyOverviewPageUrl);
 
         this.launchScraper();
     }
@@ -88,7 +88,7 @@ public class ScrapeOrganizationGlassdoorTask {
                 this.driver, archiveManager);
         scrapeBasicDataFromCompanyNamePage.run();
 
-        Logger.infoAlsoSlack("Basic data parsing completed, elasped time:\n" + scraperTaskTimer.getElapseDurationString());
+        Logger.infoAlsoSlack("Basic data parsing completed, elasped time:\n" + scraperTaskTimer.captureElapseDurationString());
         
         // short circuit if no review data
         if (scrapeBasicDataFromCompanyNamePage.sideEffect.reviewNumberText == "--") {
@@ -98,7 +98,7 @@ public class ScrapeOrganizationGlassdoorTask {
 
         // scrape review page
         final ScrapeReviewFromCompanyReviewPage scrapeReviewFromCompanyReviewPage = new ScrapeReviewFromCompanyReviewPage(
-                driver, archiveManager);
+                driver, archiveManager, scraperTaskTimer);
         scrapeReviewFromCompanyReviewPage.run();
         
         // expose data pack
@@ -125,6 +125,6 @@ public class ScrapeOrganizationGlassdoorTask {
         // extract company basic info
         Logger.infoAlsoSlack("======= Success! =======" + 
             "\nProcessed reviews count: " + scrapeReviewFromCompanyReviewPage.processedReviewsCount + "/" + this.scrapedReviewData.reviewMetadata.localReviewCount +
-            "\nDuration: " + scraperTaskTimer.getElapseDurationString());
+            "\nDuration: " + scraperTaskTimer.captureElapseDurationString());
     }
 }

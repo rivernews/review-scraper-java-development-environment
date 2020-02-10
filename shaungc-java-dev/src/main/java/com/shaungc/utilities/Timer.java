@@ -19,17 +19,22 @@ public class Timer {
         this.startDateTime = LocalDateTime.now();
     }
 
-    public void stop() {
+    public String stop() {
         this.endDateTime = LocalDateTime.now();
+        return Timer.getDurationString(this.startDateTime, this.endDateTime);
     }
 
-    public String getElapseDurationString() {
-        this.endDateTime = LocalDateTime.now();
+    public String captureElapseDurationString() {
+        final LocalDateTime nowDateTime = LocalDateTime.now();
 
-        Duration duration = Duration.between(this.startDateTime, this.endDateTime);
+        return Timer.getDurationString(startDateTime, nowDateTime);
+    }
+
+    static private String getDurationString(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+        Duration duration = Duration.between(startDateTime, endDateTime);
 
         return String.format(
-            "%02d hours : %02d minutes : %02d seconds . %d milliseconds",
+            "%02d H:%02d min:%02ds.%d milliseconds",
             duration.toHoursPart(),
             duration.toMinutesPart(),
             duration.toSecondsPart(),
