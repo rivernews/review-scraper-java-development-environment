@@ -151,7 +151,7 @@ public class ScrapeReviewFromCompanyReviewPage
                     final String elapsedTimeString = this.scraperSessionTimer != null ? this.scraperSessionTimer.captureElapseDurationString() : "";
                     Logger.infoAlsoSlack(
                         String.format(
-                            "%s%s\nPage presents %d elements\nSo far processed %d/%d reviews, keep processing for the next %d reviews ... (processed page count %d)\n",
+                            "%s%s\nPage presents %d elements. So far processed %d/%d reviews, keep processing for the next %d reviews ... (processed page count %d)\n%s\n",
                             
                             elapsedTimeString != "" ? "(" + elapsedTimeString + ") " : "",
 
@@ -162,7 +162,9 @@ public class ScrapeReviewFromCompanyReviewPage
                             glassdoorCompanyParsedData.reviewMetadata.localReviewCount,
 
                             reportingRate,
-                            processedReviewPages
+                            processedReviewPages,
+
+                            this.doesCollidedReviewExist ? "🟠 Some reviews collided previously" : ""
                         )
                     );
                 }

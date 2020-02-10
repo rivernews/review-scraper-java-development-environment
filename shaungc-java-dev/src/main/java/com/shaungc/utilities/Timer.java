@@ -34,7 +34,7 @@ public class Timer {
         Duration duration = Duration.between(startDateTime, endDateTime);
 
         return String.format(
-            "%02d H:%02d min:%02ds.%d milliseconds",
+            "%02dh:%02dmin:%02ds.%d milliseconds",
             duration.toHoursPart(),
             duration.toMinutesPart(),
             duration.toSecondsPart(),
