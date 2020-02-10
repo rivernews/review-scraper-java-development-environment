@@ -27,8 +27,10 @@ public class App {
             // TODO: scale up to accept a list of company inputs
             try {
                 URL companyOverviewPageUrl = new URL(Configuration.TEST_COMPANY_INFORMATION_STRING);
+                Logger.info("Scrape by url: " + companyOverviewPageUrl);
                 scrapeCompanyTask = new ScrapeOrganizationGlassdoorTask(driver, companyOverviewPageUrl);
             } catch (MalformedURLException e) {
+                Logger.info("Scrape by company name: " + Configuration.TEST_COMPANY_INFORMATION_STRING);
                 if (Configuration.TEST_COMPANY_INFORMATION_STRING != null) {
                     scrapeCompanyTask = new ScrapeOrganizationGlassdoorTask(driver, Configuration.TEST_COMPANY_INFORMATION_STRING);
                 } else {

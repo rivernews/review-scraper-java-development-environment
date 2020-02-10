@@ -97,7 +97,7 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
         // store org name, also for later other event use
         this.archiveManager.orgName = parsedData.companyName;
         this.archiveManager.orgId = parsedData.companyId;
-        this.archiveManager.writeGlassdoorOrganizationMetadata(parsedData);
+        this.archiveManager.writeGlassdoorOrganizationMetadataAsJson(parsedData);
 
         this.sideEffect = parsedData;
         parsedData.debugPrintAllFields();

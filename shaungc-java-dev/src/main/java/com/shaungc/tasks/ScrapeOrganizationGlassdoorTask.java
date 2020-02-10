@@ -91,7 +91,7 @@ public class ScrapeOrganizationGlassdoorTask {
         Logger.infoAlsoSlack("Basic data parsing completed, elasped time:\n" + scraperTaskTimer.getElapseDurationString());
         
         // short circuit if no review data
-        if (scrapeBasicDataFromCompanyNamePage.sideEffect.reviewNumberText == "==") {
+        if (scrapeBasicDataFromCompanyNamePage.sideEffect.reviewNumberText == "--") {
             Logger.infoAlsoSlack("Review number is -- so no need to scrape review page.");
             return;
         }
@@ -104,6 +104,15 @@ public class ScrapeOrganizationGlassdoorTask {
         // expose data pack
         this.scrapedBasicData = scrapeBasicDataFromCompanyNamePage.sideEffect;
         this.scrapedReviewData = scrapeReviewFromCompanyReviewPage.sideEffect;
+
+        // validate scraper session
+        final Float REVIEW_LOST_RATE_ALERT_THRESHOLD = Float.valueOf("0.03");
+        final Float reviewLostRate = (float) (this.scrapedReviewData.reviewMetadata.localReviewCount - scrapeReviewFromCompanyReviewPage.processedReviewsCount) / this.scrapedReviewData.reviewMetadata.localReviewCount;
+        if (reviewLostRate >= REVIEW_LOST_RATE_ALERT_THRESHOLD) {
+            Logger.warn("Major review data lost: " + scrapeReviewFromCompanyReviewPage.processedReviewsCount + "/" + this.scrapedReviewData.reviewMetadata.localReviewCount + " = " + reviewLostRate);
+            final String htmlDumpPath = archiveManager.writeHtml("reviewDataLostWarning", this.driver.getPageSource());
+            SlackService.sendMessage("🛑WARN: major review data lost. Last html is stored at " + htmlDumpPath);
+        }
 
         // extract company basic info
         Logger.infoAlsoSlack("======= Success! =======" + 

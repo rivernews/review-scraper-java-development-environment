@@ -101,11 +101,11 @@ public class ScrapeReviewFromCompanyReviewPage
         this.scrapeReviewMetadata(reviewPanelElement, glassdoorCompanyParsedData.reviewMetadata);
 
         // write out review metadata
-        this.archiveManager.writeGlassdoorOrganizationReviewsMetadata(glassdoorCompanyParsedData.reviewMetadata);
+        this.archiveManager.writeGlassdoorOrganizationReviewsMetadataAsJson(glassdoorCompanyParsedData.reviewMetadata);
 
         // foreach review
         Integer processedReviewPages = 0;
-        final Integer reviewReportTime = 4;
+        final Integer reviewReportTime = 5;
         final Integer reportingRate = (Integer)(glassdoorCompanyParsedData.reviewMetadata.localReviewCount / reviewReportTime);
         while (true) {
             // pull out review elements
@@ -119,14 +119,14 @@ public class ScrapeReviewFromCompanyReviewPage
 
                 // write out review data
                 if (!this.archiveManager.doesGlassdoorOrganizationReviewExist(employeeReviewData.reviewId)) {
-                    this.archiveManager.writeGlassdoorOrganizationReviewData(employeeReviewData);
+                    this.archiveManager.writeGlassdoorOrganizationReviewDataAsJson(employeeReviewData);
                     processedReviewsCount++;
                 } else {
-                    Logger.infoAlsoSlack("Review already existed in our archive, will not proceed with the rest of reviews since they should already ben archived based on the most-recent ordering.");
-
-                    // in order to abort all following review scraping,
-                    // will have to exit the entire function
-                    return glassdoorCompanyParsedData;
+                    Logger.infoAlsoSlack("🛑 Review already existed in our archive: " + employeeReviewData.reviewId +
+                        "\nAt url: " + this.driver.getCurrentUrl() + 
+                        "\nWe will store it in S3 anyway, but please check if it's a duplicated one."
+                    );
+                    this.archiveManager.writeCollidedGlassdoorOrganizationReviewDataAsJson(employeeReviewData);
                 }
                 
                 // TODO: remove this if not needed, since we write each review to s3 right after we parsed it, so collecting all reviews here seems unecessary
