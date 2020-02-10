@@ -27,15 +27,15 @@ public class EmployeeReviewData {
 
     public void debug(Integer messageNumber) {
         final Integer baseOneIndexMessageNumber = messageNumber + 1;
-        Logger.info("=========================== " + baseOneIndexMessageNumber);
-        Logger.info("reviewId: " + this.reviewId);
-        Logger.info("reviewHeaderTitle: " + this.reviewHeaderTitle);
+        Logger.debug("=========================== " + baseOneIndexMessageNumber);
+        Logger.debug("reviewId: " + this.reviewId);
+        Logger.debug("reviewHeaderTitle: " + this.reviewHeaderTitle);
         this.reviewRatingMetrics.debug();
-        Logger.info("reviewEmployeePositionText: " + this.reviewEmployeePositionText);
-        Logger.info("reviewEmployeeLocation: " + this.reviewEmployeeLocation);
+        Logger.debug("reviewEmployeePositionText: " + this.reviewEmployeePositionText);
+        Logger.debug("reviewEmployeeLocation: " + this.reviewEmployeeLocation);
         this.reviewTextData.debug();
-        Logger.info("helpfulCount: " + this.helpfulCount);
-        Logger.info("reviewDate: " + this.reviewDate);
-        Logger.info("scrapedTimestamp: " + this.scrapedTimestamp);
+        Logger.debug("helpfulCount: " + this.helpfulCount);
+        Logger.debug("reviewDate: " + this.reviewDate);
+        Logger.debug("scrapedTimestamp: " + this.scrapedTimestamp);
     }
 }

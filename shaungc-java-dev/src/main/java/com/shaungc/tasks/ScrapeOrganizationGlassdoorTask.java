@@ -117,9 +117,14 @@ public class ScrapeOrganizationGlassdoorTask {
             );
         }
 
+        // send other session warnings
+        if (scrapeReviewFromCompanyReviewPage.doesCollidedReviewExist) {
+            Logger.warnAlsoSlack("This session has collided / duplicated review data. Please refer to travisci log and check the collision(s) in s3.");
+        }
+
         // extract company basic info
         Logger.infoAlsoSlack("======= Success! =======" + 
-            "\nProcessed reviews count: " + scrapeReviewFromCompanyReviewPage.processedReviewsCount +
+            "\nProcessed reviews count: " + scrapeReviewFromCompanyReviewPage.processedReviewsCount + "/" + this.scrapedReviewData.reviewMetadata.localReviewCount +
             "\nDuration: " + scraperTaskTimer.getElapseDurationString());
     }
 }

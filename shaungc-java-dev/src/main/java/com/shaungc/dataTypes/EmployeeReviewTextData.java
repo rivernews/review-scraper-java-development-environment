@@ -16,9 +16,9 @@ public class EmployeeReviewTextData {
     public String conText = "";
 
     public void debug() {
-        // Logger.info("mainText:" + mainText);
-        // Logger.info("proText:" + proText);
-        // Logger.info("conText:" + conText);
-        Logger.info("rawParagraphs:" + rawParagraphs);
+        // Logger.debug("mainText:" + mainText);
+        // Logger.debug("proText:" + proText);
+        // Logger.debug("conText:" + conText);
+        Logger.debug("rawParagraphs:" + rawParagraphs);
     }
 }

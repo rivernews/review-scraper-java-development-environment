@@ -31,15 +31,15 @@ public class BasicParsedData {
     }
 
     public void debugPrintAllFields() {
-        Logger.info("companyId " + this.companyId);
-        Logger.info("companyName " + this.companyName);
-        Logger.info("companyLogoUrl " + this.companyLogoUrl);
-        Logger.info("reviewNumber " + this.reviewNumberText);
+        Logger.debug("companyId " + this.companyId);
+        Logger.debug("companyName " + this.companyName);
+        Logger.debug("companyLogoUrl " + this.companyLogoUrl);
+        Logger.debug("reviewNumber " + this.reviewNumberText);
 
-        Logger.info("companySizeText " + this.companySizeText);
-        Logger.info("companyFoundYearText " + this.companyFoundYearText);
-        Logger.info("companyLocationText " + this.companyLocationText);
-        Logger.info("companyWebsiteUrl " + this.companyWebsiteUrl);
-        Logger.info("scrapedTimestamp " + this.scrapedTimestamp);
+        Logger.debug("companySizeText " + this.companySizeText);
+        Logger.debug("companyFoundYearText " + this.companyFoundYearText);
+        Logger.debug("companyLocationText " + this.companyLocationText);
+        Logger.debug("companyWebsiteUrl " + this.companyWebsiteUrl);
+        Logger.debug("scrapedTimestamp " + this.scrapedTimestamp);
     }
 }

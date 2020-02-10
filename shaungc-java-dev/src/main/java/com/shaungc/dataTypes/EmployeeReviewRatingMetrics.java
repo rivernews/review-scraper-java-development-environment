@@ -35,11 +35,11 @@ public class EmployeeReviewRatingMetrics {
     public EmployeeReviewRatingMetrics() {}
 
     public void debug() {
-        Logger.info("overallRating: " + overallRating);
-        Logger.info("workLifeBalanceRating: " + workLifeBalanceRating);
-        Logger.info("cultureAndValuesRating: " + cultureAndValuesRating);
-        Logger.info("careerOpportunitiesRating: " + careerOpportunitiesRating);
-        Logger.info("compensationAndBenefitsRating: " + compensationAndBenefitsRating);
-        Logger.info("seniorManagementRating: " + seniorManagementRating);
+        Logger.debug("overallRating: " + overallRating);
+        Logger.debug("workLifeBalanceRating: " + workLifeBalanceRating);
+        Logger.debug("cultureAndValuesRating: " + cultureAndValuesRating);
+        Logger.debug("careerOpportunitiesRating: " + careerOpportunitiesRating);
+        Logger.debug("compensationAndBenefitsRating: " + compensationAndBenefitsRating);
+        Logger.debug("seniorManagementRating: " + seniorManagementRating);
     }
 }

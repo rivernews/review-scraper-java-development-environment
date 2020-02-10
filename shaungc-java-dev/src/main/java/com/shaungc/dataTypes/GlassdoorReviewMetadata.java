@@ -15,9 +15,9 @@ public class GlassdoorReviewMetadata {
     public Date scrapedTimestamp;
 
     public void debug () {
-        Logger.info("overallRating: " + this.overallRating);
-        Logger.info("localReviewCount: " + this.localReviewCount);
-        Logger.info("reviewCount: " + this.reviewCount);
-        Logger.info("scrapedTimestamp: " + this.scrapedTimestamp);
+        Logger.debug("overallRating: " + this.overallRating);
+        Logger.debug("localReviewCount: " + this.localReviewCount);
+        Logger.debug("reviewCount: " + this.reviewCount);
+        Logger.debug("scrapedTimestamp: " + this.scrapedTimestamp);
     }
 }

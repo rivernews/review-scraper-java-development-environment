@@ -11,6 +11,7 @@ import com.shaungc.dataTypes.GlassdoorReviewMetadata;
 import com.shaungc.dataTypes.EmployeeReviewTextData;
 import com.shaungc.javadev.Configuration;
 import com.shaungc.utilities.Logger;
+import com.shaungc.utilities.LoggerLevel;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -34,6 +35,7 @@ public class ScrapeReviewFromCompanyReviewPage
             + employeeReviewElementsLocalCssSelector;
     
     public Integer processedReviewsCount = 0;
+    public Boolean doesCollidedReviewExist = false;
 
     public ScrapeReviewFromCompanyReviewPage(final WebDriver driver) {
         super(driver);
@@ -128,6 +130,7 @@ public class ScrapeReviewFromCompanyReviewPage
                         "\nWe will store it in S3 anyway, but please check if it's a duplicated one."
                     );
                     processedReviewsCount++;
+                    this.doesCollidedReviewExist = true;
                     this.archiveManager.writeCollidedGlassdoorOrganizationReviewDataAsJson(employeeReviewData);
                 }
                 
@@ -151,8 +154,9 @@ public class ScrapeReviewFromCompanyReviewPage
                     );
                 }
 
-                // Logger.info("\n\n");
-                // employeeReviewData.debug(processedReviewsCount);
+                if (Configuration.LOGGER_LEVEL >= LoggerLevel.DEBUG.getVerbosenessLevelValue()) {
+                    employeeReviewData.debug(processedReviewsCount);
+                }
             }
 
             processedReviewPages++;
@@ -168,8 +172,11 @@ public class ScrapeReviewFromCompanyReviewPage
             }
 
             if (noNextPageLink) {
+                Logger.info("No next page link available, ready to wrap up scraper session.");
                 break;
             }
+
+            Logger.info("Found next page link, going to continue...");
 
             this.waitForReviewPanelLoading();
         }
