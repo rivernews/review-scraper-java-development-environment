@@ -39,7 +39,7 @@ public class Logger {
         String trailingNewlines = "\n".repeat(trailingNewlineCount);
         String finalMessage = leadingNewlines + logLevel.getVisualCueEmoji() + logLevel.getAliasText() + ": " + message + trailingNewlines;
 
-        if (Configuration.DEBUG || Configuration.LOGGER_LEVEL >= logLevel.getVerbosenessLevelValue()) {
+        if (Configuration.DEBUG || Configuration.LOGGER_LEVEL.compareTo(logLevel.getVerbosenessLevelValue()) >= 0) {
             System.out.println(finalMessage);
         }
 
