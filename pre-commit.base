@@ -1,0 +1,8 @@
+#!/bin/sh
+# this file should be copied to .git/hooks/pre-commit
+
+# cp $GIT_ROOT/pre-commit .git/hooks/pre-commit
+# chmod +x .git/hooks/pre-commit
+
+GIT_ROOT=$(git rev-parse --show-toplevel)
+. $GIT_ROOT/pre-commit
