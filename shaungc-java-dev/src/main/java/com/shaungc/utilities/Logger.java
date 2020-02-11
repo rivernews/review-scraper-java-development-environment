@@ -48,7 +48,6 @@ public class Logger {
 
         if (alsoSendSlackMessage) {
             SlackService.sendMessage(finalMessage);
-            // SlackService.asyncSendMessage(finalMessage);
         }
     }
 }
