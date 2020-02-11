@@ -9,3 +9,5 @@ cd $GIT_ROOT/shaungc-java-dev
 echo "$(pwd)"
 rm -rf target
 mvn package
+cd $GIT_ROOT
+git add .

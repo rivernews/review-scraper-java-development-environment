@@ -6,6 +6,9 @@
 # Edit at https://www.gitignore.io/?templates=java
 
 ### Java ###
+# Test report
+surefire-reports
+
 # Compiled class file
 # *.class # for distributed jar
 
