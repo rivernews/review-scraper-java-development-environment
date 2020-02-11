@@ -3,6 +3,8 @@
 # how to write git pre push/commit hook
 # https://www.atlassian.com/git/tutorials/git-hooks
 
+set -e
+
 GIT_ROOT=$(git rev-parse --show-toplevel)
 echo "INFO: git root is ${GIT_ROOT}"
 cd $GIT_ROOT/shaungc-java-dev
