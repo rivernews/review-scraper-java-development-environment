@@ -16,10 +16,13 @@ import org.openqa.selenium.WebDriver;
  */
 public class App {
     public static void main(String[] args) {
+        Logger.info("process started");
         WebDriver driver = null;
         ScrapeOrganizationGlassdoorTask scrapeCompanyTask = null;
         try {
             driver = WebDriverFactory.create();
+
+            Logger.info("driver created: " + driver);
 
             new LoginGlassdoorTask(driver);
 
