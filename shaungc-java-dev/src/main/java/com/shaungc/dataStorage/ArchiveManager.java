@@ -1,5 +1,6 @@
 package com.shaungc.dataStorage;
 
+import java.time.Instant;
 import java.util.Date;
 
 import com.google.gson.Gson;
@@ -8,6 +9,9 @@ import com.shaungc.dataTypes.EmployeeReviewData;
 import com.shaungc.dataTypes.GlassdoorReviewMetadata;
 import com.shaungc.javadev.Configuration;
 import com.shaungc.utilities.Logger;
+
+import software.amazon.awssdk.utils.BinaryUtils;
+import software.amazon.awssdk.utils.Md5Utils;
 
 
 enum FileType {
@@ -53,11 +57,11 @@ public class ArchiveManager {
 
     // meta info functions
 
-    static public Boolean doesObjectExist(String fullPath) {
+    static public String doesObjectExist(String fullPath) {
         return ArchiveManager.s3Service.doesObjectExist(ArchiveManager.BUCKET_NAME, fullPath);
     }
 
-    public Boolean doesGlassdoorOrganizationReviewExist(String reviewId) {
+    public String doesGlassdoorOrganizationReviewExist(String reviewId) {
         String fullPathUntilFilename = this.getGlassdoorOrgReviewDataDirectory() + reviewId;
         return ArchiveManager.doesObjectExist(ArchiveManager.getFullPathAsJson(fullPathUntilFilename));
     }
@@ -72,6 +76,7 @@ public class ArchiveManager {
     }
 
     // path generating functions
+
     public String getOrganizationDirectory() {
         return this.orgName + "-" + this.orgId;
     }
@@ -81,6 +86,24 @@ public class ArchiveManager {
 
     public String getGlassdoorOrgReviewDataDirectory() {
         return this.getOrganizationDirectory() + "/reviews/";
+    }
+
+    static public String getGlassdoorOrgReviewDataFilenamePrefix(String reviewId) {
+        return reviewId;
+    }
+
+    static public String getGlassdoorOrgReviewDataFilename(String reviewId) {
+        // do not append timestamp for review data
+        // due to its uniqueness
+        return ArchiveManager.getGlassdoorOrgReviewDataFilenamePrefix(reviewId);
+    }
+
+    static public String getCollidedGlassdoorOrgReviewDataFilenamePrefix(String reviewId) {
+        return "collision." + reviewId;
+    }
+
+    static public String getCollidedGlassdoorOrgReviewDataFilename(String reviewId) {
+        return ArchiveManager.getCollidedGlassdoorOrgReviewDataFilenamePrefix(reviewId) + "." + Instant.now();
     }
 
     // write out functions
@@ -129,15 +152,18 @@ public class ArchiveManager {
         ArchiveManager.jsonDump(ArchiveManager.getOrganizationDirectory(orgId, orgName) + "/reviews/" + reviewData.reviewId, reviewData);
     }
     public void writeGlassdoorOrganizationReviewDataAsJson(EmployeeReviewData reviewData) {
-        ArchiveManager.jsonDump(this.getOrganizationDirectory() + "/reviews/" + reviewData.reviewId, reviewData);
+        ArchiveManager.jsonDump(this.getGlassdoorOrgReviewDataDirectory() + ArchiveManager.getGlassdoorOrgReviewDataFilename(reviewData.reviewId), reviewData);
     }
-    public void writeCollidedGlassdoorOrganizationReviewDataAsJson(EmployeeReviewData reviewData) {
-        final String filename = "collision." + new Date() + "." + reviewData.reviewId;
-        ArchiveManager.jsonDump(this.getOrganizationDirectory() + "/reviews/" + filename, reviewData);
+    public String writeCollidedGlassdoorOrganizationReviewDataAsJson(EmployeeReviewData reviewData) {
+        final String pathUntilFilename = this.getGlassdoorOrgReviewDataDirectory() + ArchiveManager.getCollidedGlassdoorOrgReviewDataFilename(reviewData.reviewId);
+
+        ArchiveManager.jsonDump(pathUntilFilename, reviewData);
+
+        return ArchiveManager.getFullPathAsJson(pathUntilFilename);
     }
 
     public String writeHtml(String filename, String html) {
-        final String pathUntilFilename = this.getOrganizationDirectory() + "/logs/" + filename + "." + new Date();
+        final String pathUntilFilename = this.getOrganizationDirectory() + "/logs/" + filename + "." + Instant.now();
         ArchiveManager.htmlDump(pathUntilFilename, html);
         
         // return the complete path (key) so that caller can make good use

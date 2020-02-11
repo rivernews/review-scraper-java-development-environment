@@ -35,7 +35,7 @@ public class Timer {
 
         return String.format(
             // "%02dh:%02dmin:%02ds.%d milliseconds",
-            "%dh:%dmin:%ds.%d",
+            "*%02d:%02d:%02d.%d*",
             duration.toHoursPart(),
             duration.toMinutesPart(),
             duration.toSecondsPart(),

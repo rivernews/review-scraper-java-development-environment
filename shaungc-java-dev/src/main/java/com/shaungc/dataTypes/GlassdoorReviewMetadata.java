@@ -1,5 +1,6 @@
 package com.shaungc.dataTypes;
 
+import java.time.Instant;
 import java.util.Date;
 
 import com.shaungc.utilities.Logger;
@@ -12,7 +13,7 @@ public class GlassdoorReviewMetadata {
     public Float overallRating = Float.valueOf(-1);
     public Integer localReviewCount = 0;
     public Integer reviewCount = 0;
-    public Date scrapedTimestamp;
+    public Instant scrapedTimestamp;
 
     public void debug () {
         Logger.debug("overallRating: " + this.overallRating);

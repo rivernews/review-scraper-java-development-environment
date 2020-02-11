@@ -1,5 +1,6 @@
 package com.shaungc.events;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -50,7 +51,7 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
 
         // parse company id
         String companyId = companyHeader.findElement(By.cssSelector("div#EmpHero")).getAttribute("data-employer-id").strip();
-        if (companyId == "") {
+        if (companyId.isEmpty()) {
             Logger.warn("Failed to scrape companyId in header. HTML content:\n" + companyHeader.getText());
             throw new ScraperException("Cannot scrape company id, so we shall not proceed. The `companyHeader`'s HTML text is logged above.'");
         }
@@ -93,7 +94,7 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
     @Override
     protected void postAction(final BasicParsedData parsedData) {
         // write data to archive
-        parsedData.scrapedTimestamp = new Date();
+        parsedData.scrapedTimestamp = Instant.now();
         // store org name, also for later other event use
         this.archiveManager.orgName = parsedData.companyName;
         this.archiveManager.orgId = parsedData.companyId;

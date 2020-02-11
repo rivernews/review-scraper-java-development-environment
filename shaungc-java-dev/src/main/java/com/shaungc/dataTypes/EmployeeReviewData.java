@@ -19,8 +19,6 @@ public class EmployeeReviewData {
     public Integer helpfulCount = 0;
     public String reviewDate = "";
 
-    public Date scrapedTimestamp;
-    
     public EmployeeReviewData() {
         
     }
@@ -36,6 +34,5 @@ public class EmployeeReviewData {
         this.reviewTextData.debug();
         Logger.debug("helpfulCount: " + this.helpfulCount);
         Logger.debug("reviewDate: " + this.reviewDate);
-        Logger.debug("scrapedTimestamp: " + this.scrapedTimestamp);
     }
 }

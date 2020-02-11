@@ -88,17 +88,23 @@ public class ScrapeOrganizationGlassdoorTask {
                 this.driver, archiveManager);
         scrapeBasicDataFromCompanyNamePage.run();
 
-        Logger.infoAlsoSlack("Basic data parsing completed, elasped time:\n" + scraperTaskTimer.captureElapseDurationString());
+        Logger.infoAlsoSlack(
+            "(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ") " +
+            "Basic data parsing completed, elasped time:\n" + scraperTaskTimer.captureElapseDurationString()
+        );
         
         // short circuit if no review data
-        if (scrapeBasicDataFromCompanyNamePage.sideEffect.reviewNumberText == "--") {
-            Logger.infoAlsoSlack("Review number is -- so no need to scrape review page.");
+        if (scrapeBasicDataFromCompanyNamePage.sideEffect.reviewNumberText.equals("--")) {
+            Logger.infoAlsoSlack(
+                "(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ") " +
+                "Review number is -- so no need to scrape review page."
+            );
             return;
         }
 
         // scrape review page
         final ScrapeReviewFromCompanyReviewPage scrapeReviewFromCompanyReviewPage = new ScrapeReviewFromCompanyReviewPage(
-                driver, archiveManager, scraperTaskTimer);
+                driver, archiveManager, scraperTaskTimer, scrapeBasicDataFromCompanyNamePage.sideEffect);
         scrapeReviewFromCompanyReviewPage.run();
         
         // expose data pack
@@ -112,16 +118,21 @@ public class ScrapeOrganizationGlassdoorTask {
         if (reviewLostRate >= REVIEW_LOST_RATE_ALERT_THRESHOLD) {
             final String htmlDumpPath = archiveManager.writeHtml("reviewDataLostWarning", this.driver.getPageSource());
             
-            Logger.warnAlsoSlack("🛑 WARN: major review data lost rate " + reviewLostRatePercentage + "% " +
+            Logger.warnAlsoSlack("WARN: major review data lost rate " + reviewLostRatePercentage + "% " +
                 "(" + scrapeReviewFromCompanyReviewPage.processedReviewsCount + "/" + this.scrapedReviewData.reviewMetadata.localReviewCount + ")" +
-                ". Last html is stored at `" + htmlDumpPath + "`" +
-                "\nYou can also access the last processed webpage at " + this.driver.getCurrentUrl()
+                ". Last html stored at S3: `" + htmlDumpPath + "`" +
+                "\nYou can access the last processed webpage at " + this.driver.getCurrentUrl() + 
+                ", see if there is indeed no next page available & that's all we can get." + 
+                "\nIf you are running for an org w/ existing review pool, you can ignore this warning."
             );
         }
 
         // send other session warnings
         if (scrapeReviewFromCompanyReviewPage.doesCollidedReviewExist) {
-            Logger.warnAlsoSlack("This session has collided / duplicated review data. Please refer to travisci log and check the collision(s) in s3.");
+            Logger.warnAlsoSlack(
+                "(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ") " +
+                "This session has collided / duplicated review data. Please refer to travisci log and check the collision(s) in s3."
+            );
         }
 
         // extract company basic info

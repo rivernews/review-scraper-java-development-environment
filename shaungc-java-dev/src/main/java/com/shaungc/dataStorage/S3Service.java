@@ -1,5 +1,9 @@
 package com.shaungc.dataStorage;
 
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.shaungc.utilities.Logger;
 
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -11,8 +15,12 @@ import software.amazon.awssdk.services.s3.model.CreateBucketConfiguration;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
+import software.amazon.awssdk.services.s3.model.PublicAccessBlockConfiguration;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutPublicAccessBlockRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.utils.BinaryUtils;
+import software.amazon.awssdk.utils.Md5Utils;
 
 /**
  * S3Service
@@ -32,9 +40,29 @@ public class S3Service {
     protected void createBucket(String bucketName) {
         try {
             s3.createBucket(CreateBucketRequest.builder().bucket(bucketName)
-                    .createBucketConfiguration(CreateBucketConfiguration.builder().build())
-                    // TODO: set bucket to private
-                    .acl(S3Service.BUCKET_ACCESS_CANNED_ACL).build());
+                    .createBucketConfiguration(
+                        CreateBucketConfiguration.builder()
+                        .build()
+                    )
+                    // seems like using default will already set to private
+                    .acl(S3Service.BUCKET_ACCESS_CANNED_ACL)
+                    .build());
+            
+            // enable public access block
+            // to prevent accidentally allowing public access
+            s3.putPublicAccessBlock(
+                PutPublicAccessBlockRequest.builder()
+                    .bucket(bucketName)
+                    .publicAccessBlockConfiguration(
+                        PublicAccessBlockConfiguration.builder()
+                            .blockPublicAcls(true)
+                            .ignorePublicAcls(true)
+                            .blockPublicPolicy(true)
+                            .restrictPublicBuckets(true)
+                        .build()
+                    )
+                .build()
+            );
 
             Logger.info("Bucket created using default configuration: " + bucketName);
         } catch (BucketAlreadyOwnedByYouException e) {
@@ -48,23 +76,46 @@ public class S3Service {
         }
     }
 
-    // TODO: object CRUD operations
-    protected void putObjectOfString(String bucketName, String key, String content) {
-        // Put Object
-        this.s3.putObject(PutObjectRequest.builder().bucket(bucketName).key(key).build(),
-                RequestBody.fromString(content));
+    public static String toMD5Base64String(String content) {
+        return BinaryUtils.toBase64(
+            Md5Utils.computeMD5Hash(content.getBytes(StandardCharsets.UTF_8))
+        );
     }
 
-    protected Boolean doesObjectExist(String bucketName, String key) {
+    // TODO: object CRUD operations
+    protected void putObjectOfString(String bucketName, String key, String content) {
+        HashMap<String, String> metadata = new HashMap<String, String>();
+        metadata.put("md5", S3Service.toMD5Base64String(content));
+
+        // Put Object
+        this.s3.putObject(
+            PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .metadata(metadata)
+                .build(),
+            RequestBody.fromString(content)
+        );
+    }
+
+    protected String doesObjectExist(String bucketName, String key) {
         try {
-            this.s3.headObject(HeadObjectRequest.builder().bucket(bucketName).key(key).build());
+            HeadObjectResponse res = this.s3.headObject(HeadObjectRequest.builder().bucket(bucketName).key(key).build());
+            if (res.hasMetadata()) {
+                final Map<String, String> metadata = res.metadata();
+                final String md5 = metadata.get("md5");
+                if (md5 != null) {
+                    return md5;
+                }
+            }
         } catch (S3Exception e) {
             if (e.statusCode() == 404) {
-                return false;
+                return null;
             }
             throw e;
         }
         
-        return true;
+        // backward compatibility for objects that don't have md5 metadata yet
+        return "";
     }
 }
