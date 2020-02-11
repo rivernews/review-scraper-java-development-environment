@@ -7,7 +7,7 @@
 
 ### Java ###
 # Compiled class file
-*.class
+# *.class # for distributed jar
 
 # Log file
 *.log
@@ -19,7 +19,7 @@
 .mtj.tmp/
 
 # Package Files #
-# *.jar
+# *.jar # for distributed jar
 *.war
 *.nar
 *.ear
