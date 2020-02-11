@@ -1,12 +1,17 @@
 {
 	"name": "Java Development Environment",
-	"dockerFile": "Dockerfile",
+	"dockerFile": "dev.Dockerfile",
 
 	// Use 'settings' to set *default* container specific settings.json values on container create. 
 	// You can edit these settings after create using File > Preferences > Settings > Remote.
 	"settings": { 
-		"terminal.integrated.shell.linux": "/bin/bash"
+		// "terminal.integrated.shell.linux": "/bin/bash"
 		// "java.home": "/usr/lib/jvm/java-8-openjdk-amd64"
+
+		"terminal.integrated.shell.linux": "/usr/bin/zsh",
+		"workbench.panel.defaultLocation": "bottom",
+		"comments.openPanel": "neverOpen",
+		"terminal.integrated.fontFamily": "MesloLGS NF, Meslo LG M for Powerline, Hasklig, Monaco"
 	},
 
 	// Use 'appPort' to create a container with published ports. If the port isn't working, be sure
@@ -15,7 +20,11 @@
     
 
 	// Uncomment the next line to run commands after the container is created.
-    // "postCreateCommand": "java -version",
+	// "postCreateCommand": "java -version",
+	"postCreateCommand": [
+		// https://github.com/romkatv/powerlevel10k#configuration-wizard
+		"p10k configure"
+	],
     
     "runArgs": [
 		"--env-file", "devcontainer.env"
