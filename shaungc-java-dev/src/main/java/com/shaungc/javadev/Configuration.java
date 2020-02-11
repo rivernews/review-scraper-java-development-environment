@@ -7,9 +7,6 @@ import com.shaungc.utilities.RequestAddressValidator;
 import com.shaungc.utilities.ReviewCollisionStrategy;
 
 
-
-
-
 /**
  * Configuration
  */
@@ -17,7 +14,7 @@ public final class Configuration {
     public static Integer AVOID_GLITCH_WAIT_SECOND = 2;
     public static Integer EXPECTED_CONDITION_WAIT_SECOND = 25;
     public static Integer EXPECTED_CONDITION_WAIT_SECOND_LONGER = 60;
-    public static Boolean DEBUG = System.getenv("DEBUG") != null ? Boolean.parseBoolean(System.getenv("DEBUG")) : false;
+    public static Boolean DEBUG = Boolean.parseBoolean(Configuration.getenvOrDefault("DEBUG", "true"));
     
     // credentials
 
@@ -32,8 +29,8 @@ public final class Configuration {
 
     public static String AWS_S3_ARCHIVE_BUCKET_NAME = System.getenv("AWS_S3_ARCHIVE_BUCKET_NAME") != null ? System.getenv("AWS_S3_ARCHIVE_BUCKET_NAME") : "shaungc-qualitative-org-review--debug";
     static {
-        System.out.println("S3 bucket name is " + Configuration.AWS_S3_ARCHIVE_BUCKET_NAME);
-        // Logger.debug("S3 bucket name is " + Configuration.AWS_S3_ARCHIVE_BUCKET_NAME);
+        // System.out.println("S3 bucket name is " + Configuration.AWS_S3_ARCHIVE_BUCKET_NAME);
+        Logger.debug("S3 bucket name is " + Configuration.AWS_S3_ARCHIVE_BUCKET_NAME);
     }
 
     // flow control
@@ -43,7 +40,7 @@ public final class Configuration {
     public static Integer REVIEW_COLLISION_STRATEGY = Integer.valueOf(Configuration.getenvOrDefault("REVIEW_COLLISION_STRATEGY", ReviewCollisionStrategy.ABORT.toString()));
 
     static {
-        // Logger.debug("REVIEW_COLLISION_STRATEGY: " + Configuration.REVIEW_COLLISION_STRATEGY);
+        Logger.debug("REVIEW_COLLISION_STRATEGY: " + Configuration.REVIEW_COLLISION_STRATEGY);
     }
 
     // inputs
