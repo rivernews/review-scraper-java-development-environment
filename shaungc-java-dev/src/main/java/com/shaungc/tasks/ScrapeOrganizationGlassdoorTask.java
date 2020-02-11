@@ -90,7 +90,7 @@ public class ScrapeOrganizationGlassdoorTask {
 
         Logger.infoAlsoSlack(
             "*(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ")* " +
-            "Basic data parsing completed, elasped time:\n" + scraperTaskTimer.captureElapseDurationString()
+            "Basic data parsing completed, elasped time: " + scraperTaskTimer.captureElapseDurationString()
         );
         
         // short circuit if no review data
