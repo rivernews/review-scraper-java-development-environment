@@ -7,6 +7,7 @@ import java.util.Map;
 import com.shaungc.utilities.Logger;
 
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.BucketAlreadyExistsException;
 import software.amazon.awssdk.services.s3.model.BucketAlreadyOwnedByYouException;
@@ -34,19 +35,24 @@ public class S3Service {
     static BucketCannedACL BUCKET_ACCESS_CANNED_ACL = BucketCannedACL.PRIVATE;
 
     public S3Service() {
-        s3 = S3Client.builder().build();
+        s3 = S3Client.builder()
+            .region(Region.US_WEST_2)
+        .build();
     }
 
     protected void createBucket(String bucketName) {
         try {
-            s3.createBucket(CreateBucketRequest.builder().bucket(bucketName)
+            s3.createBucket(
+                CreateBucketRequest.builder()
+                    .bucket(bucketName)
+                    .acl(S3Service.BUCKET_ACCESS_CANNED_ACL)
                     .createBucketConfiguration(
                         CreateBucketConfiguration.builder()
                         .build()
                     )
                     // seems like using default will already set to private
-                    .acl(S3Service.BUCKET_ACCESS_CANNED_ACL)
-                    .build());
+                .build()
+            );
             
             // enable public access block
             // to prevent accidentally allowing public access

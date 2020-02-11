@@ -89,14 +89,14 @@ public class ScrapeOrganizationGlassdoorTask {
         scrapeBasicDataFromCompanyNamePage.run();
 
         Logger.infoAlsoSlack(
-            "(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ") " +
+            "*(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ")* " +
             "Basic data parsing completed, elasped time:\n" + scraperTaskTimer.captureElapseDurationString()
         );
         
         // short circuit if no review data
         if (scrapeBasicDataFromCompanyNamePage.sideEffect.reviewNumberText.equals("--")) {
             Logger.infoAlsoSlack(
-                "(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ") " +
+                "*(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ")* " +
                 "Review number is -- so no need to scrape review page."
             );
             return;
