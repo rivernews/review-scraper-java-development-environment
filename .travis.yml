@@ -27,7 +27,7 @@ script:
   if [ "$SLACK_WEBHOOK_URL" != "" ]; then
     curl -X POST --data-urlencode "payload={ \"text\": \"About to build and run the scraper.\"}" ${SLACK_WEBHOOK_URL}
   fi
-- cd shaungc-java-dev && mvn clean install && mvn exec:java
+- cd shaungc-java-dev && mvn exec:java
 cache:
   directories:
   - "$HOME/.m2/repository"
