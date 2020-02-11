@@ -41,6 +41,7 @@ public class ScrapeReviewFromCompanyReviewPage
     
     /** scraper session metadata */
     public Integer processedReviewsCount = 0;
+    public Integer wentThroughReviewsCount = 0;
     public Boolean doesCollidedReviewExist = false;
     final private Timer scraperSessionTimer;
     final private String orgNameSlackMessagePrefix;
@@ -146,7 +147,7 @@ public class ScrapeReviewFromCompanyReviewPage
                 if (null == md5ExistenceTest) {
                     Logger.info("Review hasn't existed yet, let's write to bucket.");
                     this.archiveManager.writeGlassdoorOrganizationReviewDataAsJson(employeeReviewData);
-                    processedReviewsCount++;
+                    this.processedReviewsCount++;
                 } else {
                     if (md5ExistenceTest.isEmpty()) {
                         // no md5 information; just follow collision strategy
@@ -159,7 +160,7 @@ public class ScrapeReviewFromCompanyReviewPage
                                 "\nAt url: " + this.driver.getCurrentUrl() + 
                                 "\nYou configured to store collision in S3 anyway and move on, but please check if it's a duplicated one in s3 by prefix `collision.`."
                             );
-                            processedReviewsCount++;
+                            this.processedReviewsCount++;
                         } else if (Configuration.REVIEW_COLLISION_STRATEGY == ReviewCollisionStrategy.SKIP.getValue()) {
                             // do nothing
                             Logger.warn("Skipping review. You configured to skip any review data collision. Review id is " + employeeReviewData.reviewId + " at url " + this.driver.getCurrentUrl());
@@ -199,7 +200,7 @@ public class ScrapeReviewFromCompanyReviewPage
                             
                             this.doesCollidedReviewExist = true;
 
-                            processedReviewsCount++;
+                            this.processedReviewsCount++;
 
                             throw new ScraperException("There's a data integrity concern and we need to abort, please refer to error log or slack message.");
                         }
@@ -210,7 +211,7 @@ public class ScrapeReviewFromCompanyReviewPage
                 glassdoorCompanyParsedData.employeeReviewDataList.add(employeeReviewData);
 
                 // send message per 50 reviews (5 page, each around 10 reviews)
-                if (this.processedReviewsCount % (reportingRate) == 0) {
+                if (this.wentThroughReviewsCount % (reportingRate) == 0) {
                     final String elapsedTimeString = this.scraperSessionTimer != null ? this.scraperSessionTimer.captureElapseDurationString() : "";
                     Logger.infoAlsoSlack(
                         String.format(
@@ -235,8 +236,10 @@ public class ScrapeReviewFromCompanyReviewPage
                 }
 
                 if (Configuration.LOGGER_LEVEL >= LoggerLevel.DEBUG.getVerbosenessLevelValue()) {
-                    employeeReviewData.debug(processedReviewsCount);
+                    employeeReviewData.debug(this.wentThroughReviewsCount);
                 }
+
+                this.wentThroughReviewsCount++;
             }
 
             processedReviewPages++;
