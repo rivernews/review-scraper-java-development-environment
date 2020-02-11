@@ -4,7 +4,7 @@ sudo: required
 before_install:
 - |
   if [ "$SLACK_WEBHOOK_URL" != "" ]; then
-    curl -X POST --data-urlencode "payload={ \"text\": \"About to install.\"}" ${SLACK_WEBHOOK_URL}
+    curl -X POST --data-urlencode "payload={ \"text\": \"*(${TEST_COMPANY_INFORMATION_STRING})* TravisCI about to setup environment .\"}" ${SLACK_WEBHOOK_URL}
   fi
 install:
 - sudo apt-get install google-chrome-stable
@@ -23,10 +23,6 @@ before_script:
 - sh -e /etc/init.d/xvfb start
 - sleep 3
 script:
-- |
-  if [ "$SLACK_WEBHOOK_URL" != "" ]; then
-    curl -X POST --data-urlencode "payload={ \"text\": \"About to build and run the scraper.\"}" ${SLACK_WEBHOOK_URL}
-  fi
 - cd shaungc-java-dev && mvn exec:java
 cache:
   directories:

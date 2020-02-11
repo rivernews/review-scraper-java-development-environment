@@ -118,7 +118,7 @@ public class ScrapeOrganizationGlassdoorTask {
         if (reviewLostRate >= REVIEW_LOST_RATE_ALERT_THRESHOLD) {
             final String htmlDumpPath = archiveManager.writeHtml("reviewDataLostWarning", this.driver.getPageSource());
             
-            Logger.warnAlsoSlack("WARN: major review data lost rate " + reviewLostRatePercentage + "% " +
+            Logger.warnAlsoSlack("Major review data lost rate " + reviewLostRatePercentage + "% " +
                 "(" + scrapeReviewFromCompanyReviewPage.processedReviewsCount + "/" + this.scrapedReviewData.reviewMetadata.localReviewCount + ")" +
                 ". Last html stored at S3: `" + htmlDumpPath + "`" +
                 "\nYou can access the last processed webpage at " + this.driver.getCurrentUrl() + 

@@ -215,20 +215,23 @@ public class ScrapeReviewFromCompanyReviewPage
                     final String elapsedTimeString = this.scraperSessionTimer != null ? this.scraperSessionTimer.captureElapseDurationString() : "";
                     Logger.infoAlsoSlack(
                         String.format(
-                            "%s%s%s\nPage presents %d elements. So far processed %d/%d reviews, keep processing for the next %d reviews ... (processed page count %d)\n%s\n",
+                            "%s%s\n<%s|Page %d> presents %d elements. Processed/WentThrough/Total %d/%d/%d reviews, keep processing for the next %d reviews ...\n%s\n",
 
                             this.orgNameSlackMessagePrefix,
                             
                             elapsedTimeString != "" ? "(" + elapsedTimeString + ") " : "",
 
                             this.driver.getCurrentUrl(),
+
+                            // + 1 to get current page number
+                            processedReviewPages + 1,
                             employeeReviewElements.size(),
 
                             this.processedReviewsCount,
+                            this.wentThroughReviewsCount,
                             glassdoorCompanyParsedData.reviewMetadata.localReviewCount,
 
                             reportingRate,
-                            processedReviewPages,
 
                             this.doesCollidedReviewExist ? "🟠 Some reviews collided previously" : ""
                         )
