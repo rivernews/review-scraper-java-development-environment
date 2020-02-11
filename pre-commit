@@ -5,5 +5,4 @@
 
 GIT_ROOT=$(git rev-parse --show-toplevel)
 echo "INFO: git root is ${GIT_ROOT}"
-cd $GIT_ROOT
-mvn package
+cd $GIT_ROOT/shaungc-java-dev && echo "$(pwd)" && mvn package
