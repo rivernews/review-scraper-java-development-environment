@@ -56,6 +56,6 @@ public class LoginGlassdoorTask {
         Logger.info("Waiting for login success page...");
         this.wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(judgeLoginSuccessElementXPath)));
 
-        Logger.infoAlsoSlack("OK, glassdoor login complete!");
+        Logger.infoAlsoSlack("OK, glassdoor login complete for info " + Configuration.TEST_COMPANY_INFORMATION_STRING);
     }
 }

@@ -215,7 +215,7 @@ public class ScrapeReviewFromCompanyReviewPage
                     final String elapsedTimeString = this.scraperSessionTimer != null ? this.scraperSessionTimer.captureElapseDurationString() : "";
                     Logger.infoAlsoSlack(
                         String.format(
-                            "%s%s\n<%s|Page %d> presents %d elements. Processed/WentThrough/Total %d/%d/%d reviews, keep processing for the next %d reviews ...\n%s\n",
+                            "%s%s <%s|Page %d> presents %d elements. Processed/WentThrough/Total %d/%d/%d reviews, keep processing for the next %d reviews ...\n%s\n",
 
                             this.orgNameSlackMessagePrefix,
                             
