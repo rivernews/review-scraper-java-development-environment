@@ -1,0 +1,8 @@
+#!/bin/sh
+# this file should be copied to .git/hooks/pre-push
+
+# cp $GIT_ROOT/pre-push .git/hooks/pre-push
+# chmod +x .git/hooks/pre-push
+
+GIT_ROOT=$(git rev-parse --show-toplevel)
+. $GIT_ROOT/pre-push
