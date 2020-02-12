@@ -14,3 +14,4 @@ mvn package
 cd $GIT_ROOT
 git add .
 git commit -m "pre-push auto build"
+git push
