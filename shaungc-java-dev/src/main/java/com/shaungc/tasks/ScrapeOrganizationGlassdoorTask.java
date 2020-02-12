@@ -88,15 +88,17 @@ public class ScrapeOrganizationGlassdoorTask {
                 this.driver, archiveManager);
         scrapeBasicDataFromCompanyNamePage.run();
 
+        final String orgPrefixSlackString = "*(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ")* ";
+
         Logger.infoAlsoSlack(
-            "*(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ")* " +
+            orgPrefixSlackString +
             "Basic data parsing completed, elasped time: " + scraperTaskTimer.captureElapseDurationString()
         );
         
         // short circuit if no review data
         if (scrapeBasicDataFromCompanyNamePage.sideEffect.reviewNumberText.equals("--")) {
             Logger.infoAlsoSlack(
-                "*(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ")* " +
+                orgPrefixSlackString +
                 "Review number is -- so no need to scrape review page."
             );
             return;
@@ -118,7 +120,9 @@ public class ScrapeOrganizationGlassdoorTask {
         if (reviewLostRate >= REVIEW_LOST_RATE_ALERT_THRESHOLD) {
             final String htmlDumpPath = archiveManager.writeHtml("reviewDataLostWarning", this.driver.getPageSource());
             
-            Logger.warnAlsoSlack("Major review data lost rate " + reviewLostRatePercentage + "% " +
+            Logger.warnAlsoSlack(
+                orgPrefixSlackString +
+                "Major review data lost rate " + reviewLostRatePercentage + "% " +
                 "(" + scrapeReviewFromCompanyReviewPage.processedReviewsCount + "/" + this.scrapedReviewData.reviewMetadata.localReviewCount + ")" +
                 ". Last html stored at S3: `" + htmlDumpPath + "`" +
                 "\nYou can access the last processed webpage at " + this.driver.getCurrentUrl() + 
@@ -130,14 +134,15 @@ public class ScrapeOrganizationGlassdoorTask {
         // send other session warnings
         if (scrapeReviewFromCompanyReviewPage.doesCollidedReviewExist) {
             Logger.warnAlsoSlack(
-                "(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ") " +
+                orgPrefixSlackString +
                 "This session has collided / duplicated review data. Please refer to travisci log and check the collision(s) in s3."
             );
         }
 
         // extract company basic info
-        Logger.infoAlsoSlack("======= Success! =======" + 
-            "\nProcessed reviews count: " + scrapeReviewFromCompanyReviewPage.processedReviewsCount + "/" + this.scrapedReviewData.reviewMetadata.localReviewCount +
-            "\nDuration: " + scraperTaskTimer.captureElapseDurationString());
+        Logger.infoAlsoSlack("======= Success! =======\n" + 
+            orgPrefixSlackString +
+            "Processed reviews count: " + scrapeReviewFromCompanyReviewPage.processedReviewsCount + "/" + this.scrapedReviewData.reviewMetadata.localReviewCount +
+            ", duration: " + scraperTaskTimer.captureElapseDurationString());
     }
 }

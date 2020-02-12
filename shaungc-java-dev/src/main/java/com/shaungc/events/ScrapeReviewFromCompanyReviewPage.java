@@ -142,6 +142,8 @@ public class ScrapeReviewFromCompanyReviewPage
 
                 this.scrapeEmployeeReview(employeeReviewElement, employeeReviewData);
 
+                this.wentThroughReviewsCount++;
+
                 // write out review data
                 final String md5ExistenceTest = this.archiveManager.doesGlassdoorOrganizationReviewExist(employeeReviewData.reviewId);
                 if (null == md5ExistenceTest) {
@@ -156,7 +158,8 @@ public class ScrapeReviewFromCompanyReviewPage
 
                         if (Configuration.REVIEW_COLLISION_STRATEGY == ReviewCollisionStrategy.ALWAYS_WRITE.getValue()) {
                             this.archiveManager.writeCollidedGlassdoorOrganizationReviewDataAsJson(employeeReviewData);
-                            Logger.warn("Review already existed in our archive: " + employeeReviewData.reviewId +
+                            Logger.warn(
+                                "Review already existed in our archive; w/o md5 cannot safely skip: " + employeeReviewData.reviewId +
                                 "\nAt url: " + this.driver.getCurrentUrl() + 
                                 "\nYou configured to store collision in S3 anyway and move on, but please check if it's a duplicated one in s3 by prefix `collision.`."
                             );
@@ -171,8 +174,17 @@ public class ScrapeReviewFromCompanyReviewPage
                                 "Aborting scraper. You configured to abort upon any review collision. Collided review id is " + employeeReviewData.reviewId + " at url " + this.driver.getCurrentUrl()
                             );
                             return glassdoorCompanyParsedData;
+                        } else if (Configuration.REVIEW_COLLISION_STRATEGY == ReviewCollisionStrategy.OVERWRITE.getValue()) {
+                            Logger.warn(
+                                "Overwriting. You configured to overwrite regardless of collision. Bare in mind of possible data lost due to lack of md5 metadata."
+                            );
+                            this.archiveManager.writeGlassdoorOrganizationReviewDataAsJson(employeeReviewData);
+                            this.processedReviewsCount++;
                         } else {
-                            throw new ScraperException("REVIEW_COLLISION_STRATEGY is misconfigured: " + Configuration.REVIEW_COLLISION_STRATEGY);
+                            throw new ScraperException(
+                                this.orgNameSlackMessagePrefix +
+                                "REVIEW_COLLISION_STRATEGY is misconfigured: " + Configuration.REVIEW_COLLISION_STRATEGY
+                            );
                         }
                     } else {
                         // compare md5 info; if identical then skip; otherwise store and report collision
@@ -215,7 +227,7 @@ public class ScrapeReviewFromCompanyReviewPage
                     final String elapsedTimeString = this.scraperSessionTimer != null ? this.scraperSessionTimer.captureElapseDurationString() : "";
                     Logger.infoAlsoSlack(
                         String.format(
-                            "%s%s <%s|Page %d> presents %d elements. Processed/WentThrough/Total %d/%d/%d reviews, keep processing for the next %d reviews ...\n%s\n",
+                            "%s%s <%s|Page %d> presents %d elements, processed/wentThrough/total %d/%d/%d reviews, keep processing for the next %d reviews ...\n%s\n",
 
                             this.orgNameSlackMessagePrefix,
                             
@@ -241,8 +253,6 @@ public class ScrapeReviewFromCompanyReviewPage
                 if (Configuration.LOGGER_LEVEL >= LoggerLevel.DEBUG.getVerbosenessLevelValue()) {
                     employeeReviewData.debug(this.wentThroughReviewsCount);
                 }
-
-                this.wentThroughReviewsCount++;
             }
 
             processedReviewPages++;
