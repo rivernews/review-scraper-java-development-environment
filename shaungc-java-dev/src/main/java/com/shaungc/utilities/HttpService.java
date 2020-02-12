@@ -23,7 +23,7 @@ public class HttpService {
     static public CompletableFuture<HttpResponse<String>> asyncPost(HashMap<String, String> data, URI uri) {
         String serializedData = ArchiveManager.serializeJavaObject(data);
 
-        Logger.info("serialized data: " + serializedData);
+        Logger.debug("serialized data: " + serializedData);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpService.getHttpRequest(uri, serializedData);
@@ -38,7 +38,7 @@ public class HttpService {
         HttpResponse<String> res = null;
         String serializedData = ArchiveManager.serializeJavaObject(data);
 
-        Logger.info("serialized data: " + serializedData);
+        Logger.debug("serialized data: " + serializedData);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpService.getHttpRequest(uri, serializedData);
