@@ -20,6 +20,7 @@
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/events/ScrapeBasicDataFromCompanyNamePage.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/utilities/HttpService.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/javadev/Configuration.java
+/workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/utilities/PubSubSubscription.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/events/AScraperEvent.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/utilities/Logger.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/dataTypes/EmployeeReviewData.java

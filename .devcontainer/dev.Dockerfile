@@ -18,6 +18,7 @@ ADD chromedriver_linux /tmp/chromedriver
 # install tools that are useful for development
 ENV TERM=${TERM}
 ENV COLORTERM=${COLORTERM}
+<<<<<<< HEAD
 RUN echo "Installing dependencies..." \
   # install latest git 2.17, husky requires > X.13
   && apt-get update -y \
@@ -28,6 +29,11 @@ RUN echo "Installing dependencies..." \
   # install oh-my-zsh for useful cli alias: https://github.com/ohmyzsh/ohmyzsh
   && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" \
   # install powerlevel10k
+=======
+RUN apt update \
+  && apt install -y git zsh \
+  && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" \
+>>>>>>> master
   && git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k \
   && echo "source ~/powerlevel10k/powerlevel10k.zsh-theme" >>~/.zshrc \
   && cd ~/powerlevel10k \

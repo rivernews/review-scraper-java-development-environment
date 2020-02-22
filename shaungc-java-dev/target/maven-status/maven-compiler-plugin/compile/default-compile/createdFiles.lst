@@ -10,10 +10,12 @@ com/shaungc/dataTypes/EmployeeReviewRatingMetrics.class
 com/shaungc/utilities/ReviewCollisionStrategy.class
 com/shaungc/utilities/HttpService.class
 com/shaungc/javadev/App.class
+com/shaungc/utilities/ScraperJobMessageType.class
 com/shaungc/dataTypes/BasicParsedData.class
 com/shaungc/dataStorage/ArchiveManager.class
 com/shaungc/javadev/Configuration.class
 com/shaungc/dataTypes/EmployeeReviewTextData.class
+com/shaungc/utilities/RedisPubSubChannelName.class
 com/shaungc/events/JudgeQueryCompanyPageEvent.class
 com/shaungc/dataTypes/EmployeeReviewData.class
 com/shaungc/dataTypes/GlassdoorCompanyReviewParsedData.class
@@ -22,6 +24,8 @@ com/shaungc/utilities/RequestAddressValidator.class
 com/shaungc/dataStorage/S3Service.class
 com/shaungc/javadev/WebDriverFactory.class
 com/shaungc/dataStorage/FileType.class
+com/shaungc/utilities/PubSubSubscription.class
 com/shaungc/utilities/SlackService.class
+com/shaungc/utilities/ScraperJobMessageTo.class
 com/shaungc/dataTypes/GlassdoorReviewMetadata.class
 com/shaungc/utilities/Timer.class
