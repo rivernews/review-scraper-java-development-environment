@@ -1,0 +1,19 @@
+{
+  "devDependencies": {
+    "husky": "^4.2.3",
+    "lint-staged": "^10.0.7",
+    "prettier": "^1.19.1",
+    "prettier-plugin-java": "^0.7.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && . ./pre-commit"
+    }
+  },
+  "lint-staged": {
+    "shaungc-java-dev/**/*.{,java}": [
+      "prettier --write",
+      "git add"
+    ]
+  }
+}
