@@ -1,4 +1,5 @@
 {
+  "comments": "https://github.com/jhipster/prettier-java/blob/master/docs/advanced_usage.md",
   "devDependencies": {
     "husky": "^4.2.3",
     "lint-staged": "^10.0.7",
