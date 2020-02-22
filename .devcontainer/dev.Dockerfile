@@ -8,7 +8,7 @@ ENV COLORTERM=${COLORTERM}
 RUN echo "Installing dependencies..." \
   && apt-get update -y \
   # install latest git 2.17, husky requires > X.13
-  && apt-get install git nodejs npm -y \
+  && apt-get install git -y \
   && git --version \
   # install zsh
   && apt-get install zsh -y \
@@ -20,3 +20,7 @@ RUN echo "Installing dependencies..." \
   && cd ~/powerlevel10k \
   && exec zsh
   # you have to install fonts on your laptop (where your IDE editor/machine is running on) instead of inside the container
+
+RUN echo "Installing nodejs..." \
+  && sh -c "$(curl -sL https://deb.nodesource.com/setup_12.x)" \
+  && apt-get install -y nodejs
