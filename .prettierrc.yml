@@ -6,4 +6,5 @@ overrides:
         printWidth: 140
         tabWidth: 4
         useTabs: false
-        trailingComma: false
+        trailingComma: none
+        bracketSpacing: true

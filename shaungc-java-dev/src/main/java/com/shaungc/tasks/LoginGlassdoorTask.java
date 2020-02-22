@@ -1,11 +1,9 @@
 package com.shaungc.tasks;
 
-import java.net.URL;
-
 import com.shaungc.javadev.Configuration;
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.RequestAddressValidator;
-
+import java.net.URL;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Navigation;
@@ -38,15 +36,14 @@ public class LoginGlassdoorTask {
 
         // wait login modal pop up
         WebElement usernameInputElement = new WebDriverWait(driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND)
-                .until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[name=username]")));
+        .until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[name=username]")));
 
         // pull out modal element to improve searching element performance
         WebElement loginModalElement = this.driver.findElement(By.cssSelector("div#LoginModal"));
 
         // fill out login form
         usernameInputElement.sendKeys(Configuration.GLASSDOOR_USERNAME);
-        loginModalElement.findElement(By.cssSelector("input[name=password]"))
-                .sendKeys(Configuration.GLASSDOOR_PASSWORD);
+        loginModalElement.findElement(By.cssSelector("input[name=password]")).sendKeys(Configuration.GLASSDOOR_PASSWORD);
 
         // submit
         loginModalElement.findElement(By.cssSelector("button[type=submit]")).click();

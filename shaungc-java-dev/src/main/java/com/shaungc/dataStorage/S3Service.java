@@ -1,11 +1,9 @@
 package com.shaungc.dataStorage;
 
+import com.shaungc.utilities.Logger;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.shaungc.utilities.Logger;
-
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -27,47 +25,44 @@ import software.amazon.awssdk.utils.Md5Utils;
  * S3Service
  */
 public class S3Service {
-
-    final private S3Client s3;
+    private final S3Client s3;
 
     // S3 Canned ACL:
     // https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl
     static BucketCannedACL BUCKET_ACCESS_CANNED_ACL = BucketCannedACL.PRIVATE;
 
     public S3Service() {
-        s3 = S3Client.builder()
-            .region(Region.US_WEST_2)
-        .build();
+        s3 = S3Client.builder().region(Region.US_WEST_2).build();
     }
 
     protected void createBucket(String bucketName) {
         try {
             s3.createBucket(
-                CreateBucketRequest.builder()
+                CreateBucketRequest
+                    .builder()
                     .bucket(bucketName)
                     .acl(S3Service.BUCKET_ACCESS_CANNED_ACL)
-                    .createBucketConfiguration(
-                        CreateBucketConfiguration.builder()
-                        .build()
-                    )
+                    .createBucketConfiguration(CreateBucketConfiguration.builder().build())
                     // seems like using default will already set to private
-                .build()
+                    .build()
             );
-            
+
             // enable public access block
             // to prevent accidentally allowing public access
             s3.putPublicAccessBlock(
-                PutPublicAccessBlockRequest.builder()
+                PutPublicAccessBlockRequest
+                    .builder()
                     .bucket(bucketName)
                     .publicAccessBlockConfiguration(
-                        PublicAccessBlockConfiguration.builder()
+                        PublicAccessBlockConfiguration
+                            .builder()
                             .blockPublicAcls(true)
                             .ignorePublicAcls(true)
                             .blockPublicPolicy(true)
                             .restrictPublicBuckets(true)
-                        .build()
+                            .build()
                     )
-                .build()
+                    .build()
             );
 
             Logger.info("Bucket created using default configuration: " + bucketName);
@@ -83,9 +78,7 @@ public class S3Service {
     }
 
     public static String toMD5Base64String(String content) {
-        return BinaryUtils.toBase64(
-            Md5Utils.computeMD5Hash(content.getBytes(StandardCharsets.UTF_8))
-        );
+        return BinaryUtils.toBase64(Md5Utils.computeMD5Hash(content.getBytes(StandardCharsets.UTF_8)));
     }
 
     // TODO: object CRUD operations
@@ -95,13 +88,9 @@ public class S3Service {
 
         // Put Object
         this.s3.putObject(
-            PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(key)
-                .metadata(metadata)
-                .build(),
-            RequestBody.fromString(content)
-        );
+                PutObjectRequest.builder().bucket(bucketName).key(key).metadata(metadata).build(),
+                RequestBody.fromString(content)
+            );
     }
 
     protected String doesObjectExist(String bucketName, String key) {
@@ -120,7 +109,7 @@ public class S3Service {
             }
             throw e;
         }
-        
+
         // backward compatibility for objects that don't have md5 metadata yet
         return "";
     }

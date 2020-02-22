@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
  * Timer
  */
 public class Timer {
-
     private LocalDateTime startDateTime;
     private LocalDateTime endDateTime;
 
@@ -30,7 +29,7 @@ public class Timer {
         return Timer.getDurationString(startDateTime, nowDateTime);
     }
 
-    static private String getDurationString(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+    private static String getDurationString(LocalDateTime startDateTime, LocalDateTime endDateTime) {
         Duration duration = Duration.between(startDateTime, endDateTime);
 
         return String.format(

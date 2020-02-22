@@ -12,7 +12,7 @@
     }
   },
   "lint-staged": {
-    "*.{,java}": [
+    "**/*.java": [
       "prettier --write",
       "git add"
     ]

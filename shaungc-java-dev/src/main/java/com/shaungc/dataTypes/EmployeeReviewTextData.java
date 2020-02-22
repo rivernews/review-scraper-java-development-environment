@@ -1,10 +1,8 @@
 package com.shaungc.dataTypes;
 
+import com.shaungc.utilities.Logger;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.shaungc.utilities.Logger;
-
 
 /**
  * ReviewTextData

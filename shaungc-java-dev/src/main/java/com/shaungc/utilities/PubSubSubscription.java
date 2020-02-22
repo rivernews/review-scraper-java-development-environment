@@ -1,16 +1,13 @@
 package com.shaungc.utilities;
 
-import java.util.ArrayList;
-
 import com.shaungc.exceptions.ScraperException;
 import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.javadev.Configuration;
-
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
-
+import java.util.ArrayList;
 
 // Writing PubSub adapter
 // https://www.baeldung.com/java-redis-lettuce#pubsub
@@ -26,9 +23,7 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
     // https://lettuce.io/core/release/reference/#pubsub.subscribing
 
     public PubSubSubscription() {
-        final String redisUrl = Configuration.DEBUG ? 
-        "redis://host.docker.internal:6379/5" :
-        "redis://localhost:6379/5";
+        final String redisUrl = Configuration.DEBUG ? "redis://host.docker.internal:6379/5" : "redis://localhost:6379/5";
         this.subscriberRedisClient = RedisClient.create(redisUrl);
         this.publisherRedisClient = RedisClient.create(redisUrl);
         this.subscriberRedisConnection = this.subscriberRedisClient.connectPubSub();
@@ -46,13 +41,13 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
 
         Logger.info("Subscribed to PubSub");
         this.publish(
-            String.format(
-                "%s:%s:%s",
-                ScraperJobMessageType.PREFLIGHT.getString(),
-                ScraperJobMessageTo.SLACK_MD_SVC.getString(),
-                "BeginPubsubCommunication"
-            )
-        );
+                String.format(
+                    "%s:%s:%s",
+                    ScraperJobMessageType.PREFLIGHT.getString(),
+                    ScraperJobMessageTo.SLACK_MD_SVC.getString(),
+                    "BeginPubsubCommunication"
+                )
+            );
     }
 
     public void publish(String message) {
@@ -64,7 +59,6 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
         super.message(channel, message);
 
         if (channel.equals(RedisPubSubChannelName.SCRAPER_JOB_CHANNEL.getString())) {
-            
             final String[] messageTokens = message.split(":", 3);
 
             // message at least has to contain type and recipient info
@@ -85,7 +79,6 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
             } else {
                 Logger.debug("Ignoring message that's not for ours: " + message);
             }
-
         }
     }
 

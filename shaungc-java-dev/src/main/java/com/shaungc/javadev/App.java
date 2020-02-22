@@ -1,8 +1,5 @@
 package com.shaungc.javadev;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import com.shaungc.exceptions.ScraperException;
 import com.shaungc.tasks.LoginGlassdoorTask;
 import com.shaungc.tasks.ScrapeOrganizationGlassdoorTask;
@@ -10,7 +7,8 @@ import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.PubSubSubscription;
 import com.shaungc.utilities.ScraperJobMessageTo;
 import com.shaungc.utilities.ScraperJobMessageType;
-
+import java.net.MalformedURLException;
+import java.net.URL;
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -18,6 +16,7 @@ import org.openqa.selenium.WebDriver;
  *
  */
 public class App {
+
     public static void main(String[] args) {
         PubSubSubscription pubSubSubscription = new PubSubSubscription();
 
@@ -45,16 +44,28 @@ public class App {
                 }
             }
 
-            pubSubSubscription.publish(String.format("%s:%s:%s", ScraperJobMessageType.FINISH.getString(), ScraperJobMessageTo.SLACK_MD_SVC.getString(), "OK!"));
+            pubSubSubscription.publish(
+                String.format("%s:%s:%s", ScraperJobMessageType.FINISH.getString(), ScraperJobMessageTo.SLACK_MD_SVC.getString(), "OK!")
+            );
             pubSubSubscription.cleanup();
             driver.quit();
 
             return;
         } catch (ScraperException e) {
             Logger.info(e.getMessage());
-            Logger.errorAlsoSlack("A scraper exception is raised and its message is logged above; which is not an error of the program, but more of the webpage the scraper is dealing with. There is something special with the webpage. Refer to the current url of the scraper to investigate more: " + driver.getCurrentUrl());
+            Logger.errorAlsoSlack(
+                "A scraper exception is raised and its message is logged above; which is not an error of the program, but more of the webpage the scraper is dealing with. There is something special with the webpage. Refer to the current url of the scraper to investigate more: " +
+                driver.getCurrentUrl()
+            );
 
-            pubSubSubscription.publish(String.format("%s:%s:%s", ScraperJobMessageType.ERROR.getString(), ScraperJobMessageTo.SLACK_MD_SVC.getString(), "ScraperException: " + e.getMessage()));
+            pubSubSubscription.publish(
+                String.format(
+                    "%s:%s:%s",
+                    ScraperJobMessageType.ERROR.getString(),
+                    ScraperJobMessageTo.SLACK_MD_SVC.getString(),
+                    "ScraperException: " + e.getMessage()
+                )
+            );
 
             pubSubSubscription.cleanup();
             if (driver != null) {
@@ -64,16 +75,23 @@ public class App {
             return;
         } catch (Exception e) {
             Logger.error("Program ended in exception block...!\n\n");
-            
+
             System.out.println(e);
 
-            pubSubSubscription.publish(String.format("%s:%s:%s", ScraperJobMessageType.ERROR.getString(), ScraperJobMessageTo.SLACK_MD_SVC.getString(), "Exception: " + e.getMessage()));
+            pubSubSubscription.publish(
+                String.format(
+                    "%s:%s:%s",
+                    ScraperJobMessageType.ERROR.getString(),
+                    ScraperJobMessageTo.SLACK_MD_SVC.getString(),
+                    "Exception: " + e.getMessage()
+                )
+            );
 
             pubSubSubscription.cleanup();
             if (driver != null) {
                 driver.quit();
             }
-            
+
             throw e;
         }
     }

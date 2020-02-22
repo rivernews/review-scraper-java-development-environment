@@ -1,15 +1,12 @@
 package com.shaungc.dataTypes;
 
-import java.util.Date;
-
 import com.shaungc.utilities.Logger;
-
+import java.util.Date;
 
 /**
  * ReviewParsedData
  */
 public class EmployeeReviewData {
-
     public String reviewId = "";
     public String reviewHeaderTitle = "";
     public EmployeeReviewRatingMetrics reviewRatingMetrics = new EmployeeReviewRatingMetrics();
@@ -19,9 +16,7 @@ public class EmployeeReviewData {
     public Integer helpfulCount = 0;
     public String reviewDate = "";
 
-    public EmployeeReviewData() {
-        
-    }
+    public EmployeeReviewData() {}
 
     public void debug(Integer messageNumber) {
         final Integer baseOneIndexMessageNumber = messageNumber + 1;

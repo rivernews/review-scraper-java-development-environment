@@ -1,8 +1,7 @@
 package com.shaungc.dataTypes;
 
-import java.time.Instant;
-
 import com.shaungc.utilities.Logger;
+import java.time.Instant;
 
 public class BasicParsedData {
     public String companyId;
@@ -17,8 +16,16 @@ public class BasicParsedData {
 
     public Instant scrapedTimestamp;
 
-    public BasicParsedData(String pCompanyId, String pCompanyLogoUrl, String pReviewNumberText, String pCompanySizeText,
-            String pCompanyFoundYearText, String pCompanyLocationText, String pCompanyWebsiteUrl, String pCompanyName) {
+    public BasicParsedData(
+        String pCompanyId,
+        String pCompanyLogoUrl,
+        String pReviewNumberText,
+        String pCompanySizeText,
+        String pCompanyFoundYearText,
+        String pCompanyLocationText,
+        String pCompanyWebsiteUrl,
+        String pCompanyName
+    ) {
         this.companyId = pCompanyId;
         this.companyLogoUrl = pCompanyLogoUrl;
         this.reviewNumberText = pReviewNumberText;

@@ -1,7 +1,6 @@
 package com.shaungc.utilities;
 
-
-// defines strategies to handle when 
+// defines strategies to handle when
 // a review collision occurs, how to deal with it
 public enum ReviewCollisionStrategy {
     // please be careful to use this in production
@@ -17,11 +16,11 @@ public enum ReviewCollisionStrategy {
     // skip and keep going to next review
     SKIP(1),
 
-    // when scraper is stable, use this with most-recent ordering 
+    // when scraper is stable, use this with most-recent ordering
     // to avoid re-accessing same reviews & pages
     ABORT(2);
 
-    final private int value;
+    private final int value;
 
     ReviewCollisionStrategy(Integer value) {
         this.value = value;
