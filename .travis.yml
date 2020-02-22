@@ -25,8 +25,9 @@ before_script:
 script:
 - . ./get-k8-toolkit.sh
 - ls -la
-- KUBECONFIG=kubeconfig.yaml kubectl -n redis-cluster port-forward deploy/redis-cluster-deployment 6379:6379 &
+- KUBECONFIG=kubeconfig.yaml ./kubectl -n redis-cluster port-forward deploy/redis-cluster-deployment 6379:6379 &
 - export REDIS_PORT_FORWARD_PID=$!
+- echo "Port fowarding process is ${REDIS_PORT_FORWARD_PID}"
 - cd shaungc-java-dev && mvn exec:java
 - kill ${REDIS_PORT_FORWARD_PID}
 cache:
