@@ -61,24 +61,29 @@ enum ScraperJobMessageTo {
 // Writing PubSub adapter
 // https://www.baeldung.com/java-redis-lettuce#pubsub
 public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
-    RedisClient redisClient;
-    StatefulRedisPubSubConnection<String, String> redisPubSubConnection;
-    RedisPubSubCommands<String, String> pubsubCommands;
+    RedisClient subscriberRedisClient;
+    RedisClient publisherRedisClient;
+    StatefulRedisPubSubConnection<String, String> subscriberRedisConnection;
+    StatefulRedisPubSubConnection<String, String> publisherRedisConnection;
+    RedisPubSubCommands<String, String> subscriberCommands;
+    RedisPubSubCommands<String, String> publisherCommands;
 
     // subscribing
     // https://lettuce.io/core/release/reference/#pubsub.subscribing
 
     public PubSubSubscription() {
-        this.redisClient = RedisClient.create(
-            Configuration.DEBUG ? 
-                "redis://host.docker.internal:6379/5" :
-                "redis://localhost:6379/5"
-        );
-        this.redisPubSubConnection = redisClient.connectPubSub();
-        redisPubSubConnection.addListener(this);
-        this.pubsubCommands = this.redisPubSubConnection.sync();
+        final String redisUrl = Configuration.DEBUG ? 
+        "redis://host.docker.internal:6379/5" :
+        "redis://localhost:6379/5";
+        this.subscriberRedisClient = RedisClient.create(redisUrl);
+        this.publisherRedisClient = RedisClient.create(redisUrl);
+        this.subscriberRedisConnection = this.subscriberRedisClient.connectPubSub();
+        this.publisherRedisConnection = this.publisherRedisClient.connectPubSub();
+        this.subscriberCommands = this.subscriberRedisConnection.sync();
+        this.publisherCommands = this.publisherRedisConnection.sync();
 
-        this.pubsubCommands.subscribe(RedisPubSubChannelName.SCRAPER_JOB_CHANNEL.getString());
+        this.subscriberRedisConnection.addListener(this);
+        this.subscriberCommands.subscribe(RedisPubSubChannelName.SCRAPER_JOB_CHANNEL.getString());
     }
 
     @Override
@@ -87,7 +92,7 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
 
         Logger.info("Subscribed to PubSub");
 
-        this.pubsubCommands.publish(
+        this.publisherCommands.publish(
             RedisPubSubChannelName.SCRAPER_JOB_CHANNEL.getString(),
             String.format(
                 "%s:%s:%s",
@@ -135,7 +140,7 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
     }
 
     public void cleanup() {
-        this.redisPubSubConnection.close();
-        this.redisClient.shutdown();
+        this.subscriberRedisConnection.close();
+        this.subscriberRedisClient.shutdown();
     }
 }
