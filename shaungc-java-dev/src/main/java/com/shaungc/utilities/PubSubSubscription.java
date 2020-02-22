@@ -70,7 +70,7 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
 
     public PubSubSubscription() {
         this.redisClient = RedisClient.create(
-            Configuration.RUNNING_FROM_CONTAINER ? 
+            Configuration.DEBUG ? 
                 "redis://host.docker.internal:6379/5" :
                 "redis://localhost:6379/5"
         );
