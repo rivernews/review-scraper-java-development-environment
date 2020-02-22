@@ -12,52 +12,6 @@ import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
 
 
-enum RedisPubSubChannelName {
-    SCRAPER_JOB_CHANNEL("scraperJobChannel");
-
-    private final String string;
-
-    private RedisPubSubChannelName(String string) {
-        this.string = string;
-    }
-
-    public String getString() {
-        return this.string;
-    }
-}
-
-enum ScraperJobMessageType {
-    PREFLIGHT("preflight"),
-    PROGRESS("progress"),
-    FINISH("finish"),
-    ERROR("error");
-
-    private final String string;
-
-    private ScraperJobMessageType(String string) {
-        this.string = string;
-    }
-
-    public String getString() {
-        return this.string;
-    }
-}
-
-enum ScraperJobMessageTo {
-    SLACK_MD_SVC("slackMiddlewareService"),
-    SCRAPER("scraper");
-
-    private final String string;
-
-    private ScraperJobMessageTo(String string) {
-        this.string = string;
-    }
-
-    public String getString() {
-        return this.string;
-    }
-}
-
 // Writing PubSub adapter
 // https://www.baeldung.com/java-redis-lettuce#pubsub
 public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
@@ -91,16 +45,18 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
         super.subscribed(channel, count);
 
         Logger.info("Subscribed to PubSub");
-
-        this.publisherCommands.publish(
-            RedisPubSubChannelName.SCRAPER_JOB_CHANNEL.getString(),
+        this.publish(
             String.format(
                 "%s:%s:%s",
-                ScraperJobMessageType.PREFLIGHT,
-                ScraperJobMessageTo.SLACK_MD_SVC,
+                ScraperJobMessageType.PREFLIGHT.getString(),
+                ScraperJobMessageTo.SLACK_MD_SVC.getString(),
                 "BeginPubsubCommunication"
             )
         );
+    }
+
+    public void publish(String message) {
+        this.publisherCommands.publish(RedisPubSubChannelName.SCRAPER_JOB_CHANNEL.getString(), message);
     }
 
     @Override

@@ -8,6 +8,8 @@ import com.shaungc.tasks.LoginGlassdoorTask;
 import com.shaungc.tasks.ScrapeOrganizationGlassdoorTask;
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.PubSubSubscription;
+import com.shaungc.utilities.ScraperJobMessageTo;
+import com.shaungc.utilities.ScraperJobMessageType;
 
 import org.openqa.selenium.WebDriver;
 
@@ -43,6 +45,7 @@ public class App {
                 }
             }
 
+            pubSubSubscription.publish(String.format("%s:%s:%s", ScraperJobMessageType.FINISH.getString(), ScraperJobMessageTo.SLACK_MD_SVC.getString(), "OK!"));
             pubSubSubscription.cleanup();
             driver.quit();
 
@@ -50,6 +53,8 @@ public class App {
         } catch (ScraperException e) {
             Logger.info(e.getMessage());
             Logger.errorAlsoSlack("A scraper exception is raised and its message is logged above; which is not an error of the program, but more of the webpage the scraper is dealing with. There is something special with the webpage. Refer to the current url of the scraper to investigate more: " + driver.getCurrentUrl());
+
+            pubSubSubscription.publish(String.format("%s:%s:%s", ScraperJobMessageType.ERROR.getString(), ScraperJobMessageTo.SLACK_MD_SVC.getString(), "ScraperException: " + e.getMessage()));
 
             pubSubSubscription.cleanup();
             if (driver != null) {
@@ -61,6 +66,8 @@ public class App {
             Logger.error("Program ended in exception block...!\n\n");
             
             System.out.println(e);
+
+            pubSubSubscription.publish(String.format("%s:%s:%s", ScraperJobMessageType.ERROR.getString(), ScraperJobMessageTo.SLACK_MD_SVC.getString(), "Exception: " + e.getMessage()));
 
             pubSubSubscription.cleanup();
             if (driver != null) {

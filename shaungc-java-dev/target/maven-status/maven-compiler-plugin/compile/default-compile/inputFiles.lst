@@ -1,5 +1,6 @@
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/utilities/Timer.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/dataStorage/S3Service.java
+/workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/utilities/ScraperJobMessageType.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/events/JudgeQueryCompanyPageEvent.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/dataTypes/EmployeeReviewTextData.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/utilities/SlackService.java
@@ -9,6 +10,7 @@
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/utilities/LoggerLevel.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/dataTypes/BasicParsedData.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/exceptions/ScraperShouldHaltException.java
+/workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/utilities/RedisPubSubChannelName.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/javadev/WebDriverFactory.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/utilities/RequestAddressValidator.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/tasks/ScrapeOrganizationGlassdoorTask.java
@@ -19,6 +21,7 @@
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/javadev/App.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/events/ScrapeBasicDataFromCompanyNamePage.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/utilities/HttpService.java
+/workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/utilities/ScraperJobMessageTo.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/javadev/Configuration.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/utilities/PubSubSubscription.java
 /workspaces/review-scraper-java-development-environment/shaungc-java-dev/src/main/java/com/shaungc/events/AScraperEvent.java
