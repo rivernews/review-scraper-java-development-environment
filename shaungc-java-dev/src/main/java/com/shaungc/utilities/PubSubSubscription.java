@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.shaungc.exceptions.ScraperException;
 import com.shaungc.exceptions.ScraperShouldHaltException;
+import com.shaungc.javadev.Configuration;
 
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
@@ -68,7 +69,11 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
     // https://lettuce.io/core/release/reference/#pubsub.subscribing
 
     public PubSubSubscription() {
-        this.redisClient = RedisClient.create("redis://host.docker.internal:6379/5");
+        this.redisClient = RedisClient.create(
+            Configuration.RUNNING_FROM_CONTAINER ? 
+                "redis://host.docker.internal:6379/5" :
+                "redis://localhost:6379/5"
+        );
         this.redisPubSubConnection = redisClient.connectPubSub();
         redisPubSubConnection.addListener(this);
         this.pubsubCommands = this.redisPubSubConnection.sync();
