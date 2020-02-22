@@ -7,11 +7,11 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && . ./pre-commit"
+      "pre-commit": ". ./pre-commit && lint-staged"
     }
   },
   "lint-staged": {
-    "shaungc-java-dev/**/*.{,java}": [
+    "*.{,java}": [
       "prettier --write",
       "git add"
     ]
