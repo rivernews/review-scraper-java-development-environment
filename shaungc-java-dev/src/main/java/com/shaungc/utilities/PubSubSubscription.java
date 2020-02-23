@@ -1,23 +1,24 @@
 package com.shaungc.utilities;
 
-import com.shaungc.exceptions.ScraperException;
 import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.javadev.Configuration;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
-import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 // Writing PubSub adapter
 // https://www.baeldung.com/java-redis-lettuce#pubsub
 public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
-    RedisClient subscriberRedisClient;
-    RedisClient publisherRedisClient;
-    StatefulRedisPubSubConnection<String, String> subscriberRedisConnection;
-    StatefulRedisPubSubConnection<String, String> publisherRedisConnection;
-    RedisPubSubCommands<String, String> subscriberCommands;
-    RedisPubSubCommands<String, String> publisherCommands;
+    private final RedisClient subscriberRedisClient;
+    private final RedisClient publisherRedisClient;
+    private final StatefulRedisPubSubConnection<String, String> subscriberRedisConnection;
+    private final StatefulRedisPubSubConnection<String, String> publisherRedisConnection;
+    private final RedisPubSubCommands<String, String> subscriberCommands;
+    private final RedisPubSubCommands<String, String> publisherCommands;
+
+    public final CountDownLatch supervisorCountDownLatch;
 
     // subscribing
     // https://lettuce.io/core/release/reference/#pubsub.subscribing
@@ -31,15 +32,18 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
         this.subscriberCommands = this.subscriberRedisConnection.sync();
         this.publisherCommands = this.publisherRedisConnection.sync();
 
+        supervisorCountDownLatch = new CountDownLatch(1);
+
         this.subscriberRedisConnection.addListener(this);
         this.subscriberCommands.subscribe(RedisPubSubChannelName.SCRAPER_JOB_CHANNEL.getString());
     }
 
     @Override
-    public void subscribed(String channel, long count) {
+    public void subscribed(final String channel, final long count) {
         super.subscribed(channel, count);
 
         Logger.info("Subscribed to PubSub");
+
         this.publish(
                 String.format(
                     "%s:%s:%s",
@@ -50,12 +54,12 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
             );
     }
 
-    public void publish(String message) {
+    public void publish(final String message) {
         this.publisherCommands.publish(RedisPubSubChannelName.SCRAPER_JOB_CHANNEL.getString(), message);
     }
 
     @Override
-    public void message(String channel, String message) {
+    public void message(final String channel, final String message) {
         super.message(channel, message);
 
         if (channel.equals(RedisPubSubChannelName.SCRAPER_JOB_CHANNEL.getString())) {
@@ -71,10 +75,12 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
             final String payload = messageTokens.length == 3 ? messageTokens[2] : "";
 
             if (messageTo.equals(ScraperJobMessageTo.SCRAPER.getString())) {
-                // TODO: receive ack msg from slack md svc -> can now proceed (communication w/ slack md svc confirmed)
+                // TODO: receive ack msg from slack md svc -> can now proceed (communication w/
+                // slack md svc confirmed)
 
                 if (messageType.equals(ScraperJobMessageType.PREFLIGHT.getString())) {
                     Logger.infoAlsoSlack("Received acked from slack md svc, pubsub communication channel confirmed");
+                    this.supervisorCountDownLatch.countDown();
                 }
             } else {
                 Logger.debug("Ignoring message that's not for ours: " + message);
@@ -83,7 +89,7 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
     }
 
     @Override
-    public void unsubscribed(String channel, long count) {
+    public void unsubscribed(final String channel, final long count) {
         // TODO Auto-generated method stub
         super.unsubscribed(channel, count);
     }

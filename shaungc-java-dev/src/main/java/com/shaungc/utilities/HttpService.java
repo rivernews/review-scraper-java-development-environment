@@ -1,6 +1,7 @@
 package com.shaungc.utilities;
 
 import com.shaungc.dataStorage.ArchiveManager;
+import com.shaungc.dataStorage.S3Service;
 import com.shaungc.exceptions.ScraperShouldHaltException;
 import java.io.IOException;
 import java.net.URI;
@@ -20,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 public class HttpService {
 
     public static CompletableFuture<HttpResponse<String>> asyncPost(HashMap<String, String> data, URI uri) {
-        String serializedData = ArchiveManager.serializeJavaObject(data);
+        String serializedData = S3Service.serializeJavaObject(data);
 
         Logger.debug("serialized data: " + serializedData);
 
@@ -39,7 +40,7 @@ public class HttpService {
 
     public static HttpResponse<String> post(HashMap<String, String> data, URI uri) {
         HttpResponse<String> res = null;
-        String serializedData = ArchiveManager.serializeJavaObject(data);
+        String serializedData = S3Service.serializeJavaObject(data);
 
         Logger.debug("serialized data: " + serializedData);
 

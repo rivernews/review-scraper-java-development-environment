@@ -10,7 +10,7 @@
 surefire-reports
 
 # Compiled class file
-# *.class # for distributed jar
+*.class # for distributed jar
 
 # Log file
 *.log

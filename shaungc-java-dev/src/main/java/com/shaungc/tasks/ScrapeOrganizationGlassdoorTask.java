@@ -8,6 +8,7 @@ import com.shaungc.events.ScrapeBasicDataFromCompanyNamePage;
 import com.shaungc.events.ScrapeReviewFromCompanyReviewPage;
 import com.shaungc.exceptions.ScraperException;
 import com.shaungc.utilities.Logger;
+import com.shaungc.utilities.PubSubSubscription;
 import com.shaungc.utilities.SlackService;
 import com.shaungc.utilities.Timer;
 import java.net.URL;
@@ -28,20 +29,30 @@ public class ScrapeOrganizationGlassdoorTask {
     public GlassdoorCompanyReviewParsedData scrapedReviewData = null;
     public BasicParsedData scrapedBasicData = null;
 
-    public ScrapeOrganizationGlassdoorTask(final WebDriver driver, final String companyName) throws ScraperException {
+    final PubSubSubscription pubSubSubscription;
+
+    public ScrapeOrganizationGlassdoorTask(final WebDriver driver, final PubSubSubscription pubSubSubscription, final String companyName)
+        throws ScraperException {
         this.driver = driver;
         this.searchCompanyName = companyName;
         this.companyOverviewPageUrl = null;
+        this.pubSubSubscription = pubSubSubscription;
 
         SlackService.asyncSendMessage("Scraper task started by company name: " + companyName);
 
         this.launchScraper();
     }
 
-    public ScrapeOrganizationGlassdoorTask(final WebDriver driver, final URL companyOverviewPageUrl) throws ScraperException {
+    public ScrapeOrganizationGlassdoorTask(
+        final WebDriver driver,
+        final PubSubSubscription pubSubSubscription,
+        final URL companyOverviewPageUrl
+    )
+        throws ScraperException {
         this.driver = driver;
         this.searchCompanyName = null;
         this.companyOverviewPageUrl = companyOverviewPageUrl;
+        this.pubSubSubscription = pubSubSubscription;
 
         Logger.infoAlsoSlack("Scraper task started by url: " + companyOverviewPageUrl);
 
@@ -109,6 +120,7 @@ public class ScrapeOrganizationGlassdoorTask {
         // scrape review page
         final ScrapeReviewFromCompanyReviewPage scrapeReviewFromCompanyReviewPage = new ScrapeReviewFromCompanyReviewPage(
             driver,
+            this.pubSubSubscription,
             archiveManager,
             scraperTaskTimer,
             scrapeBasicDataFromCompanyNamePage.sideEffect

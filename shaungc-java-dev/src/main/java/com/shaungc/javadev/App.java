@@ -9,6 +9,7 @@ import com.shaungc.utilities.ScraperJobMessageTo;
 import com.shaungc.utilities.ScraperJobMessageType;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -19,10 +20,20 @@ public class App {
 
     public static void main(String[] args) {
         PubSubSubscription pubSubSubscription = new PubSubSubscription();
-
         WebDriver driver = null;
-        ScrapeOrganizationGlassdoorTask scrapeCompanyTask = null;
+
         try {
+            try {
+                pubSubSubscription.supervisorCountDownLatch.await(1, TimeUnit.MINUTES);
+            } catch (InterruptedException e1) {
+                // TODO Auto-generated catch block
+                throw new ScraperException("Waiting for supervisor's confirmation timed out for 1 minute.");
+            }
+
+            Logger.info("confirmed pubsub with supervisor.");
+
+            ScrapeOrganizationGlassdoorTask scrapeCompanyTask = null;
+
             driver = WebDriverFactory.create();
 
             new LoginGlassdoorTask(driver);
@@ -32,15 +43,16 @@ public class App {
             try {
                 URL companyOverviewPageUrl = new URL(Configuration.TEST_COMPANY_INFORMATION_STRING);
                 Logger.info("Scrape by url: " + companyOverviewPageUrl);
-                scrapeCompanyTask = new ScrapeOrganizationGlassdoorTask(driver, companyOverviewPageUrl);
+                scrapeCompanyTask = new ScrapeOrganizationGlassdoorTask(driver, pubSubSubscription, companyOverviewPageUrl);
             } catch (MalformedURLException e) {
                 Logger.info("Scrape by company name: " + Configuration.TEST_COMPANY_INFORMATION_STRING);
                 if (Configuration.TEST_COMPANY_INFORMATION_STRING != null) {
-                    scrapeCompanyTask = new ScrapeOrganizationGlassdoorTask(driver, Configuration.TEST_COMPANY_INFORMATION_STRING);
+                    scrapeCompanyTask =
+                        new ScrapeOrganizationGlassdoorTask(driver, pubSubSubscription, Configuration.TEST_COMPANY_INFORMATION_STRING);
                 } else {
                     // new ScrapeOrganizationGlassdoorTask(driver, "DigitalOcean");
                     // new ScrapeOrganizationGlassdoorTask(driver, "Waymo");
-                    scrapeCompanyTask = new ScrapeOrganizationGlassdoorTask(driver, "23AndMe");
+                    scrapeCompanyTask = new ScrapeOrganizationGlassdoorTask(driver, pubSubSubscription, "23AndMe");
                 }
             }
 
