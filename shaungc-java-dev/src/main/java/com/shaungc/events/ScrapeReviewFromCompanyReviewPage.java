@@ -90,19 +90,20 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // TODO: filter by engineering category
 
+        // TODO: remove sort if not needed - especially when we will scrape all reviews anyway, and the ordering may not matter.
         // use wait which is based on this.driver to avoid click() interrupted by
         // element structure changed, or "element not attach to page document" error
         // sort by most recent
-        final String sortDropdownElementCssSelector = "body div#PageContent article[id=MainCol] .filterSorts select[name=filterSorts]";
+        // final String sortDropdownElementCssSelector = "body div#PageContent article[id=MainCol] .filterSorts select[name=filterSorts]";
 
-        // locate sort dropdown list
-        this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(sortDropdownElementCssSelector))).click();
+        // // locate sort dropdown list
+        // this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(sortDropdownElementCssSelector))).click();
 
-        this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(sortDropdownElementCssSelector + " option[value=DATE]")))
-            .click();
+        // this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(sortDropdownElementCssSelector + " option[value=DATE]")))
+        //     .click();
 
-        // wait for loading sort
-        this.waitForReviewPanelLoading();
+        // // wait for loading sort
+        // this.waitForReviewPanelLoading();
 
         // locate review panel
         final WebElement reviewPanelElement =
@@ -422,6 +423,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         // scrape featured
         try {
             employeeReviewLiElement.findElement(By.cssSelector("div.hreview div.featuredFlag"));
+            // employeeReviewLiElement.findElement(By.cssSelector("div.hreview > div.d-flex.justify-content-between > div > div.featuredFlag"));
             reviewDataStore.varyingReviewData.featured = true;
         } catch (final NoSuchElementException e) {}
 
