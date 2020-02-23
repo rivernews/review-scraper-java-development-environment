@@ -56,6 +56,17 @@ public final class Configuration {
     public static String TEST_COMPANY_INFORMATION_STRING = System.getenv("TEST_COMPANY_INFORMATION_STRING") != null
         ? System.getenv("TEST_COMPANY_INFORMATION_STRING")
         : null;
+    public static String TEST_COMPANY_ID = Configuration.getenvOrDefault("TEST_COMPANY_ID", "");
+    public static String TEST_COMPANY_LAST_PROGRESS_PROCESSED = Configuration.getenvOrDefault("TEST_COMPANY_LAST_PROGRESS_PROCESSED", "");
+    public static String TEST_COMPANY_LAST_PROGRESS_WENTTHROUGH = Configuration.getenvOrDefault(
+        "TEST_COMPANY_LAST_PROGRESS_WENTTHROUGH",
+        ""
+    );
+    public static String TEST_COMPANY_LAST_PROGRESS_TOTAL = Configuration.getenvOrDefault("TEST_COMPANY_LAST_PROGRESS_TOTAL", "");
+    public static String TEST_COMPANY_LAST_REVIEW_PAGE_URL = Configuration.getenvOrDefault("TEST_COMPANY_LAST_REVIEW_PAGE_URL", "");
+    public static String SCRAPER_MODE = Configuration.getenvOrDefault("SCRAPER_MODE", "");
+
+    // misc helper
 
     public static String getenvOrDefault(String envKey, String defaultString) {
         String envValue = System.getenv(envKey);

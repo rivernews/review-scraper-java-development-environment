@@ -157,7 +157,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
                 this.pubSubSubscription.publish(
                         String.format(
-                            "%s:%s:{\"processed\": \"%s\",\"wentThrough\": \"%s\",\"total\": \"%s\"}",
+                            "%s:%s:{\"processed\":%d,\"wentThrough\":%d,\"total\":%d}",
                             ScraperJobMessageType.PROGRESS.getString(),
                             ScraperJobMessageTo.SLACK_MD_SVC.getString(),
                             this.processedReviewsCount,
