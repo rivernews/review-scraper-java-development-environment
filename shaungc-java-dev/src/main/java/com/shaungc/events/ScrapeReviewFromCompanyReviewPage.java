@@ -48,7 +48,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
     private final String reviewPanelElementCssSelector = "article[id*=MainCol] main";
     private final String employeeReviewElementsLocalCssSelector = "div#ReviewsFeed ol > li";
-    
+
     /** scraper session metadata */
 
     public Integer processedReviewsCount = 0;
@@ -57,12 +57,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     // else if mode == renewal, will obtain from env var (Configuration)
     public Integer localReviewCount;
     private Integer processedReviewPages = 0;
-    
+
     /** expose other data for external use */
 
     public Boolean doesCollidedReviewExist = false;
     public Boolean isFinalSession = false;
-    
 
     /**
      * For regular scraper mode
@@ -385,7 +384,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                                         this.wentThroughReviewsCount,
                                         this.localReviewCount,
                                         this.scraperSessionTimer.captureOverallElapseDurationInMilliAsString(),
-                                        this.processedReviewPages
+                                        this.processedReviewPages,
+                                        Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION + 1
                                     ),
                                     this.driver.getCurrentUrl(),
                                     ScraperMode.RENEWAL.getString()

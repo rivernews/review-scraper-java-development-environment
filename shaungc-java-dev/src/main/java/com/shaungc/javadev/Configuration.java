@@ -73,6 +73,9 @@ public final class Configuration {
     public static Integer TEST_COMPANY_LAST_PROGRESS_PAGE = Integer.valueOf(
         Configuration.getenvOrDefault("TEST_COMPANY_LAST_PROGRESS_PAGE", "0")
     );
+    public static Integer TEST_COMPANY_LAST_PROGRESS_SESSION = Integer.valueOf(
+        Configuration.getenvOrDefault("TEST_COMPANY_LAST_PROGRESS_SESSION", "0")
+    );
 
     public static String TEST_COMPANY_LAST_REVIEW_PAGE_URL = Configuration.getenvOrDefault("TEST_COMPANY_LAST_REVIEW_PAGE_URL", "");
     public static String SCRAPER_MODE = Configuration.getenvOrDefault("SCRAPER_MODE", ScraperMode.REGULAR.getString());

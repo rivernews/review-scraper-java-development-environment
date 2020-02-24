@@ -160,15 +160,17 @@ public class ScrapeOrganizationGlassdoorTask {
         );
         scrapeBasicDataFromCompanyNamePage.run();
 
-        final String orgPrefixSlackString = "*(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ")* ";
+        this.orgPrefixSlackString = "*(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ")* ";
 
         Logger.infoAlsoSlack(
-            orgPrefixSlackString + "Basic data parsing completed, elasped time: " + scraperTaskTimer.captureOverallElapseDurationString()
+            this.orgPrefixSlackString +
+            "Basic data parsing completed, elasped time: " +
+            scraperTaskTimer.captureOverallElapseDurationString()
         );
 
         // short circuit if no review data
         if (scrapeBasicDataFromCompanyNamePage.sideEffect.reviewNumberText.equals("--")) {
-            Logger.infoAlsoSlack(orgPrefixSlackString + "Review number is -- so no need to scrape review page.");
+            Logger.infoAlsoSlack(this.orgPrefixSlackString + "Review number is -- so no need to scrape review page.");
             return;
         }
 
@@ -187,7 +189,7 @@ public class ScrapeOrganizationGlassdoorTask {
         this.processedReviewsCount = scrapeReviewFromCompanyReviewPage.processedReviewsCount;
         this.wentThroughReviewsCount = scrapeReviewFromCompanyReviewPage.wentThroughReviewsCount;
         this.localReviewsCount = scrapeReviewFromCompanyReviewPage.localReviewCount;
-        this.orgPrefixSlackString = "*(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ")* ";
+        // this.orgPrefixSlackString is set above
         this.doesCollidedReviewExist = scrapeReviewFromCompanyReviewPage.doesCollidedReviewExist;
         this.isFinalSession = scrapeReviewFromCompanyReviewPage.isFinalSession;
     }
@@ -237,19 +239,23 @@ public class ScrapeOrganizationGlassdoorTask {
             "/" +
             this.localReviewsCount +
             ", duration: " +
-            this.scraperTaskTimer.captureOverallElapseDurationString()
+            this.scraperTaskTimer.captureOverallElapseDurationString() +
+            ", session used: " +
+            Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION +
+            1
         );
     }
 
     private void generateContinueSessionReport() {
         Logger.infoAlsoSlack(
             String.format(
-                "=== Session finished, continuing cross session === %sprocessed/wentThrough/total, %s/%s/%s, duration %s",
+                "=== Session finished, continuing cross session === %sprocessed/wentThrough/total, %s/%s/%s, duration %s, session used: %s",
                 this.orgPrefixSlackString,
                 this.processedReviewsCount,
                 this.wentThroughReviewsCount,
                 this.localReviewsCount,
-                this.scraperTaskTimer.captureOverallElapseDurationString()
+                this.scraperTaskTimer.captureOverallElapseDurationString(),
+                Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION + 1
             )
         );
     }
