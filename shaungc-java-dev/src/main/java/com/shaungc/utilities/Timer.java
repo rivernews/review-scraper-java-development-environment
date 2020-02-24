@@ -44,7 +44,7 @@ public class Timer {
         Duration duration = Duration.between(this.startInstant, endInstant);
 
         if (this.durationOffset != null) {
-            duration.plus(this.durationOffset);
+            duration = duration.plus(this.durationOffset);
         }
 
         return duration;
