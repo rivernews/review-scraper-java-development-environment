@@ -356,6 +356,9 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             // check if approaching travis build limit
             // if so, stop session and try to schedule a cross-session job instead
             if (this.scraperSessionTimer.doesSessionApproachesTravisBuildLimit()) {
+                final String orgName =
+                    "\"" + (this.orgMetadata != null ? this.orgMetadata.companyName : Configuration.TEST_COMPANY_NAME) + "\"";
+
                 this.pubSubSubscription.publish(
                         String.format(
                             "%s:%s:%s",
@@ -364,7 +367,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                             S3Service.serializeJavaObject(
                                 new ScraperJobData(
                                     this.orgMetadata != null ? this.orgMetadata.companyId : Configuration.TEST_COMPANY_ID,
-                                    this.orgMetadata != null ? this.orgMetadata.companyName : Configuration.TEST_COMPANY_NAME,
+                                    orgName,
                                     new ScraperProgressData(
                                         this.processedReviewsCount,
                                         this.wentThroughReviewsCount,
