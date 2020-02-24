@@ -39,9 +39,9 @@ public class ScrapeOrganizationGlassdoorTask {
         this.companyOverviewPageUrl = null;
         this.pubSubSubscription = pubSubSubscription;
 
-        SlackService.asyncSendMessage("Scraper task started by company name: " + companyName);
+        Logger.infoAlsoSlack("Scraper task started by company name: " + companyName);
 
-        this.launchScraper();
+        this.launchSessionScraper();
     }
 
     public ScrapeOrganizationGlassdoorTask(
@@ -57,11 +57,23 @@ public class ScrapeOrganizationGlassdoorTask {
 
         Logger.infoAlsoSlack("Scraper task started by url: " + companyOverviewPageUrl);
 
-        if (Configuration.SCRAPER_MODE.equals(ScraperMode.RENEWAL.getString())) {
-            this.continueCrossSessionScraper();
-        } else {
-            this.launchScraper();
-        }
+        this.launchSessionScraper();
+    }
+
+    /**
+     * Scraper task for renewal mode
+     */
+    public ScrapeOrganizationGlassdoorTask(final WebDriver driver, final PubSubSubscription pubSubSubscription) throws ScraperException {
+        this.driver = driver;
+        this.searchCompanyName = null;
+        this.companyOverviewPageUrl = null;
+        this.pubSubSubscription = pubSubSubscription;
+
+        Logger.infoAlsoSlack(
+            "Renewal task for: " + Configuration.TEST_COMPANY_NAME + ", from review page " + Configuration.TEST_COMPANY_LAST_REVIEW_PAGE_URL
+        );
+
+        this.continueCrossSessionScraper();
     }
 
     private void continueCrossSessionScraper() throws ScraperException {
@@ -86,7 +98,7 @@ public class ScrapeOrganizationGlassdoorTask {
             );
     }
 
-    private void launchScraper() throws ScraperException {
+    private void launchSessionScraper() throws ScraperException {
         this.scraperTaskTimer = new Timer();
 
         // Access company overview page

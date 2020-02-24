@@ -7,6 +7,7 @@ import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.PubSubSubscription;
 import com.shaungc.utilities.ScraperJobMessageTo;
 import com.shaungc.utilities.ScraperJobMessageType;
+import com.shaungc.utilities.ScraperMode;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +27,6 @@ public class App {
             try {
                 pubSubSubscription.supervisorCountDownLatch.await(1, TimeUnit.MINUTES);
             } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
                 throw new ScraperException("Waiting for supervisor's confirmation timed out for 1 minute.");
             }
 
@@ -39,20 +39,21 @@ public class App {
             new LoginGlassdoorTask(driver);
 
             // launch scraping task against a company
-            // TODO: scale up to accept a list of company inputs
-            try {
-                URL companyOverviewPageUrl = new URL(Configuration.TEST_COMPANY_INFORMATION_STRING);
-                Logger.info("Scrape by url: " + companyOverviewPageUrl);
-                scrapeCompanyTask = new ScrapeOrganizationGlassdoorTask(driver, pubSubSubscription, companyOverviewPageUrl);
-            } catch (MalformedURLException e) {
-                Logger.info("Scrape by company name: " + Configuration.TEST_COMPANY_INFORMATION_STRING);
-                if (Configuration.TEST_COMPANY_INFORMATION_STRING != null) {
-                    scrapeCompanyTask =
-                        new ScrapeOrganizationGlassdoorTask(driver, pubSubSubscription, Configuration.TEST_COMPANY_INFORMATION_STRING);
-                } else {
-                    // new ScrapeOrganizationGlassdoorTask(driver, "DigitalOcean");
-                    // new ScrapeOrganizationGlassdoorTask(driver, "Waymo");
-                    scrapeCompanyTask = new ScrapeOrganizationGlassdoorTask(driver, pubSubSubscription, "23AndMe");
+            if (Configuration.SCRAPER_MODE.equals(ScraperMode.RENEWAL.getString())) {
+                scrapeCompanyTask = new ScrapeOrganizationGlassdoorTask(driver, pubSubSubscription);
+            } else {
+                try {
+                    URL companyOverviewPageUrl = new URL(Configuration.TEST_COMPANY_INFORMATION_STRING);
+                    scrapeCompanyTask = new ScrapeOrganizationGlassdoorTask(driver, pubSubSubscription, companyOverviewPageUrl);
+                } catch (MalformedURLException e) {
+                    if (Configuration.TEST_COMPANY_INFORMATION_STRING != null) {
+                        scrapeCompanyTask =
+                            new ScrapeOrganizationGlassdoorTask(driver, pubSubSubscription, Configuration.TEST_COMPANY_INFORMATION_STRING);
+                    } else {
+                        // new ScrapeOrganizationGlassdoorTask(driver, "DigitalOcean");
+                        // new ScrapeOrganizationGlassdoorTask(driver, "Waymo");
+                        scrapeCompanyTask = new ScrapeOrganizationGlassdoorTask(driver, pubSubSubscription, "23AndMe");
+                    }
                 }
             }
 
