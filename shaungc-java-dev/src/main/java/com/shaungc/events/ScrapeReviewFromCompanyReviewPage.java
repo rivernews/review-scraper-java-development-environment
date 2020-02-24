@@ -34,27 +34,35 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
  * ScrapeReviewFromCompanyReviewPage
  */
 public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCompanyReviewParsedData, GlassdoorCompanyReviewParsedData> {
+    /** previous session data */
+
     final BasicParsedData orgMetadata;
+    private final String orgNameSlackMessagePrefix;
+
+    /** session utilities */
+
+    private final Timer scraperSessionTimer;
+    final PubSubSubscription pubSubSubscription;
 
     /** element locating resources */
+
     private final String reviewPanelElementCssSelector = "article[id*=MainCol] main";
     private final String employeeReviewElementsLocalCssSelector = "div#ReviewsFeed ol > li";
-    private final String employeeReviewElementsCssSelector = reviewPanelElementCssSelector + employeeReviewElementsLocalCssSelector;
-
+    
     /** scraper session metadata */
+
     public Integer processedReviewsCount = 0;
     public Integer wentThroughReviewsCount = 0;
-    private Integer processedReviewPages = 0;
-
     // if scraper mode == regular, will obtain when scraping review meta
     // else if mode == renewal, will obtain from env var (Configuration)
     public Integer localReviewCount;
+    private Integer processedReviewPages = 0;
+    
+    /** expose other data for external use */
 
     public Boolean doesCollidedReviewExist = false;
-
-    private final Timer scraperSessionTimer;
-    private final String orgNameSlackMessagePrefix;
-    final PubSubSubscription pubSubSubscription;
+    public Boolean isFinalSession = false;
+    
 
     /**
      * For regular scraper mode
@@ -64,14 +72,15 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         final PubSubSubscription pubSubSubscription,
         final ArchiveManager archiveManager,
         final Timer scraperSessionTimer,
-        final BasicParsedData orgMetadata
+        final BasicParsedData orgMetadata,
+        final String orgNameSlackMessagePrefix
     ) {
         super(driver, archiveManager);
         this.pubSubSubscription = pubSubSubscription;
         this.scraperSessionTimer = scraperSessionTimer;
         this.orgMetadata = orgMetadata;
 
-        this.orgNameSlackMessagePrefix = "*(" + orgMetadata.companyName + ")* ";
+        this.orgNameSlackMessagePrefix = orgNameSlackMessagePrefix;
     }
 
     /**
@@ -81,14 +90,15 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         final WebDriver driver,
         final PubSubSubscription pubSubSubscription,
         final ArchiveManager archiveManager,
-        final Timer scraperSessionTimer
+        final Timer scraperSessionTimer,
+        final String orgNameSlackMessagePrefix
     ) {
         super(driver, archiveManager);
         this.pubSubSubscription = pubSubSubscription;
         this.scraperSessionTimer = scraperSessionTimer;
         this.orgMetadata = null;
 
-        this.orgNameSlackMessagePrefix = "*(" + Configuration.TEST_COMPANY_NAME + ")* ";
+        this.orgNameSlackMessagePrefix = orgNameSlackMessagePrefix;
 
         this.processedReviewsCount = Configuration.TEST_COMPANY_LAST_PROGRESS_PROCESSED;
         this.wentThroughReviewsCount = Configuration.TEST_COMPANY_LAST_PROGRESS_WENTTHROUGH;
@@ -114,7 +124,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // TODO: filter by engineering category
 
-        // TODO: remove sort if not needed - especially when we will scrape all reviews anyway, and the ordering may not matter.
+        // TODO: remove sort if not needed - especially when we will scrape all reviews anyway, and the ordering may not matter. This is also to scrape "featured flag", which is only displayed only in popular ordering
         // use wait which is based on this.driver to avoid click() interrupted by
         // element structure changed, or "element not attach to page document" error
         // sort by most recent
@@ -346,6 +356,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             if (noNextPageLink) {
                 Logger.info("No next page link available, ready to wrap up scraper session.");
+                this.isFinalSession = true;
                 break;
             }
 
@@ -430,7 +441,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
     private void scrapeEmployeeReview(final WebElement employeeReviewLiElement, final EmployeeReviewData reviewDataStore) {
         reviewDataStore.stableReviewData.reviewId = this.parseReviewId(employeeReviewLiElement);
-        // TODO: check review id
 
         // scrape time
         try {
@@ -457,7 +467,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         this.parseReviewTextData(employeeReviewLiElement, reviewDataStore);
 
         // scrape helpful
-        final Integer helpfulCount = 0;
         // TODO: handle possible comma in text
         try {
             reviewDataStore.varyingReviewData.helpfulCount =

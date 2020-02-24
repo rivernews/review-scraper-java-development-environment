@@ -4,7 +4,14 @@ sudo: required
 before_install:
 - |
   if [ "$SLACK_WEBHOOK_URL" != "" ]; then
-    curl -X POST --data-urlencode "payload={ \"text\": \"*(${TEST_COMPANY_INFORMATION_STRING})* TravisCI about to setup environment .\"}" ${SLACK_WEBHOOK_URL}
+
+    if [ "$TEST_COMPANY_INFORMATION_STRING" != "" ]; then
+      curl -X POST --data-urlencode "payload={ \"text\": \"*(${TEST_COMPANY_INFORMATION_STRING})* TravisCI about to setup environment .\"}" ${SLACK_WEBHOOK_URL}
+    else
+      curl -X POST --data-urlencode "payload={ \"text\": \"*(${TEST_COMPANY_NAME})* TravisCI about to setup environment .\"}" ${SLACK_WEBHOOK_URL}
+    fi
+
+    
   fi
 install:
 - sudo apt-get install google-chrome-stable
