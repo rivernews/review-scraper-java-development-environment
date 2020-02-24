@@ -241,15 +241,14 @@ public class ScrapeOrganizationGlassdoorTask {
             ", duration: " +
             this.scraperTaskTimer.captureOverallElapseDurationString() +
             ", session used: " +
-            Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION +
-            1
+            (Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION + 1)
         );
     }
 
     private void generateContinueSessionReport() {
         Logger.infoAlsoSlack(
             String.format(
-                "=== Session finished, continuing cross session === %sprocessed/wentThrough/total, %s/%s/%s, duration %s, session used: %s",
+                "=== Session finished, continuing cross session === %sprocessed/wentThrough/total, %s/%s/%s, duration %s, session used: %d",
                 this.orgPrefixSlackString,
                 this.processedReviewsCount,
                 this.wentThroughReviewsCount,
