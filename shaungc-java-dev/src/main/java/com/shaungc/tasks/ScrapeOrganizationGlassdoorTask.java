@@ -65,7 +65,6 @@ public class ScrapeOrganizationGlassdoorTask {
 
     /**
      * Scraper task for renewal mode
-     * 
      */
     public ScrapeOrganizationGlassdoorTask(final WebDriver driver, final PubSubSubscription pubSubSubscription) throws ScraperException {
         this.driver = driver;
@@ -217,7 +216,6 @@ public class ScrapeOrganizationGlassdoorTask {
                 "\nYou can access the last processed webpage at " +
                 this.driver.getCurrentUrl() +
                 ", see if there is indeed no next page available & that's all we can get." +
-
                 "\nIf you are running for an org w/ existing review pool, you can ignore this warning."
             );
         }
@@ -244,15 +242,15 @@ public class ScrapeOrganizationGlassdoorTask {
     }
 
     private void generateContinueSessionReport() {
-        Logger.infoAlsoSlack(String.format(
+        Logger.infoAlsoSlack(
+            String.format(
                 "=== Session finished, continuing cross session === %sprocessed/wentThrough/total, %s/%s/%s, duration %s",
                 this.orgPrefixSlackString,
-
                 this.processedReviewsCount,
                 this.wentThroughReviewsCount,
                 this.localReviewsCount,
-
                 this.scraperTaskTimer.captureOverallElapseDurationString()
-            ));
+            )
+        );
     }
 }
