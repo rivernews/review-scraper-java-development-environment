@@ -10,11 +10,8 @@ import com.shaungc.exceptions.ScraperException;
 import com.shaungc.javadev.Configuration;
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.PubSubSubscription;
-import com.shaungc.utilities.ScraperMode;
-import com.shaungc.utilities.SlackService;
 import com.shaungc.utilities.Timer;
 import java.net.URL;
-import java.time.Duration;
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -79,7 +76,7 @@ public class ScrapeOrganizationGlassdoorTask {
     private void continueCrossSessionScraper() throws ScraperException {
         this.scraperTaskTimer = new Timer(Configuration.TEST_COMPANY_LAST_PROGRESS_DURATION);
 
-        final ArchiveManager archiveManager = new ArchiveManager(Configuration.TEST_COMPANY_NAME, Configuration.TEST_COMPANY_ID);
+        this.archiveManager = new ArchiveManager(Configuration.TEST_COMPANY_NAME, Configuration.TEST_COMPANY_ID);
 
         final ScrapeReviewFromCompanyReviewPage scrapeReviewFromCompanyReviewPage = new ScrapeReviewFromCompanyReviewPage(
             driver,
