@@ -3,6 +3,7 @@ package com.shaungc.javadev;
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.RequestAddressValidator;
 import com.shaungc.utilities.ReviewCollisionStrategy;
+import com.shaungc.utilities.ScraperMode;
 import java.net.URI;
 
 /**
@@ -57,14 +58,24 @@ public final class Configuration {
         ? System.getenv("TEST_COMPANY_INFORMATION_STRING")
         : null;
     public static String TEST_COMPANY_ID = Configuration.getenvOrDefault("TEST_COMPANY_ID", "");
-    public static String TEST_COMPANY_LAST_PROGRESS_PROCESSED = Configuration.getenvOrDefault("TEST_COMPANY_LAST_PROGRESS_PROCESSED", "");
-    public static String TEST_COMPANY_LAST_PROGRESS_WENTTHROUGH = Configuration.getenvOrDefault(
-        "TEST_COMPANY_LAST_PROGRESS_WENTTHROUGH",
-        ""
+    public static String TEST_COMPANY_NAME = Configuration.getenvOrDefault("TEST_COMPANY_NAME", "");
+
+    public static Integer TEST_COMPANY_LAST_PROGRESS_PROCESSED = Integer.valueOf(
+        Configuration.getenvOrDefault("TEST_COMPANY_LAST_PROGRESS_PROCESSED", "0")
     );
-    public static String TEST_COMPANY_LAST_PROGRESS_TOTAL = Configuration.getenvOrDefault("TEST_COMPANY_LAST_PROGRESS_TOTAL", "");
+    public static Integer TEST_COMPANY_LAST_PROGRESS_WENTTHROUGH = Integer.valueOf(
+        Configuration.getenvOrDefault("TEST_COMPANY_LAST_PROGRESS_WENTTHROUGH", "0")
+    );
+    public static Integer TEST_COMPANY_LAST_PROGRESS_TOTAL = Integer.valueOf(
+        Configuration.getenvOrDefault("TEST_COMPANY_LAST_PROGRESS_TOTAL", "0")
+    );
+    public static String TEST_COMPANY_LAST_PROGRESS_DURATION = Configuration.getenvOrDefault("TEST_COMPANY_LAST_PROGRESS_DURATION", "0");
+    public static Integer TEST_COMPANY_LAST_PROGRESS_PAGE = Integer.valueOf(
+        Configuration.getenvOrDefault("TEST_COMPANY_LAST_PROGRESS_PAGE", "0")
+    );
+
     public static String TEST_COMPANY_LAST_REVIEW_PAGE_URL = Configuration.getenvOrDefault("TEST_COMPANY_LAST_REVIEW_PAGE_URL", "");
-    public static String SCRAPER_MODE = Configuration.getenvOrDefault("SCRAPER_MODE", "");
+    public static String SCRAPER_MODE = Configuration.getenvOrDefault("SCRAPER_MODE", ScraperMode.REGULAR.getString());
 
     // misc helper
 

@@ -7,6 +7,8 @@ import com.shaungc.dataTypes.EmployeeReviewData;
 import com.shaungc.dataTypes.EmployeeReviewTextData;
 import com.shaungc.dataTypes.GlassdoorCompanyReviewParsedData;
 import com.shaungc.dataTypes.GlassdoorReviewMetadata;
+import com.shaungc.dataTypes.ScraperJobData;
+import com.shaungc.dataTypes.ScraperProgressData;
 import com.shaungc.exceptions.ScraperException;
 import com.shaungc.javadev.Configuration;
 import com.shaungc.utilities.Logger;
@@ -15,6 +17,7 @@ import com.shaungc.utilities.PubSubSubscription;
 import com.shaungc.utilities.ReviewCollisionStrategy;
 import com.shaungc.utilities.ScraperJobMessageTo;
 import com.shaungc.utilities.ScraperJobMessageType;
+import com.shaungc.utilities.ScraperMode;
 import com.shaungc.utilities.Timer;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -31,6 +34,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
  * ScrapeReviewFromCompanyReviewPage
  */
 public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCompanyReviewParsedData, GlassdoorCompanyReviewParsedData> {
+    final BasicParsedData orgMetadata;
+
     /** element locating resources */
     private final String reviewPanelElementCssSelector = "article[id*=MainCol] main";
     private final String employeeReviewElementsLocalCssSelector = "div#ReviewsFeed ol > li";
@@ -39,30 +44,21 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     /** scraper session metadata */
     public Integer processedReviewsCount = 0;
     public Integer wentThroughReviewsCount = 0;
+    private Integer processedReviewPages = 0;
+
+    // if scraper mode == regular, will obtain when scraping review meta
+    // else if mode == renewal, will obtain from env var (Configuration)
+    public Integer localReviewCount;
+
     public Boolean doesCollidedReviewExist = false;
+
     private final Timer scraperSessionTimer;
     private final String orgNameSlackMessagePrefix;
-
     final PubSubSubscription pubSubSubscription;
 
-    // public ScrapeReviewFromCompanyReviewPage(final WebDriver driver) {
-    //     super(driver);
-    //     this.scraperSessionTimer = null;
-    //     this.orgNameSlackMessagePrefix = "";
-    // }
-
-    // public ScrapeReviewFromCompanyReviewPage(final WebDriver driver, ArchiveManager archiveManager) {
-    //     super(driver, archiveManager);
-    //     this.scraperSessionTimer = null;
-    //     this.orgNameSlackMessagePrefix = "";
-    // }
-
-    // public ScrapeReviewFromCompanyReviewPage(final WebDriver driver, ArchiveManager archiveManager, Timer scraperSessionTimer) {
-    //     super(driver, archiveManager);
-    //     this.scraperSessionTimer = scraperSessionTimer;
-    //     this.orgNameSlackMessagePrefix = "";
-    // }
-
+    /**
+     * For regular scraper mode
+     */
     public ScrapeReviewFromCompanyReviewPage(
         final WebDriver driver,
         final PubSubSubscription pubSubSubscription,
@@ -73,7 +69,31 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         super(driver, archiveManager);
         this.pubSubSubscription = pubSubSubscription;
         this.scraperSessionTimer = scraperSessionTimer;
+        this.orgMetadata = orgMetadata;
+
         this.orgNameSlackMessagePrefix = "*(" + orgMetadata.companyName + ")* ";
+    }
+
+    /**
+     * For renewal scraper mode
+     */
+    public ScrapeReviewFromCompanyReviewPage(
+        final WebDriver driver,
+        final PubSubSubscription pubSubSubscription,
+        final ArchiveManager archiveManager,
+        final Timer scraperSessionTimer
+    ) {
+        super(driver, archiveManager);
+        this.pubSubSubscription = pubSubSubscription;
+        this.scraperSessionTimer = scraperSessionTimer;
+        this.orgMetadata = null;
+
+        this.orgNameSlackMessagePrefix = "*(" + Configuration.TEST_COMPANY_NAME + ")* ";
+
+        this.processedReviewsCount = Configuration.TEST_COMPANY_LAST_PROGRESS_PROCESSED;
+        this.wentThroughReviewsCount = Configuration.TEST_COMPANY_LAST_PROGRESS_WENTTHROUGH;
+        this.localReviewCount = Configuration.TEST_COMPANY_LAST_PROGRESS_TOTAL;
+        this.processedReviewPages = Configuration.TEST_COMPANY_LAST_PROGRESS_PAGE;
     }
 
     @Override
@@ -81,7 +101,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         final List<WebElement> locatedElements = new ArrayList<>();
 
         // navigate to reviews page
-        this.driver.findElement(By.cssSelector("article[id*=WideCol] a.eiCell.reviews")).click();
+        if (Configuration.SCRAPER_MODE.equals(ScraperMode.RENEWAL.getString())) {
+            this.driver.navigate().to(Configuration.TEST_COMPANY_LAST_REVIEW_PAGE_URL);
+        } else {
+            this.driver.findElement(By.cssSelector("article[id*=WideCol] a.eiCell.reviews")).click();
+        }
 
         // confirm that we are on review page while locating filter button
         final WebElement filterButtonElement = wait.until(
@@ -128,16 +152,21 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         // initialize data pack to store review data
         final GlassdoorCompanyReviewParsedData glassdoorCompanyParsedData = new GlassdoorCompanyReviewParsedData();
 
-        // scrape for review metadata
-        this.scrapeReviewMetadata(reviewPanelElement, glassdoorCompanyParsedData.reviewMetadata);
+        if (Configuration.SCRAPER_MODE.equals(ScraperMode.REGULAR.getString())) {
+            // Scrape Review Metadata
 
-        // write out review metadata
-        this.archiveManager.writeGlassdoorOrganizationReviewsMetadataAsJson(glassdoorCompanyParsedData.reviewMetadata);
+            // scrape for review metadata
+            this.scrapeReviewMetadata(reviewPanelElement, glassdoorCompanyParsedData.reviewMetadata);
+
+            // write out review metadata
+            this.archiveManager.writeGlassdoorOrganizationReviewsMetadataAsJson(glassdoorCompanyParsedData.reviewMetadata);
+
+            this.localReviewCount = glassdoorCompanyParsedData.reviewMetadata.localReviewCount;
+        }
 
         // foreach review
-        Integer processedReviewPages = 0;
         final Integer reviewReportTime = 5;
-        final Integer reportingRate = (Integer) (glassdoorCompanyParsedData.reviewMetadata.localReviewCount / reviewReportTime);
+        final Integer reportingRate = (Integer) (this.localReviewCount / reviewReportTime);
         while (true) {
             // pull out review elements
             final List<WebElement> employeeReviewElements = reviewPanelElement.findElements(
@@ -162,7 +191,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                             ScraperJobMessageTo.SLACK_MD_SVC.getString(),
                             this.processedReviewsCount,
                             this.wentThroughReviewsCount,
-                            glassdoorCompanyParsedData.reviewMetadata.localReviewCount
+                            this.localReviewCount
                         )
                     );
 
@@ -289,11 +318,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                             elapsedTimeString != "" ? "(" + elapsedTimeString + ") " : "",
                             this.driver.getCurrentUrl(),
                             // + 1 to get current page number
-                            processedReviewPages + 1,
+                            this.processedReviewPages + 1,
                             employeeReviewElements.size(),
                             this.processedReviewsCount,
                             this.wentThroughReviewsCount,
-                            glassdoorCompanyParsedData.reviewMetadata.localReviewCount,
+                            this.localReviewCount,
                             reportingRate,
                             this.doesCollidedReviewExist ? "🟠 Some reviews collided previously" : ""
                         )
@@ -305,7 +334,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 }
             }
 
-            processedReviewPages++;
+            this.processedReviewPages++;
 
             // click next page
             Boolean noNextPageLink = false;
@@ -323,6 +352,36 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             Logger.info("Found next page link, going to continue...");
 
             this.waitForReviewPanelLoading();
+
+            // check if approaching travis build limit
+            // if so, stop session and try to schedule a cross-session job instead
+            if (this.scraperSessionTimer.doesSessionApproachesTravisBuildLimit()) {
+                this.pubSubSubscription.publish(
+                        String.format(
+                            "%s:%s:%s",
+                            ScraperJobMessageType.CROSS.getString(),
+                            ScraperJobMessageTo.SLACK_MD_SVC.getString(),
+                            S3Service.serializeJavaObject(
+                                new ScraperJobData(
+                                    this.orgMetadata != null ? this.orgMetadata.companyId : Configuration.TEST_COMPANY_ID,
+                                    this.orgMetadata != null ? this.orgMetadata.companyName : Configuration.TEST_COMPANY_NAME,
+                                    new ScraperProgressData(
+                                        this.processedReviewsCount,
+                                        this.wentThroughReviewsCount,
+                                        this.localReviewCount,
+                                        this.scraperSessionTimer.captureElapseDurationInMilliAsString(),
+                                        this.processedReviewPages
+                                    ),
+                                    this.driver.getCurrentUrl(),
+                                    ScraperMode.RENEWAL.getString()
+                                )
+                            )
+                        )
+                    );
+
+                // stop scraper session
+                return glassdoorCompanyParsedData;
+            }
         }
 
         return glassdoorCompanyParsedData;

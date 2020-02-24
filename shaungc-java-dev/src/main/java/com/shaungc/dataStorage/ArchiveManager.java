@@ -43,6 +43,14 @@ public class ArchiveManager {
         this.s3Service.createBucket();
     }
 
+    public ArchiveManager(String orgName, String orgId) {
+        this.s3Service = new S3Service(ArchiveManager.BUCKET_NAME);
+        this.s3Service.createBucket();
+
+        this.orgName = orgName;
+        this.orgId = orgId;
+    }
+
     // meta info functions
 
     public String doesObjectExist(String fullPath) {

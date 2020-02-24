@@ -7,15 +7,14 @@ import com.shaungc.events.JudgeQueryCompanyPageEvent;
 import com.shaungc.events.ScrapeBasicDataFromCompanyNamePage;
 import com.shaungc.events.ScrapeReviewFromCompanyReviewPage;
 import com.shaungc.exceptions.ScraperException;
+import com.shaungc.javadev.Configuration;
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.PubSubSubscription;
+import com.shaungc.utilities.ScraperMode;
 import com.shaungc.utilities.SlackService;
 import com.shaungc.utilities.Timer;
 import java.net.URL;
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.temporal.Temporal;
-import java.util.Date;
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -29,6 +28,8 @@ public class ScrapeOrganizationGlassdoorTask {
     public GlassdoorCompanyReviewParsedData scrapedReviewData = null;
     public BasicParsedData scrapedBasicData = null;
 
+    private Timer scraperTaskTimer;
+    private ArchiveManager archiveManager;
     final PubSubSubscription pubSubSubscription;
 
     public ScrapeOrganizationGlassdoorTask(final WebDriver driver, final PubSubSubscription pubSubSubscription, final String companyName)
@@ -56,11 +57,37 @@ public class ScrapeOrganizationGlassdoorTask {
 
         Logger.infoAlsoSlack("Scraper task started by url: " + companyOverviewPageUrl);
 
-        this.launchScraper();
+        if (Configuration.SCRAPER_MODE.equals(ScraperMode.RENEWAL.getString())) {
+            this.continueCrossSessionScraper();
+        } else {
+            this.launchScraper();
+        }
+    }
+
+    private void continueCrossSessionScraper() throws ScraperException {
+        this.scraperTaskTimer = new Timer(Configuration.TEST_COMPANY_LAST_PROGRESS_DURATION);
+
+        final ArchiveManager archiveManager = new ArchiveManager(Configuration.TEST_COMPANY_NAME, Configuration.TEST_COMPANY_ID);
+
+        final ScrapeReviewFromCompanyReviewPage scrapeReviewFromCompanyReviewPage = new ScrapeReviewFromCompanyReviewPage(
+            driver,
+            this.pubSubSubscription,
+            archiveManager,
+            scraperTaskTimer
+        );
+        scrapeReviewFromCompanyReviewPage.run();
+
+        final String orgPrefixSlackString = "*(" + Configuration.TEST_COMPANY_NAME + ")* ";
+        this.generateSessionReport(
+                Configuration.TEST_COMPANY_LAST_PROGRESS_TOTAL,
+                Configuration.TEST_COMPANY_LAST_PROGRESS_PROCESSED,
+                orgPrefixSlackString,
+                scrapeReviewFromCompanyReviewPage.doesCollidedReviewExist
+            );
     }
 
     private void launchScraper() throws ScraperException {
-        Timer scraperTaskTimer = new Timer();
+        this.scraperTaskTimer = new Timer();
 
         // Access company overview page
         if (this.companyOverviewPageUrl != null) {
@@ -96,12 +123,12 @@ public class ScrapeOrganizationGlassdoorTask {
         }
 
         // prepare to write data
-        ArchiveManager archiveManager = new ArchiveManager();
+        this.archiveManager = new ArchiveManager();
 
         // scrape company basic info
         final ScrapeBasicDataFromCompanyNamePage scrapeBasicDataFromCompanyNamePage = new ScrapeBasicDataFromCompanyNamePage(
             this.driver,
-            archiveManager
+            this.archiveManager
         );
         scrapeBasicDataFromCompanyNamePage.run();
 
@@ -121,25 +148,35 @@ public class ScrapeOrganizationGlassdoorTask {
         final ScrapeReviewFromCompanyReviewPage scrapeReviewFromCompanyReviewPage = new ScrapeReviewFromCompanyReviewPage(
             driver,
             this.pubSubSubscription,
-            archiveManager,
+            this.archiveManager,
             scraperTaskTimer,
             scrapeBasicDataFromCompanyNamePage.sideEffect
         );
         scrapeReviewFromCompanyReviewPage.run();
 
         // expose data pack
-        this.scrapedBasicData = scrapeBasicDataFromCompanyNamePage.sideEffect;
         this.scrapedReviewData = scrapeReviewFromCompanyReviewPage.sideEffect;
 
+        this.generateSessionReport(
+                this.scrapedReviewData.reviewMetadata.localReviewCount,
+                scrapeReviewFromCompanyReviewPage.processedReviewsCount,
+                orgPrefixSlackString,
+                scrapeReviewFromCompanyReviewPage.doesCollidedReviewExist
+            );
+    }
+
+    private void generateSessionReport(
+        Integer localReviewCount,
+        Integer processedReviewsCount,
+        String orgPrefixSlackString,
+        Boolean doesCollidedReviewExist
+    ) {
         // validate scraper session
         final Float REVIEW_LOST_RATE_ALERT_THRESHOLD = Float.valueOf("0.03");
-        final Float reviewLostRate = (float) (
-            this.scrapedReviewData.reviewMetadata.localReviewCount - scrapeReviewFromCompanyReviewPage.processedReviewsCount
-        ) /
-        this.scrapedReviewData.reviewMetadata.localReviewCount;
+        final Float reviewLostRate = (float) (localReviewCount - processedReviewsCount) / localReviewCount;
         final Float reviewLostRatePercentage = reviewLostRate * (float) 100.0;
         if (reviewLostRate >= REVIEW_LOST_RATE_ALERT_THRESHOLD) {
-            final String htmlDumpPath = archiveManager.writeHtml("reviewDataLostWarning", this.driver.getPageSource());
+            final String htmlDumpPath = this.archiveManager.writeHtml("reviewDataLostWarning", this.driver.getPageSource());
 
             Logger.warnAlsoSlack(
                 orgPrefixSlackString +
@@ -147,9 +184,9 @@ public class ScrapeOrganizationGlassdoorTask {
                 reviewLostRatePercentage +
                 "% " +
                 "(" +
-                scrapeReviewFromCompanyReviewPage.processedReviewsCount +
+                processedReviewsCount +
                 "/" +
-                this.scrapedReviewData.reviewMetadata.localReviewCount +
+                localReviewCount +
                 ")" +
                 ". Last html stored at S3: `" +
                 htmlDumpPath +
@@ -162,7 +199,7 @@ public class ScrapeOrganizationGlassdoorTask {
         }
 
         // send other session warnings
-        if (scrapeReviewFromCompanyReviewPage.doesCollidedReviewExist) {
+        if (doesCollidedReviewExist) {
             Logger.warnAlsoSlack(
                 orgPrefixSlackString +
                 "This session has collided / duplicated review data. Please refer to travisci log and check the collision(s) in s3."
@@ -174,11 +211,11 @@ public class ScrapeOrganizationGlassdoorTask {
             "======= Success! =======\n" +
             orgPrefixSlackString +
             "Processed reviews count: " +
-            scrapeReviewFromCompanyReviewPage.processedReviewsCount +
+            processedReviewsCount +
             "/" +
-            this.scrapedReviewData.reviewMetadata.localReviewCount +
+            localReviewCount +
             ", duration: " +
-            scraperTaskTimer.captureElapseDurationString()
+            this.scraperTaskTimer.captureElapseDurationString()
         );
     }
 }
