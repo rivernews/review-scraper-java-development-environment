@@ -18,6 +18,7 @@ public class Timer {
     }
 
     public Timer(String durationInMilliString) {
+        this.start();
         Long durationInMilli = Long.valueOf(durationInMilliString);
         this.durationOffset = Duration.ofMillis(durationInMilli);
     }
@@ -32,7 +33,7 @@ public class Timer {
     }
 
     public Boolean doesSessionApproachesTravisBuildLimit() {
-        return this.captureCurrentSessionDuration(Instant.now()).compareTo(this.TRAVIS_BUILD_TIME_LIMIT) > 0;
+        return this.captureCurrentSessionDuration(Instant.now()).compareTo(Timer.TRAVIS_BUILD_TIME_LIMIT) > 0;
     }
 
     private Duration captureCurrentSessionDuration(Instant endInstant) {
