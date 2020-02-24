@@ -144,7 +144,7 @@ public class ScrapeOrganizationGlassdoorTask {
         final String orgPrefixSlackString = "*(" + scrapeBasicDataFromCompanyNamePage.sideEffect.companyName + ")* ";
 
         Logger.infoAlsoSlack(
-            orgPrefixSlackString + "Basic data parsing completed, elasped time: " + scraperTaskTimer.captureElapseDurationString()
+            orgPrefixSlackString + "Basic data parsing completed, elasped time: " + scraperTaskTimer.captureOverallElapseDurationString()
         );
 
         // short circuit if no review data
@@ -224,7 +224,7 @@ public class ScrapeOrganizationGlassdoorTask {
             "/" +
             localReviewCount +
             ", duration: " +
-            this.scraperTaskTimer.captureElapseDurationString()
+            this.scraperTaskTimer.captureOverallElapseDurationString()
         );
     }
 }

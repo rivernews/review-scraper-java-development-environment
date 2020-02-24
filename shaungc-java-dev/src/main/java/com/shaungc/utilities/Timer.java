@@ -29,7 +29,7 @@ public class Timer {
 
     public String stop() {
         this.endInstant = Instant.now();
-        return this.getDurationString(this.captureOverallDuration());
+        return this.getDurationString(this.captureCurrentSessionDuration());
     }
 
     public Boolean doesSessionApproachesTravisBuildLimit() {
@@ -50,16 +50,16 @@ public class Timer {
         return duration;
     }
 
-    private Duration captureOverallDuration() {
-        return this.captureOverallDuration(this.endInstant);
+    private Duration captureCurrentSessionDuration() {
+        return this.captureCurrentSessionDuration(Instant.now());
     }
 
-    public String captureElapseDurationString() {
+    public String captureOverallElapseDurationString() {
         final Duration duration = this.captureOverallDuration(Instant.now());
         return this.getDurationString(duration);
     }
 
-    public String captureElapseDurationInMilliAsString() {
+    public String captureOverallElapseDurationInMilliAsString() {
         final Duration duration = this.captureOverallDuration(Instant.now());
         return String.format("%s", duration.toMillis());
     }

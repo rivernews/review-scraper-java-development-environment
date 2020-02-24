@@ -309,7 +309,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 // send message per 50 reviews (5 page, each around 10 reviews)
                 if (this.wentThroughReviewsCount % (reportingRate) == 0) {
                     final String elapsedTimeString = this.scraperSessionTimer != null
-                        ? this.scraperSessionTimer.captureElapseDurationString()
+                        ? this.scraperSessionTimer.captureOverallElapseDurationString()
                         : "";
                     Logger.infoAlsoSlack(
                         String.format(
@@ -373,7 +373,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                                         this.processedReviewsCount,
                                         this.wentThroughReviewsCount,
                                         this.localReviewCount,
-                                        this.scraperSessionTimer.captureElapseDurationInMilliAsString(),
+                                        this.scraperSessionTimer.captureOverallElapseDurationInMilliAsString(),
                                         this.processedReviewPages
                                     ),
                                     this.driver.getCurrentUrl(),
