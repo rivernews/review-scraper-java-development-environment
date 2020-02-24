@@ -356,6 +356,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             // check if approaching travis build limit
             // if so, stop session and try to schedule a cross-session job instead
             if (this.scraperSessionTimer.doesSessionApproachesTravisBuildLimit()) {
+                // handle env var value needs quotes when value contains spaces
                 final String orgName =
                     "\"" + (this.orgMetadata != null ? this.orgMetadata.companyName : Configuration.TEST_COMPANY_NAME) + "\"";
 
