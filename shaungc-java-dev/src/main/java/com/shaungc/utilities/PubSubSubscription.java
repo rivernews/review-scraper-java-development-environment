@@ -17,7 +17,7 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
         "%s:%s:%s",
         RedisPubSubChannelPrefix.SCRAPER_JOB_CHANNEL.getString(),
         Configuration.TEST_COMPANY_INFORMATION_STRING.isEmpty()
-            ? Configuration.TEST_COMPANY_NAME
+            ? "\"" + Configuration.TEST_COMPANY_NAME + "\""
             : Configuration.TEST_COMPANY_INFORMATION_STRING,
         Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION
     );
