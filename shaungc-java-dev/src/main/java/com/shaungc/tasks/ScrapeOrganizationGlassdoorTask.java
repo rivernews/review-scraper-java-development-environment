@@ -98,6 +98,7 @@ public class ScrapeOrganizationGlassdoorTask {
 
         this.archiveManager = new ArchiveManager(Configuration.TEST_COMPANY_NAME, Configuration.TEST_COMPANY_ID);
 
+        this.orgPrefixSlackString = "*(" + Configuration.TEST_COMPANY_NAME + ")* ";
         final ScrapeReviewFromCompanyReviewPage scrapeReviewFromCompanyReviewPage = new ScrapeReviewFromCompanyReviewPage(
             driver,
             this.pubSubSubscription,
@@ -111,7 +112,7 @@ public class ScrapeOrganizationGlassdoorTask {
         this.processedReviewsCount = scrapeReviewFromCompanyReviewPage.processedReviewsCount;
         this.wentThroughReviewsCount = scrapeReviewFromCompanyReviewPage.wentThroughReviewsCount;
         this.localReviewsCount = scrapeReviewFromCompanyReviewPage.localReviewCount;
-        this.orgPrefixSlackString = "*(" + Configuration.TEST_COMPANY_NAME + ")* ";
+        // this.orgPrefixSlackString should be assigned before review scraper
         this.doesCollidedReviewExist = scrapeReviewFromCompanyReviewPage.doesCollidedReviewExist;
         this.isFinalSession = scrapeReviewFromCompanyReviewPage.isFinalSession;
     }

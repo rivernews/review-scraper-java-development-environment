@@ -56,7 +56,7 @@ public final class Configuration {
 
     public static String TEST_COMPANY_INFORMATION_STRING = System.getenv("TEST_COMPANY_INFORMATION_STRING") != null
         ? System.getenv("TEST_COMPANY_INFORMATION_STRING")
-        : null;
+        : "";
     public static String TEST_COMPANY_ID = Configuration.getenvOrDefault("TEST_COMPANY_ID", "");
     public static String TEST_COMPANY_NAME = Configuration.getenvOrDefault("TEST_COMPANY_NAME", "");
 

@@ -2,6 +2,8 @@ package com.shaungc.utilities;
 
 import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.javadev.Configuration;
+import com.shaungc.utilities.ScraperJobMessageTo;
+import com.shaungc.utilities.ScraperJobMessageType;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
@@ -11,6 +13,14 @@ import java.util.concurrent.CountDownLatch;
 // Writing PubSub adapter
 // https://www.baeldung.com/java-redis-lettuce#pubsub
 public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
+    private final String redisPubsubChannelName = String.format(
+        "%s:%s:%s",
+        RedisPubSubChannelPrefix.SCRAPER_JOB_CHANNEL.getString(),
+        Configuration.TEST_COMPANY_INFORMATION_STRING.isEmpty()
+            ? Configuration.TEST_COMPANY_NAME
+            : Configuration.TEST_COMPANY_INFORMATION_STRING,
+        Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION
+    );
     private final RedisClient subscriberRedisClient;
     private final RedisClient publisherRedisClient;
     private final StatefulRedisPubSubConnection<String, String> subscriberRedisConnection;
@@ -35,7 +45,8 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
         supervisorCountDownLatch = new CountDownLatch(1);
 
         this.subscriberRedisConnection.addListener(this);
-        this.subscriberCommands.subscribe(RedisPubSubChannelName.SCRAPER_JOB_CHANNEL.getString());
+        this.subscriberCommands.subscribe(this.redisPubsubChannelName);
+        Logger.info("Subscribed to channel " + this.redisPubsubChannelName);
     }
 
     @Override
@@ -55,36 +66,34 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
     }
 
     public void publish(final String message) {
-        this.publisherCommands.publish(RedisPubSubChannelName.SCRAPER_JOB_CHANNEL.getString(), message);
+        this.publisherCommands.publish(this.redisPubsubChannelName, message);
     }
 
     @Override
     public void message(final String channel, final String message) {
         super.message(channel, message);
 
-        if (channel.equals(RedisPubSubChannelName.SCRAPER_JOB_CHANNEL.getString())) {
-            final String[] messageTokens = message.split(":", 3);
+        final String[] messageTokens = message.split(":", 3);
 
-            // message at least has to contain type and recipient info
-            // otherwise raise error
-            if (messageTokens.length < 2) {
-                throw new ScraperShouldHaltException("Received invalid message: " + message + ", in channel " + channel);
+        // message at least has to contain type and recipient info
+        // otherwise raise error
+        if (messageTokens.length < 2) {
+            throw new ScraperShouldHaltException("Received invalid message: " + message + ", in channel " + channel);
+        }
+        final String messageType = messageTokens[0];
+        final String messageTo = messageTokens[1];
+        final String payload = messageTokens.length == 3 ? messageTokens[2] : "";
+
+        if (messageTo.equals(ScraperJobMessageTo.SCRAPER.getString())) {
+            // TODO: receive ack msg from slack md svc -> can now proceed (communication w/
+            // slack md svc confirmed)
+
+            if (messageType.equals(ScraperJobMessageType.PREFLIGHT.getString())) {
+                Logger.infoAlsoSlack("Received acked from slack md svc, pubsub communication channel confirmed");
+                this.supervisorCountDownLatch.countDown();
             }
-            final String messageType = messageTokens[0];
-            final String messageTo = messageTokens[1];
-            final String payload = messageTokens.length == 3 ? messageTokens[2] : "";
-
-            if (messageTo.equals(ScraperJobMessageTo.SCRAPER.getString())) {
-                // TODO: receive ack msg from slack md svc -> can now proceed (communication w/
-                // slack md svc confirmed)
-
-                if (messageType.equals(ScraperJobMessageType.PREFLIGHT.getString())) {
-                    Logger.infoAlsoSlack("Received acked from slack md svc, pubsub communication channel confirmed");
-                    this.supervisorCountDownLatch.countDown();
-                }
-            } else {
-                Logger.debug("Ignoring message that's not for ours: " + message);
-            }
+        } else {
+            Logger.debug("Ignoring message that's not for ours: " + message);
         }
     }
 
