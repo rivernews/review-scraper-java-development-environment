@@ -147,13 +147,6 @@ public class ArchiveManager {
         Logger.info("Dumped data:\n" + dumpString.substring(0, Math.min(dumpString.length(), 100)) + "...\n");
     }
 
-    // public void writeGlassdoorOrganizationMetadataAsJson(String orgId, String orgName, BasicParsedData orgMetadata) {
-    //     this.jsonDump(
-    //         ArchiveManager.getOrganizationDirectory(orgId, orgName) + "/meta/" + orgMetadata.scrapedTimestamp,
-    //         orgMetadata
-    //     );
-    // }
-
     public void writeGlassdoorOrganizationMetadataAsJson(BasicParsedData orgMetadata) {
         this.jsonDump(this.getOrganizationDirectory() + "/meta/" + orgMetadata.scrapedTimestamp, orgMetadata);
     }
@@ -170,16 +163,6 @@ public class ArchiveManager {
         this.jsonDump(this.getOrganizationDirectory() + "/reviews-meta/" + reviewMetadata.scrapedTimestamp, reviewMetadata);
     }
 
-    // public static void writeGlassdoorOrganizationReviewDataAsJson(String orgId, String orgName, EmployeeReviewData reviewData) {
-    //     ArchiveManager.jsonDump(ArchiveManager.getOrganizationDirectory(orgId, orgName) + "/reviews/" + reviewData.reviewId, reviewData);
-    // }
-
-    // public void writeGlassdoorOrganizationReviewDataAsJson(EmployeeReviewData reviewData) {
-    //     ArchiveManager.jsonDump(
-    //         this.getGlassdoorOrgReviewDataDirectory() + ArchiveManager.getGlassdoorOrgReviewDataFilename(reviewData.reviewId),
-    //         reviewData
-    //     );
-    // }
     private Boolean writeReviewData(String reviewId, String subDirectory, String filename, Object data) {
         final String reviewDataDirectory = String.format("%s%s/%s/", this.getGlassdoorOrgReviewDataDirectory(), subDirectory, reviewId);
         final String pathUntilFilename = reviewDataDirectory + filename;
