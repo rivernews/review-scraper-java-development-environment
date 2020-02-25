@@ -25,12 +25,13 @@ public class App {
 
         try {
             try {
+                Logger.info("waiting for pubsub countdown latch");
                 pubSubSubscription.supervisorCountDownLatch.await(1, TimeUnit.MINUTES);
             } catch (InterruptedException e1) {
                 throw new ScraperException("Waiting for supervisor's confirmation timed out for 1 minute.");
             }
 
-            Logger.info("confirmed pubsub with supervisor.");
+            Logger.info("countdown latch passed; confirmed pubsub with supervisor");
 
             ScrapeOrganizationGlassdoorTask scrapeCompanyTask = null;
 
