@@ -81,14 +81,6 @@ public class S3Service {
                     .build()
             );
 
-            s3.putBucketTagging(
-                PutBucketTaggingRequest
-                    .builder()
-                    .bucket(this.bucketName)
-                    .tagging(Tagging.builder().tagSet(Tag.builder().key("costGroup").value("scraperJob").build()).build())
-                    .build()
-            );
-
             Logger.info("Bucket created using default configuration: " + this.bucketName);
         } catch (BucketAlreadyOwnedByYouException e) {
             Logger.info("Bucket already own by you, will do nothing");
@@ -99,6 +91,16 @@ public class S3Service {
             Logger.info("Unknown error occured while using the bucket name " + this.bucketName);
             throw e;
         }
+
+        // here we ensure the bucket exist
+        // set tag on bucket
+        s3.putBucketTagging(
+            PutBucketTaggingRequest
+                .builder()
+                .bucket(this.bucketName)
+                .tagging(Tagging.builder().tagSet(Tag.builder().key("costGroup").value("scraperJob").build()).build())
+                .build()
+        );
     }
 
     public static String serializeJavaObject(Object object) {
