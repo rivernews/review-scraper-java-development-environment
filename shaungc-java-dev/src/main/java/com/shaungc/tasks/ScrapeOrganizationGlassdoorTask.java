@@ -198,15 +198,15 @@ public class ScrapeOrganizationGlassdoorTask {
     private void generateFinalSessionReport() {
         // validate scraper session
         final Float REVIEW_LOST_RATE_ALERT_THRESHOLD = Float.valueOf("0.03");
-        final Float reviewLostRate = (float) (this.localReviewsCount - this.processedReviewsCount) / this.localReviewsCount;
-        final Float reviewLostRatePercentage = reviewLostRate * (float) 100.0;
-        if (reviewLostRate >= REVIEW_LOST_RATE_ALERT_THRESHOLD) {
+        final Float reviewProcessRate = (float) (this.processedReviewsCount) / this.localReviewsCount;
+        final Float reviewProcessRatePercentage = reviewProcessRate * (float) 100.0;
+        if (reviewProcessRate >= REVIEW_LOST_RATE_ALERT_THRESHOLD) {
             final String htmlDumpPath = this.archiveManager.writeHtml("reviewDataLostWarning", this.driver.getPageSource());
 
             Logger.warnAlsoSlack(
                 this.orgPrefixSlackString +
                 "Low processing rate " +
-                reviewLostRatePercentage +
+                reviewProcessRatePercentage +
                 "% " +
                 "(" +
                 this.processedReviewsCount +

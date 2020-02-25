@@ -24,11 +24,16 @@ public class App {
         WebDriver driver = null;
 
         try {
+            Boolean pubsubAcked;
             try {
                 Logger.info("waiting for pubsub countdown latch");
-                pubSubSubscription.supervisorCountDownLatch.await(1, TimeUnit.MINUTES);
-            } catch (InterruptedException e1) {
-                throw new ScraperException("Waiting for supervisor's confirmation timed out for 1 minute.");
+                pubsubAcked = pubSubSubscription.supervisorCountDownLatch.await(1, TimeUnit.MINUTES);
+            } catch (InterruptedException e) {
+                throw e;
+            }
+
+            if (!pubsubAcked) {
+                throw new ScraperException("Waiting for supervisor's confirmation timed out for 1 minute, will now abort scraper.");
             }
 
             Logger.info("countdown latch passed; confirmed pubsub with supervisor");
