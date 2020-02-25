@@ -19,10 +19,13 @@ import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PublicAccessBlockConfiguration;
+import software.amazon.awssdk.services.s3.model.PutBucketTaggingRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutPublicAccessBlockRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.model.Tag;
+import software.amazon.awssdk.services.s3.model.Tagging;
 import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 import software.amazon.awssdk.utils.BinaryUtils;
 import software.amazon.awssdk.utils.Md5Utils;
@@ -48,6 +51,7 @@ public class S3Service {
     }
 
     protected void createBucket() {
+        Logger.info("About to create S3 bucket...");
         try {
             s3.createBucket(
                 CreateBucketRequest
@@ -74,6 +78,14 @@ public class S3Service {
                             .restrictPublicBuckets(true)
                             .build()
                     )
+                    .build()
+            );
+
+            s3.putBucketTagging(
+                PutBucketTaggingRequest
+                    .builder()
+                    .bucket(this.bucketName)
+                    .tagging(Tagging.builder().tagSet(Tag.builder().key("costGroup").value("scraperJob").build()).build())
                     .build()
             );
 

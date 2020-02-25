@@ -46,7 +46,7 @@ public final class Configuration {
 
     public static String AWS_S3_ARCHIVE_BUCKET_NAME = System.getenv("AWS_S3_ARCHIVE_BUCKET_NAME") != null
         ? System.getenv("AWS_S3_ARCHIVE_BUCKET_NAME")
-        : "iriversland-qualitative-org-review--debug01";
+        : "iriversland-qualitative-org-review--debug03";
 
     static {
         Logger.debug("S3 bucket name is " + Configuration.AWS_S3_ARCHIVE_BUCKET_NAME);
