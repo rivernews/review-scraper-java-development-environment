@@ -76,7 +76,7 @@ public class Timer {
         );
     }
 
-    public void resetStart() {
+    public void restart() {
         this.startInstant = Instant.now();
         this.endInstant = null;
     }
