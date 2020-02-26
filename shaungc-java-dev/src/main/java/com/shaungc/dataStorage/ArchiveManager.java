@@ -7,6 +7,7 @@ import com.shaungc.dataTypes.GlassdoorReviewMetadata;
 import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.javadev.Configuration;
 import com.shaungc.utilities.Logger;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Date;
 import software.amazon.awssdk.utils.BinaryUtils;
@@ -18,7 +19,7 @@ enum FileType {
 
     private final String extension;
 
-    private FileType(String extension) {
+    private FileType(final String extension) {
         this.extension = extension;
     }
 
@@ -43,7 +44,7 @@ public class ArchiveManager {
         this.s3Service.createBucket();
     }
 
-    public ArchiveManager(String orgName, String orgId) {
+    public ArchiveManager(final String orgName, final String orgId) {
         this.s3Service = new S3Service(ArchiveManager.BUCKET_NAME);
         this.s3Service.createBucket();
 
@@ -53,33 +54,13 @@ public class ArchiveManager {
 
     // meta info functions
 
-    public String doesObjectExist(String fullPath) {
+    public String doesObjectExist(final String fullPath) {
         return this.s3Service.doesObjectExistAndGetMd5(fullPath);
     }
 
-    public String doesGlassdoorOrganizationReviewExist(String reviewId) {
-        String fullPathUntilFilename = this.getGlassdoorOrgReviewDataDirectory() + reviewId;
-        return this.doesObjectExist(ArchiveManager.getFullPathAsJson(fullPathUntilFilename));
-    }
-
-    public Boolean isLatestObjectTheSame(Object object, String objectCollectionS3Prefix) {
-        // no previous object exists
-
-        // exist and latest object content is the same
-
-        // exist but latest object content is not the same
-
-        return false;
-    }
-
-    // getter functions
-
-    private static String getFullPathAsJson(String fullPathUntilFilename) {
-        return fullPathUntilFilename + "." + FileType.JSON.getExtension();
-    }
-
-    private static String getFullPathAsHtml(String fullPathUntilFilename) {
-        return fullPathUntilFilename + "." + FileType.HTML.getExtension();
+    public String doesGlassdoorOrganizationReviewExist(final String reviewId) {
+        final String fullPathUntilFilename = this.getGlassdoorOrgReviewDataDirectory() + reviewId;
+        return this.doesObjectExist(S3Service.getFullPathAsJsonFile(fullPathUntilFilename));
     }
 
     // path generating functions
@@ -88,7 +69,7 @@ public class ArchiveManager {
         return this.orgName + "-" + this.orgId;
     }
 
-    public static String getOrganizationDirectory(String orgId, String orgName) {
+    public static String getOrganizationDirectory(final String orgId, final String orgName) {
         return orgName + "-" + orgId;
     }
 
@@ -96,21 +77,21 @@ public class ArchiveManager {
         return this.getOrganizationDirectory() + "/reviews/";
     }
 
-    public static String getGlassdoorOrgReviewDataFilenamePrefix(String reviewId) {
+    public static String getGlassdoorOrgReviewDataFilenamePrefix(final String reviewId) {
         return reviewId;
     }
 
-    public static String getGlassdoorOrgReviewDataFilename(String reviewId) {
+    public static String getGlassdoorOrgReviewDataFilename(final String reviewId) {
         // do not append timestamp for review data
         // due to its uniqueness
         return ArchiveManager.getGlassdoorOrgReviewDataFilenamePrefix(reviewId);
     }
 
-    public static String getCollidedGlassdoorOrgReviewDataFilenamePrefix(String reviewId) {
+    public static String getCollidedGlassdoorOrgReviewDataFilenamePrefix(final String reviewId) {
         return "collision." + reviewId;
     }
 
-    public static String getCollidedGlassdoorOrgReviewDataFilename(String reviewId) {
+    public static String getCollidedGlassdoorOrgReviewDataFilename(final String reviewId) {
         return ArchiveManager.getCollidedGlassdoorOrgReviewDataFilenamePrefix(reviewId) + "." + Instant.now();
     }
 
@@ -122,77 +103,70 @@ public class ArchiveManager {
      * @param pathUntilFilename - the full path to the file, without extension
      * @param object
      */
-    public void jsonDump(String pathUntilFilename, Object object) {
-        this.fileDump(pathUntilFilename, object, FileType.JSON);
+    public void putJsonOnS3(final String pathUntilFilename, final Object object) {
+        this.s3Service.putFileOnS3(pathUntilFilename, object, FileType.JSON);
     }
 
-    public void htmlDump(String pathUntilFilename, Object object) {
-        this.fileDump(pathUntilFilename, object, FileType.HTML);
+    public void putHtmlOnS3(final String pathUntilFilename, final Object object) {
+        this.s3Service.putFileOnS3(pathUntilFilename, object, FileType.HTML);
     }
 
-    public void fileDump(String pathUntilFilename, Object object, FileType fileType) {
-        String dumpString = S3Service.serializeJavaObject(object);
+    // public void putFileOnS3(String pathUntilFilename, Object object, FileType
+    // fileType) {
+    // String dumpString = S3Service.serializeJavaObjectAsJsonStyle(object);
 
-        if (fileType == FileType.JSON) {
-            this.s3Service.putObjectOfString(ArchiveManager.getFullPathAsJson(pathUntilFilename), dumpString);
-            Logger.info("JSON dumped to path " + pathUntilFilename);
-        } else if (fileType == FileType.HTML) {
-            this.s3Service.putObjectOfString(ArchiveManager.getFullPathAsHtml(pathUntilFilename), dumpString);
-            Logger.info("HTML dumped to path " + pathUntilFilename);
-        } else {
-            this.s3Service.putObjectOfString(pathUntilFilename, dumpString);
-            Logger.info("file dumped to path " + pathUntilFilename);
-        }
+    // if (fileType == FileType.JSON) {
+    // this.s3Service.putObjectOfString(ArchiveManager.getFullPathAsJson(pathUntilFilename),
+    // dumpString);
+    // Logger.info("JSON dumped to path " + pathUntilFilename);
+    // } else if (fileType == FileType.HTML) {
+    // this.s3Service.putObjectOfString(ArchiveManager.getFullPathAsHtml(pathUntilFilename),
+    // dumpString);
+    // Logger.info("HTML dumped to path " + pathUntilFilename);
+    // } else {
+    // this.s3Service.putObjectOfString(pathUntilFilename, dumpString);
+    // Logger.info("file dumped to path " + pathUntilFilename);
+    // }
 
-        Logger.info("Dumped data:\n" + dumpString.substring(0, Math.min(dumpString.length(), 100)) + "...\n");
+    // Logger.info("Dumped data:\n" + dumpString.substring(0,
+    // Math.min(dumpString.length(), 100)) + "...\n");
+    // }
+
+    public void writeGlassdoorOrganizationMetadataAsJson(final BasicParsedData orgMetadata) {
+        final String orgMetadataDirectory = Path.of(this.getOrganizationDirectory(), "meta").toString();
+
+        final String filenameWithoutExtension = orgMetadata.scrapedTimestamp.toString();
+
+        this.s3Service.putLatestObject(orgMetadataDirectory, filenameWithoutExtension, orgMetadata, FileType.JSON);
     }
 
-    public void writeGlassdoorOrganizationMetadataAsJson(BasicParsedData orgMetadata) {
-        this.jsonDump(this.getOrganizationDirectory() + "/meta/" + orgMetadata.scrapedTimestamp, orgMetadata);
+    public void writeGlassdoorOrganizationReviewsMetadataAsJson(
+        final String orgId,
+        final String orgName,
+        final GlassdoorReviewMetadata reviewMetadata
+    ) {
+        final String reviewMetadataDirectory = Path.of(this.getOrganizationDirectory(), "reviews-meta").toString();
+
+        final String filenameWithoutExtension = reviewMetadata.scrapedTimestamp.toString();
+
+        this.s3Service.putLatestObject(reviewMetadataDirectory, filenameWithoutExtension, reviewMetadata, FileType.JSON);
     }
 
-    public void writeGlassdoorOrganizationReviewsMetadataAsJson(String orgId, String orgName, GlassdoorReviewMetadata reviewMetadata) {
-        this.jsonDump(
-                ArchiveManager.getOrganizationDirectory(orgId, orgName) + "/reviews-meta/" + reviewMetadata.scrapedTimestamp,
-                reviewMetadata
-            );
-    }
-
-    public void writeGlassdoorOrganizationReviewsMetadataAsJson(GlassdoorReviewMetadata reviewMetadata) {
+    public void writeGlassdoorOrganizationReviewsMetadataAsJson(final GlassdoorReviewMetadata reviewMetadata) {
         Logger.infoAlsoSlack("Local review count is " + reviewMetadata.localReviewCount + ", we will scrape within these reviews.");
-        this.jsonDump(this.getOrganizationDirectory() + "/reviews-meta/" + reviewMetadata.scrapedTimestamp, reviewMetadata);
+        this.putJsonOnS3(this.getOrganizationDirectory() + "/reviews-meta/" + reviewMetadata.scrapedTimestamp, reviewMetadata);
     }
 
-    private Boolean writeReviewData(String reviewId, String subDirectory, String filename, Object data) {
+    /**
+     * @return Whether or not a new review data is written to a file on s3
+     */
+    private Boolean writeReviewData(final String reviewId, final String subDirectory, final String filename, final Object data) {
         final String reviewDataDirectory = String.format("%s%s/%s/", this.getGlassdoorOrgReviewDataDirectory(), subDirectory, reviewId);
-        final String pathUntilFilename = reviewDataDirectory + filename;
-        final String latestObjectKey = this.s3Service.getLatestObjectKey(ArchiveManager.BUCKET_NAME, reviewDataDirectory);
 
-        // only if not exist, or md5 not the same, do we need to write
-        Boolean willWriteToS3 = false;
-        if (latestObjectKey == null) {
-            willWriteToS3 = true;
-        } else {
-            final String md5OnS3 = this.s3Service.getObjectMd5(latestObjectKey);
-
-            if (md5OnS3.strip().isEmpty()) {
-                throw new ScraperShouldHaltException("No md5 at key " + latestObjectKey);
-            }
-
-            willWriteToS3 = (!S3Service.toMD5Base64String(data).equals(md5OnS3));
-        }
-
-        if (willWriteToS3) {
-            this.jsonDump(pathUntilFilename, data);
-            Logger.info(subDirectory + ", new object or object md5 not the same, writing to s3. Review id: " + reviewId);
-            return true;
-        } else {
-            Logger.debug(subDirectory + ", object md5 identical, will not write. Review id: " + reviewId);
-            return false;
-        }
+        return this.s3Service.putLatestObject(reviewDataDirectory, filename, data, FileType.JSON);
     }
 
-    public Boolean writeGlassdoorOrganizationReviewDataAsJson(EmployeeReviewData reviewData) {
+    public Boolean writeGlassdoorOrganizationReviewDataAsJson(final EmployeeReviewData reviewData) {
         final String filename = Instant.now().toString();
 
         final String varyingDataDirectoryName = "varying";
@@ -208,22 +182,22 @@ public class ArchiveManager {
         return writtenStableData || writtenVaryingData;
     }
 
-    public String writeCollidedGlassdoorOrganizationReviewDataAsJson(EmployeeReviewData reviewData) {
+    public String writeCollidedGlassdoorOrganizationReviewDataAsJson(final EmployeeReviewData reviewData) {
         final String pathUntilFilename =
             this.getGlassdoorOrgReviewDataDirectory() +
             ArchiveManager.getCollidedGlassdoorOrgReviewDataFilename(reviewData.stableReviewData.reviewId);
 
-        this.jsonDump(pathUntilFilename, reviewData);
+        this.putJsonOnS3(pathUntilFilename, reviewData);
 
-        return ArchiveManager.getFullPathAsJson(pathUntilFilename);
+        return S3Service.getFullPathAsJsonFile(pathUntilFilename);
     }
 
-    public String writeHtml(String filename, String html) {
+    public String writeHtml(final String filename, final String html) {
         final String pathUntilFilename = this.getOrganizationDirectory() + "/logs/" + filename + "." + Instant.now();
-        this.htmlDump(pathUntilFilename, html);
+        this.putHtmlOnS3(pathUntilFilename, html);
 
         // return the complete path (key) so that caller can make good use
-        return ArchiveManager.getFullPathAsHtml(pathUntilFilename);
+        return S3Service.getFullPathAsHtmlFile(pathUntilFilename);
     }
     // misc helper functions
 

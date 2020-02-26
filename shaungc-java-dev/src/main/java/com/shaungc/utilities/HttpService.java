@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 public class HttpService {
 
     public static CompletableFuture<HttpResponse<String>> asyncPost(HashMap<String, String> data, URI uri) {
-        String serializedData = S3Service.serializeJavaObject(data);
+        String serializedData = S3Service.serializeJavaObjectAsJsonStyle(data);
 
         Logger.debug("serialized data: " + serializedData);
 
@@ -40,7 +40,7 @@ public class HttpService {
 
     public static HttpResponse<String> post(HashMap<String, String> data, URI uri) {
         HttpResponse<String> res = null;
-        String serializedData = S3Service.serializeJavaObject(data);
+        String serializedData = S3Service.serializeJavaObjectAsJsonStyle(data);
 
         Logger.debug("serialized data: " + serializedData);
 

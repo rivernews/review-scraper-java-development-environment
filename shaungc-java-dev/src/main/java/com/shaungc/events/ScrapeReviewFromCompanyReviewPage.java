@@ -375,7 +375,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                             "%s:%s:%s",
                             ScraperJobMessageType.CROSS.getString(),
                             ScraperJobMessageTo.SLACK_MD_SVC.getString(),
-                            S3Service.serializeJavaObject(
+                            S3Service.serializeJavaObjectAsJsonStyle(
                                 new ScraperJobData(
                                     this.orgMetadata != null ? this.orgMetadata.companyId : Configuration.TEST_COMPANY_ID,
                                     orgName,
