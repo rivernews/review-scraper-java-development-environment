@@ -27,7 +27,7 @@ public class App {
             Boolean pubsubAcked;
             try {
                 Logger.info("waiting for pubsub countdown latch");
-                pubsubAcked = pubSubSubscription.supervisorCountDownLatch.await(1, TimeUnit.MINUTES);
+                pubsubAcked = pubSubSubscription.supervisorCountDownLatch.await(30, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 throw new ScraperException("Pubsub ack countdown latch interrupted: " + e.getMessage());
             }
