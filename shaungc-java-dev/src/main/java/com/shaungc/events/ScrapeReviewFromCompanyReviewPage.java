@@ -19,6 +19,7 @@ import com.shaungc.utilities.ScraperJobMessageTo;
 import com.shaungc.utilities.ScraperJobMessageType;
 import com.shaungc.utilities.ScraperMode;
 import com.shaungc.utilities.Timer;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -176,6 +177,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         // foreach review
         final Integer reviewReportTime = 5;
         final Integer reportingRate = (Integer) (this.localReviewCount / reviewReportTime);
+        final Timer progressReportingTimer = new Timer(Duration.ofSeconds(5));
         while (true) {
             // pull out review elements
             final List<WebElement> employeeReviewElements = reviewPanelElement.findElements(
@@ -193,16 +195,19 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     this.processedReviewsCount++;
                 }
 
-                this.pubSubSubscription.publish(
-                        String.format(
-                            "%s:%s:{\"processed\":%d,\"wentThrough\":%d,\"total\":%d}",
-                            ScraperJobMessageType.PROGRESS.getString(),
-                            ScraperJobMessageTo.SLACK_MD_SVC.getString(),
-                            this.processedReviewsCount,
-                            this.wentThroughReviewsCount,
-                            this.localReviewCount
-                        )
-                    );
+                if (progressReportingTimer.doesReachCountdownDuration()) {
+                    this.pubSubSubscription.publish(
+                            String.format(
+                                "%s:%s:{\"processed\":%d,\"wentThrough\":%d,\"total\":%d}",
+                                ScraperJobMessageType.PROGRESS.getString(),
+                                ScraperJobMessageTo.SLACK_MD_SVC.getString(),
+                                this.processedReviewsCount,
+                                this.wentThroughReviewsCount,
+                                this.localReviewCount
+                            )
+                        );
+                    progressReportingTimer.restart();
+                }
 
                 // write out review data
                 // final String md5ExistenceTest =
@@ -365,7 +370,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             // check if approaching travis build limit
             // if so, stop session and try to schedule a cross-session job instead
-            if (this.scraperSessionTimer.doesSessionApproachesTravisBuildLimit()) {
+            if (this.scraperSessionTimer.doesReachCountdownDuration()) {
                 // handle env var value needs quotes when value contains spaces
                 final String orgName =
                     "\"" + (this.orgMetadata != null ? this.orgMetadata.companyName : Configuration.TEST_COMPANY_NAME) + "\"";

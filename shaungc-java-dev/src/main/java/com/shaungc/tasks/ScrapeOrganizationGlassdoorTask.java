@@ -13,6 +13,7 @@ import com.shaungc.utilities.PubSubSubscription;
 import com.shaungc.utilities.ScraperMode;
 import com.shaungc.utilities.Timer;
 import java.net.URL;
+import java.time.Duration;
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -94,7 +95,7 @@ public class ScrapeOrganizationGlassdoorTask {
     }
 
     private void continueCrossSessionScraper() throws ScraperException {
-        this.scraperTaskTimer = new Timer(Configuration.TEST_COMPANY_LAST_PROGRESS_DURATION);
+        this.scraperTaskTimer = new Timer(Configuration.TEST_COMPANY_LAST_PROGRESS_DURATION, Duration.ofMinutes(1));
 
         this.archiveManager = new ArchiveManager(Configuration.TEST_COMPANY_NAME, Configuration.TEST_COMPANY_ID);
 
@@ -118,7 +119,7 @@ public class ScrapeOrganizationGlassdoorTask {
     }
 
     private void launchSessionScraper() throws ScraperException {
-        this.scraperTaskTimer = new Timer();
+        this.scraperTaskTimer = new Timer(Duration.ofMinutes(1));
 
         // Access company overview page
         if (this.companyOverviewPageUrl != null) {

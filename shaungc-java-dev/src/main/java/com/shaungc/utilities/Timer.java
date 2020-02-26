@@ -10,16 +10,22 @@ public class Timer {
     private Instant startInstant;
     private Instant endInstant;
 
-    private Duration durationOffset;
+    private final Duration durationOffset;
 
-    private static Duration TRAVIS_BUILD_TIME_LIMIT = Duration.ofMinutes(1);
+    private final Duration countdownDuration;
 
-    public Timer() {
+    public Timer(final Duration countdownDuration) {
+        this.countdownDuration = countdownDuration;
+        this.durationOffset = null;
+
         this.start();
     }
 
-    public Timer(String durationInMilliString) {
+    public Timer(String durationInMilliString, final Duration countDownDuration) {
+        this.countdownDuration = countDownDuration;
+
         this.start();
+
         Long durationInMilli = Long.valueOf(durationInMilliString);
         this.durationOffset = Duration.ofMillis(durationInMilli);
     }
@@ -33,8 +39,8 @@ public class Timer {
         return this.getDurationString(this.captureCurrentSessionDuration(this.endInstant));
     }
 
-    public Boolean doesSessionApproachesTravisBuildLimit() {
-        return this.captureCurrentSessionDuration(Instant.now()).compareTo(Timer.TRAVIS_BUILD_TIME_LIMIT) > 0;
+    public Boolean doesReachCountdownDuration() {
+        return this.captureCurrentSessionDuration(Instant.now()).compareTo(this.countdownDuration) > 0;
     }
 
     private Duration captureCurrentSessionDuration(Instant endInstant) {
