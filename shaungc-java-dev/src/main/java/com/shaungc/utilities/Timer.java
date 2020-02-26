@@ -30,7 +30,7 @@ public class Timer {
 
     public String stop() {
         this.endInstant = Instant.now();
-        return this.getDurationString(this.captureCurrentSessionDuration());
+        return this.getDurationString(this.captureCurrentSessionDuration(this.endInstant));
     }
 
     public Boolean doesSessionApproachesTravisBuildLimit() {
@@ -49,10 +49,6 @@ public class Timer {
         }
 
         return duration;
-    }
-
-    private Duration captureCurrentSessionDuration() {
-        return this.captureCurrentSessionDuration(Instant.now());
     }
 
     public String captureOverallElapseDurationString() {

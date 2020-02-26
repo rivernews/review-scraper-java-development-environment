@@ -119,21 +119,12 @@ public class ArchiveManager {
         this.s3Service.putLatestObject(orgMetadataDirectory, filenameWithoutExtension, orgMetadata, FileType.JSON);
     }
 
-    public void writeGlassdoorOrganizationReviewsMetadataAsJson(
-        final String orgId,
-        final String orgName,
-        final GlassdoorReviewMetadata reviewMetadata
-    ) {
+    public void writeGlassdoorOrganizationReviewsMetadataAsJson(final GlassdoorReviewMetadata reviewMetadata) {
         final String reviewMetadataDirectory = Path.of(this.getOrganizationDirectory(), "reviews-meta").toString();
 
         final String filenameWithoutExtension = Instant.now().toString();
 
         this.s3Service.putLatestObject(reviewMetadataDirectory, filenameWithoutExtension, reviewMetadata, FileType.JSON);
-    }
-
-    public void writeGlassdoorOrganizationReviewsMetadataAsJson(final GlassdoorReviewMetadata reviewMetadata) {
-        Logger.infoAlsoSlack("Local review count is " + reviewMetadata.localReviewCount + ", we will scrape within these reviews.");
-        this.putJsonOnS3(this.getOrganizationDirectory() + "/reviews-meta/" + reviewMetadata.scrapedTimestamp, reviewMetadata);
     }
 
     /**
