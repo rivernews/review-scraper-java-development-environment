@@ -281,7 +281,7 @@ public class S3Service {
             }
 
             if (S3Service.toMD5Base64String(data).equals(md5OnS3)) {
-                Logger.debug(directoryAsPrefix + ", latest object " + latestObjectKey + " md5 is identical to our data, will not write.");
+                Logger.info(directoryAsPrefix + ", latest object " + latestObjectKey + " md5 is identical to our data, will not write.");
                 return false;
             }
         }
