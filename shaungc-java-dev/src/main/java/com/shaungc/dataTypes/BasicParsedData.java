@@ -1,9 +1,9 @@
 package com.shaungc.dataTypes;
 
 import com.shaungc.utilities.Logger;
-import java.time.Instant;
 
 public class BasicParsedData {
+    public String companyOverviewPageUrl;
     public String companyId;
     public String companyLogoUrl;
     public String reviewNumberText;
@@ -15,15 +15,17 @@ public class BasicParsedData {
     public String companyWebsiteUrl;
 
     public BasicParsedData(
-        String pCompanyId,
-        String pCompanyLogoUrl,
-        String pReviewNumberText,
-        String pCompanySizeText,
-        String pCompanyFoundYearText,
-        String pCompanyLocationText,
-        String pCompanyWebsiteUrl,
-        String pCompanyName
+        final String pcompanyOverviewPageUrl,
+        final String pCompanyId,
+        final String pCompanyLogoUrl,
+        final String pReviewNumberText,
+        final String pCompanySizeText,
+        final String pCompanyFoundYearText,
+        final String pCompanyLocationText,
+        final String pCompanyWebsiteUrl,
+        final String pCompanyName
     ) {
+        this.companyOverviewPageUrl = pcompanyOverviewPageUrl;
         this.companyId = pCompanyId;
         this.companyLogoUrl = pCompanyLogoUrl;
         this.reviewNumberText = pReviewNumberText;
@@ -36,6 +38,7 @@ public class BasicParsedData {
     }
 
     public void debugPrintAllFields() {
+        Logger.debug("companyOverviewPageUrl " + this.companyOverviewPageUrl);
         Logger.debug("companyId " + this.companyId);
         Logger.debug("companyName " + this.companyName);
         Logger.debug("companyLogoUrl " + this.companyLogoUrl);

@@ -85,6 +85,7 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
         } catch (final NoSuchElementException e) {}
 
         return new BasicParsedData(
+            this.driver.getCurrentUrl(),
             companyId,
             companyLogoImageUrl,
             reviewNumberText,

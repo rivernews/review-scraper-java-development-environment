@@ -1,17 +1,11 @@
 package com.shaungc.dataStorage;
 
-import com.google.gson.Gson;
 import com.shaungc.dataTypes.BasicParsedData;
 import com.shaungc.dataTypes.EmployeeReviewData;
 import com.shaungc.dataTypes.GlassdoorReviewMetadata;
-import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.javadev.Configuration;
-import com.shaungc.utilities.Logger;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.Date;
-import software.amazon.awssdk.utils.BinaryUtils;
-import software.amazon.awssdk.utils.Md5Utils;
 
 enum FileType {
     JSON("json"),
@@ -39,9 +33,12 @@ public class ArchiveManager {
     public String orgName;
     public String orgId;
 
+    private final String gdOrgOverviewPageUrlsDirectory = Path.of("/", "all-urls").toString();
+
     public ArchiveManager() {
         this.s3Service = new S3Service(ArchiveManager.BUCKET_NAME);
         this.s3Service.createBucket();
+        // orgName and orgId will be set after org meta is scraped
     }
 
     public ArchiveManager(final String orgName, final String orgId) {
@@ -67,10 +64,6 @@ public class ArchiveManager {
 
     public String getOrganizationDirectory() {
         return this.orgName + "-" + this.orgId;
-    }
-
-    public static String getOrganizationDirectory(final String orgId, final String orgName) {
-        return orgName + "-" + orgId;
     }
 
     public String getGlassdoorOrgReviewDataDirectory() {
@@ -117,6 +110,14 @@ public class ArchiveManager {
         final String filenameWithoutExtension = Instant.now().toString();
 
         this.s3Service.putLatestObject(orgMetadataDirectory, filenameWithoutExtension, orgMetadata, FileType.JSON);
+
+        // also write company overview page url
+        // no need to check exist or not, just overwrite is fine
+        final String orgOverviewPageUrlObjectKey = Path
+            .of(this.gdOrgOverviewPageUrlsDirectory, orgMetadata.companyOverviewPageUrl)
+            .toString();
+
+        this.s3Service.putObjectOfString(orgOverviewPageUrlObjectKey, "");
     }
 
     public void writeGlassdoorOrganizationReviewsMetadataAsJson(final GlassdoorReviewMetadata reviewMetadata) {
