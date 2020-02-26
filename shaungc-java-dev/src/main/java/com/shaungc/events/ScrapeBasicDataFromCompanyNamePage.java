@@ -98,8 +98,6 @@ public class ScrapeBasicDataFromCompanyNamePage extends AScraperEvent<BasicParse
 
     @Override
     protected void postAction(final BasicParsedData parsedData) {
-        // write data to archive
-        parsedData.scrapedTimestamp = Instant.now();
         // store org name, also for later other event use
         this.archiveManager.orgName = parsedData.companyName;
         this.archiveManager.orgId = parsedData.companyId;

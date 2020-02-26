@@ -9,6 +9,7 @@ import java.time.Instant;
 public class Timer {
     private Instant startInstant;
     private Instant endInstant;
+
     private Duration durationOffset;
 
     private static Duration TRAVIS_BUILD_TIME_LIMIT = Duration.ofMinutes(1);
@@ -73,5 +74,10 @@ public class Timer {
             duration.toSecondsPart(),
             duration.toMillisPart()
         );
+    }
+
+    public void resetStart() {
+        this.startInstant = Instant.now();
+        this.endInstant = null;
     }
 }

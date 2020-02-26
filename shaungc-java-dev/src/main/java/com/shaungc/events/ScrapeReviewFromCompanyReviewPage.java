@@ -411,9 +411,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // scrape ovwerall review counts
         this.scrapeReviewCount(reviewPanelElement, glassdoorReviewMetadataStore);
-
-        // write out data
-        glassdoorReviewMetadataStore.scrapedTimestamp = Instant.now();
     }
 
     private void scrapeReviewCount(final WebElement reviewPanelElement, final GlassdoorReviewMetadata glassdoorReviewMetadataStore) {

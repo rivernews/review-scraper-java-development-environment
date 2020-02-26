@@ -135,7 +135,7 @@ public class ArchiveManager {
     public void writeGlassdoorOrganizationMetadataAsJson(final BasicParsedData orgMetadata) {
         final String orgMetadataDirectory = Path.of(this.getOrganizationDirectory(), "meta").toString();
 
-        final String filenameWithoutExtension = orgMetadata.scrapedTimestamp.toString();
+        final String filenameWithoutExtension = Instant.now().toString();
 
         this.s3Service.putLatestObject(orgMetadataDirectory, filenameWithoutExtension, orgMetadata, FileType.JSON);
     }
@@ -147,7 +147,7 @@ public class ArchiveManager {
     ) {
         final String reviewMetadataDirectory = Path.of(this.getOrganizationDirectory(), "reviews-meta").toString();
 
-        final String filenameWithoutExtension = reviewMetadata.scrapedTimestamp.toString();
+        final String filenameWithoutExtension = Instant.now().toString();
 
         this.s3Service.putLatestObject(reviewMetadataDirectory, filenameWithoutExtension, reviewMetadata, FileType.JSON);
     }

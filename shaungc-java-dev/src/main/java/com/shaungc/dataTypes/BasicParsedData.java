@@ -14,8 +14,6 @@ public class BasicParsedData {
     public String companyLocationText;
     public String companyWebsiteUrl;
 
-    public Instant scrapedTimestamp;
-
     public BasicParsedData(
         String pCompanyId,
         String pCompanyLogoUrl,
@@ -47,6 +45,5 @@ public class BasicParsedData {
         Logger.debug("companyFoundYearText " + this.companyFoundYearText);
         Logger.debug("companyLocationText " + this.companyLocationText);
         Logger.debug("companyWebsiteUrl " + this.companyWebsiteUrl);
-        Logger.debug("scrapedTimestamp " + this.scrapedTimestamp);
     }
 }
