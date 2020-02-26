@@ -111,27 +111,6 @@ public class ArchiveManager {
         this.s3Service.putFileOnS3(pathUntilFilename, object, FileType.HTML);
     }
 
-    // public void putFileOnS3(String pathUntilFilename, Object object, FileType
-    // fileType) {
-    // String dumpString = S3Service.serializeJavaObjectAsJsonStyle(object);
-
-    // if (fileType == FileType.JSON) {
-    // this.s3Service.putObjectOfString(ArchiveManager.getFullPathAsJson(pathUntilFilename),
-    // dumpString);
-    // Logger.info("JSON dumped to path " + pathUntilFilename);
-    // } else if (fileType == FileType.HTML) {
-    // this.s3Service.putObjectOfString(ArchiveManager.getFullPathAsHtml(pathUntilFilename),
-    // dumpString);
-    // Logger.info("HTML dumped to path " + pathUntilFilename);
-    // } else {
-    // this.s3Service.putObjectOfString(pathUntilFilename, dumpString);
-    // Logger.info("file dumped to path " + pathUntilFilename);
-    // }
-
-    // Logger.info("Dumped data:\n" + dumpString.substring(0,
-    // Math.min(dumpString.length(), 100)) + "...\n");
-    // }
-
     public void writeGlassdoorOrganizationMetadataAsJson(final BasicParsedData orgMetadata) {
         final String orgMetadataDirectory = Path.of(this.getOrganizationDirectory(), "meta").toString();
 
