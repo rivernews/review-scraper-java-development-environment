@@ -33,7 +33,8 @@ public class ArchiveManager {
     public String orgName;
     public String orgId;
 
-    private final String gdOrgOverviewPageUrlsDirectory = Path.of("/", "all-urls").toString();
+    // s3 does not allow a `/` at front; if you do so, you will get an empty-named folder
+    private final String gdOrgOverviewPageUrlsDirectory = Path.of("all-urls").toString();
 
     public ArchiveManager() {
         this.s3Service = new S3Service(ArchiveManager.BUCKET_NAME);
@@ -113,11 +114,9 @@ public class ArchiveManager {
 
         // also write company overview page url
         // no need to check exist or not, just overwrite is fine
-        final String orgOverviewPageUrlObjectKey = Path
-            .of(this.gdOrgOverviewPageUrlsDirectory, orgMetadata.companyOverviewPageUrl)
-            .toString();
+        final String orgOverviewPageUrlObjectKey = Path.of(this.gdOrgOverviewPageUrlsDirectory, this.getOrganizationDirectory()).toString();
 
-        this.s3Service.putObjectOfString(orgOverviewPageUrlObjectKey, "");
+        this.s3Service.putObjectOfString(orgOverviewPageUrlObjectKey, orgMetadata.companyOverviewPageUrl);
     }
 
     public void writeGlassdoorOrganizationReviewsMetadataAsJson(final GlassdoorReviewMetadata reviewMetadata) {
