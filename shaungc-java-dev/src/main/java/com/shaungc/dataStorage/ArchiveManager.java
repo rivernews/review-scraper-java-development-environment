@@ -132,7 +132,7 @@ public class ArchiveManager {
      * @return Whether or not a new review data is written to a file on s3
      */
     private Boolean writeReviewData(final String reviewId, final String subDirectory, final String filename, final Object data) {
-        final String reviewDataDirectory = String.format("%s%s/%s/", this.getGlassdoorOrgReviewDataDirectory(), subDirectory, reviewId);
+        final String reviewDataDirectory = Path.of(this.getGlassdoorOrgReviewDataDirectory(), subDirectory, reviewId).toString();
 
         return this.s3Service.putLatestObject(reviewDataDirectory, filename, data, FileType.JSON);
     }
