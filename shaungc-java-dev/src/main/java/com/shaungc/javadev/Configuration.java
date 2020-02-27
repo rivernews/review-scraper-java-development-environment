@@ -44,6 +44,10 @@ public final class Configuration {
         Logger.debug("S3 bucket name is " + Configuration.AWS_S3_ARCHIVE_BUCKET_NAME);
     }
 
+    public static Long CROSS_SESSION_TIME_LIMIT_MINUTES = Long.valueOf(
+        Configuration.getenvOrDefault("CROSS_SESSION_TIME_LIMIT_MINUTES", "0.5")
+    );
+
     // inputs
 
     public static String TEST_COMPANY_INFORMATION_STRING = System.getenv("TEST_COMPANY_INFORMATION_STRING") != null
