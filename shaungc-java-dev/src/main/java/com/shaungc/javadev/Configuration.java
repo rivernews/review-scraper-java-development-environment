@@ -2,7 +2,6 @@ package com.shaungc.javadev;
 
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.RequestAddressValidator;
-import com.shaungc.utilities.ReviewCollisionStrategy;
 import com.shaungc.utilities.ScraperMode;
 import java.net.URI;
 
@@ -19,13 +18,6 @@ public final class Configuration {
     public static Boolean RUNNING_FROM_CONTAINER = System.getenv("RUNNING_FROM_CONTAINER") != null
         ? Boolean.parseBoolean(System.getenv("RUNNING_FROM_CONTAINER"))
         : true;
-    public static Integer REVIEW_COLLISION_STRATEGY = Integer.valueOf(
-        Configuration.getenvOrDefault("REVIEW_COLLISION_STRATEGY", ReviewCollisionStrategy.ABORT.toString())
-    );
-
-    static {
-        Logger.debug("REVIEW_COLLISION_STRATEGY: " + Configuration.REVIEW_COLLISION_STRATEGY);
-    }
 
     // credentials
 

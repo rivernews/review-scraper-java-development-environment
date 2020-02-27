@@ -123,7 +123,7 @@ public class ScrapeOrganizationGlassdoorTask {
     }
 
     private void launchSessionScraper() throws ScraperException {
-        this.scraperTaskTimer = new Timer(Duration.ofSeconds(20));
+        this.scraperTaskTimer = new Timer(Duration.ofSeconds(15));
 
         // Access company overview page
         if (this.companyOverviewPageUrl != null) {
