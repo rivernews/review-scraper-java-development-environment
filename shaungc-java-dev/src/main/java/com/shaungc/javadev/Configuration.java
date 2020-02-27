@@ -30,11 +30,7 @@ public final class Configuration {
 
     public static URI SLACK_WEBHOOK_URL = RequestAddressValidator.toURI(System.getenv("SLACK_WEBHOOK_URL"));
 
-    // constants
-
-    public static Integer AVOID_GLITCH_WAIT_SECOND = 2;
-    public static Integer EXPECTED_CONDITION_WAIT_SECOND = 25;
-    public static Integer EXPECTED_CONDITION_WAIT_SECOND_LONGER = 60;
+    // external resources
 
     public static String AWS_S3_ARCHIVE_BUCKET_NAME = System.getenv("AWS_S3_ARCHIVE_BUCKET_NAME") != null
         ? System.getenv("AWS_S3_ARCHIVE_BUCKET_NAME")
@@ -43,6 +39,18 @@ public final class Configuration {
     static {
         Logger.debug("S3 bucket name is " + Configuration.AWS_S3_ARCHIVE_BUCKET_NAME);
     }
+
+    public static String SUPERVISOR_PUBSUB_REDIS_DB = Configuration.getenvOrDefault("SUPERVISOR_PUBSUB_REDIS_DB", "");
+
+    static {
+        Logger.debug("SUPERVISOR_PUBSUB_REDIS_DB is " + Configuration.SUPERVISOR_PUBSUB_REDIS_DB);
+    }
+
+    // constants
+
+    public static Integer AVOID_GLITCH_WAIT_SECOND = 2;
+    public static Integer EXPECTED_CONDITION_WAIT_SECOND = 25;
+    public static Integer EXPECTED_CONDITION_WAIT_SECOND_LONGER = 60;
 
     public static Long CROSS_SESSION_TIME_LIMIT_MINUTES = Float
         .valueOf(Configuration.getenvOrDefault("CROSS_SESSION_TIME_LIMIT_MINUTES", "0.5"))

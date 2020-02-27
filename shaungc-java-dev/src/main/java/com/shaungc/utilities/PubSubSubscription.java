@@ -34,7 +34,14 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
     // https://lettuce.io/core/release/reference/#pubsub.subscribing
 
     public PubSubSubscription() {
-        final String redisUrl = Configuration.DEBUG ? "redis://host.docker.internal:6379/5" : "redis://localhost:6379/5";
+        if (Configuration.SUPERVISOR_PUBSUB_REDIS_DB.isEmpty()) {
+            throw new ScraperShouldHaltException("SUPERVISOR_PUBSUB_REDIS_DB is not set.");
+        }
+
+        final String redisUrl =
+            (Configuration.DEBUG ? "redis://host.docker.internal:6379/" : "redis://localhost:6379/") +
+            Configuration.SUPERVISOR_PUBSUB_REDIS_DB;
+
         this.subscriberRedisClient = RedisClient.create(redisUrl);
         this.publisherRedisClient = RedisClient.create(redisUrl);
         this.subscriberRedisConnection = this.subscriberRedisClient.connectPubSub();
