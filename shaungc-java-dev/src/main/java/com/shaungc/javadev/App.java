@@ -1,5 +1,8 @@
 package com.shaungc.javadev;
 
+import com.shaungc.dataStorage.S3Service;
+import com.shaungc.dataTypes.ScraperJobData;
+import com.shaungc.dataTypes.ScraperProgressData;
 import com.shaungc.exceptions.ScraperException;
 import com.shaungc.tasks.LoginGlassdoorTask;
 import com.shaungc.tasks.ScrapeOrganizationGlassdoorTask;
@@ -65,9 +68,40 @@ public class App {
                 }
             }
 
-            pubSubSubscription.publish(
-                String.format("%s:%s:%s", ScraperJobMessageType.FINISH.getString(), ScraperJobMessageTo.SLACK_MD_SVC.getString(), "OK!")
-            );
+            // tell FINAL to supervisor
+            if (scrapeCompanyTask.isFinalSession) {
+                pubSubSubscription.publish(
+                    String.format("%s:%s:%s", ScraperJobMessageType.FINISH.getString(), ScraperJobMessageTo.SLACK_MD_SVC.getString(), "OK!")
+                );
+            } else {
+                // handle env var value needs quotes when value contains spaces
+                final String doubleQuotedOrgName = "\"" + (scrapeCompanyTask.archiveManager.orgName) + "\"";
+
+                pubSubSubscription.publish(
+                    String.format(
+                        "%s:%s:%s",
+                        ScraperJobMessageType.FINISH.getString(),
+                        ScraperJobMessageTo.SLACK_MD_SVC.getString(),
+                        S3Service.serializeJavaObjectAsJsonStyle(
+                            new ScraperJobData(
+                                scrapeCompanyTask.archiveManager.orgId,
+                                doubleQuotedOrgName,
+                                new ScraperProgressData(
+                                    scrapeCompanyTask.processedReviewsCount,
+                                    scrapeCompanyTask.wentThroughReviewsCount,
+                                    scrapeCompanyTask.localReviewsCount,
+                                    scrapeCompanyTask.scraperTaskTimer.captureOverallElapseDurationInMilliAsString(),
+                                    scrapeCompanyTask.processedReviewPages,
+                                    Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION + 1
+                                ),
+                                driver.getCurrentUrl(),
+                                ScraperMode.RENEWAL.getString()
+                            )
+                        )
+                    )
+                );
+            }
+
             pubSubSubscription.cleanup();
             driver.quit();
 

@@ -20,21 +20,24 @@ import org.openqa.selenium.WebDriver;
  * ScrapeOrganizationGlassdoorTask
  */
 public class ScrapeOrganizationGlassdoorTask {
-    private final WebDriver driver;
     private final String searchCompanyName;
     private final URL companyOverviewPageUrl;
 
-    private Timer scraperTaskTimer;
-    private ArchiveManager archiveManager;
-    final PubSubSubscription pubSubSubscription;
+    /** session utilities */
+    private final WebDriver driver;
+    public Timer scraperTaskTimer;
+    public ArchiveManager archiveManager;
+    private final PubSubSubscription pubSubSubscription;
 
     /** session stats */
     private String orgPrefixSlackString;
-    private Integer processedReviewsCount;
-    private Integer wentThroughReviewsCount;
-    private Integer localReviewsCount;
     private Boolean doesCollidedReviewExist;
-    private Boolean isFinalSession;
+    public Integer processedReviewsCount;
+    public Integer wentThroughReviewsCount;
+    public Integer localReviewsCount;
+    public Integer processedReviewPages;
+
+    public Boolean isFinalSession;
 
     public ScrapeOrganizationGlassdoorTask(final WebDriver driver, final PubSubSubscription pubSubSubscription, final String companyName)
         throws ScraperException {
@@ -113,13 +116,14 @@ public class ScrapeOrganizationGlassdoorTask {
         this.processedReviewsCount = scrapeReviewFromCompanyReviewPage.processedReviewsCount;
         this.wentThroughReviewsCount = scrapeReviewFromCompanyReviewPage.wentThroughReviewsCount;
         this.localReviewsCount = scrapeReviewFromCompanyReviewPage.localReviewCount;
+        this.processedReviewPages = scrapeReviewFromCompanyReviewPage.processedReviewPages;
         // this.orgPrefixSlackString should be assigned before review scraper
         this.doesCollidedReviewExist = scrapeReviewFromCompanyReviewPage.doesCollidedReviewExist;
         this.isFinalSession = scrapeReviewFromCompanyReviewPage.isFinalSession;
     }
 
     private void launchSessionScraper() throws ScraperException {
-        this.scraperTaskTimer = new Timer(Duration.ofMinutes(1));
+        this.scraperTaskTimer = new Timer(Duration.ofSeconds(20));
 
         // Access company overview page
         if (this.companyOverviewPageUrl != null) {
@@ -167,7 +171,7 @@ public class ScrapeOrganizationGlassdoorTask {
         Logger.infoAlsoSlack(
             this.orgPrefixSlackString +
             "Basic data parsing completed, elasped time: " +
-            scraperTaskTimer.captureOverallElapseDurationString()
+            this.scraperTaskTimer.captureOverallElapseDurationString()
         );
 
         // short circuit if no review data
@@ -181,7 +185,7 @@ public class ScrapeOrganizationGlassdoorTask {
             driver,
             this.pubSubSubscription,
             this.archiveManager,
-            scraperTaskTimer,
+            this.scraperTaskTimer,
             scrapeBasicDataFromCompanyNamePage.sideEffect,
             this.orgPrefixSlackString
         );
@@ -191,6 +195,7 @@ public class ScrapeOrganizationGlassdoorTask {
         this.processedReviewsCount = scrapeReviewFromCompanyReviewPage.processedReviewsCount;
         this.wentThroughReviewsCount = scrapeReviewFromCompanyReviewPage.wentThroughReviewsCount;
         this.localReviewsCount = scrapeReviewFromCompanyReviewPage.localReviewCount;
+        this.processedReviewPages = scrapeReviewFromCompanyReviewPage.processedReviewPages;
         // this.orgPrefixSlackString is set above
         this.doesCollidedReviewExist = scrapeReviewFromCompanyReviewPage.doesCollidedReviewExist;
         this.isFinalSession = scrapeReviewFromCompanyReviewPage.isFinalSession;

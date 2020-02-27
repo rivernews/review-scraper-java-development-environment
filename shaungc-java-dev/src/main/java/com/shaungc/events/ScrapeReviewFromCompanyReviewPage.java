@@ -57,7 +57,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     // if scraper mode == regular, will obtain when scraping review meta
     // else if mode == renewal, will obtain from env var (Configuration)
     public Integer localReviewCount;
-    private Integer processedReviewPages = 0;
+    public Integer processedReviewPages = 0;
 
     /** expose other data for external use */
 
@@ -371,35 +371,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             // check if approaching travis build limit
             // if so, stop session and try to schedule a cross-session job instead
             if (this.scraperSessionTimer.doesReachCountdownDuration()) {
-                // handle env var value needs quotes when value contains spaces
-                final String orgName =
-                    "\"" + (this.orgMetadata != null ? this.orgMetadata.companyName : Configuration.TEST_COMPANY_NAME) + "\"";
-
-                this.pubSubSubscription.publish(
-                        String.format(
-                            "%s:%s:%s",
-                            ScraperJobMessageType.CROSS.getString(),
-                            ScraperJobMessageTo.SLACK_MD_SVC.getString(),
-                            S3Service.serializeJavaObjectAsJsonStyle(
-                                new ScraperJobData(
-                                    this.orgMetadata != null ? this.orgMetadata.companyId : Configuration.TEST_COMPANY_ID,
-                                    orgName,
-                                    new ScraperProgressData(
-                                        this.processedReviewsCount,
-                                        this.wentThroughReviewsCount,
-                                        this.localReviewCount,
-                                        this.scraperSessionTimer.captureOverallElapseDurationInMilliAsString(),
-                                        this.processedReviewPages,
-                                        Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION + 1
-                                    ),
-                                    this.driver.getCurrentUrl(),
-                                    ScraperMode.RENEWAL.getString()
-                                )
-                            )
-                        )
-                    );
-
-                // stop scraper session
+                // stop current scraper session
                 return glassdoorCompanyParsedData;
             }
         }

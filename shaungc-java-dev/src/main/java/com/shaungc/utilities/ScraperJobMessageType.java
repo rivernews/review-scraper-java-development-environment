@@ -4,9 +4,6 @@ public enum ScraperJobMessageType {
     PREFLIGHT("preflight"),
     PROGRESS("progress"),
 
-    // scraper wants to do a cross-session job
-    CROSS("cross"),
-
     FINISH("finish"),
     ERROR("error");
 

@@ -27,6 +27,10 @@ public class WebDriverFactory {
 
             chromeOptions.addArguments("--disable-extensions");
             chromeOptions.addArguments("--start-maximized");
+            // solving chrome driver issue
+            // `UnknownError: session deleted because of page crash from tab crashed`
+            // https://stackoverflow.com/a/53970825/9814131
+            chromeOptions.addArguments("--no-sandbox");
 
             return (WebDriver) new RemoteWebDriver(
                 RequestAddressValidator.toURL("http://" + webDriverServiceUrl + ":4444/wd/hub"),
