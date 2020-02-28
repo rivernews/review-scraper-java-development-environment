@@ -96,7 +96,11 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
             // slack md svc confirmed)
 
             if (messageType.equals(ScraperJobMessageType.PREFLIGHT.getString())) {
-                Logger.infoAlsoSlack("Received acked from slack md svc, pubsub communication channel confirmed");
+                Logger.infoAlsoSlack(
+                    "Received acked from slack md svc, pubsub communication channel confirmed. Using redis db `" +
+                    Configuration.SUPERVISOR_PUBSUB_REDIS_DB +
+                    "`"
+                );
                 this.supervisorCountDownLatch.countDown();
             }
         } else {
