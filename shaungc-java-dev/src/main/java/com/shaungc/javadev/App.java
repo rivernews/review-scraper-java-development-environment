@@ -38,9 +38,11 @@ public class App {
 
             if (!pubsubAcked) {
                 throw new ScraperException(
-                    "Waiting for supervisor's confirmation timed out for " +
-                    pubsubAckTimedoutSeconds +
-                    " seconds, will now abort scraper. Is the supervisor job at slack md svc still active?"
+                    String.format(
+                        "Waiting for supervisor's pubsub confirmation timed out for %d seconds, will now abort scraper. Does the supervisor at slackMdSvc subscribing to channel `%s` and is still active?",
+                        pubSubSubscription.redisPubsubChannelName,
+                        pubsubAckTimedoutSeconds
+                    )
                 );
             }
 

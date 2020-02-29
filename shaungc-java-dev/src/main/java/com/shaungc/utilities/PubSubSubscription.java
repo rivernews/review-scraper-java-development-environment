@@ -13,10 +13,12 @@ import java.util.concurrent.CountDownLatch;
 // Writing PubSub adapter
 // https://www.baeldung.com/java-redis-lettuce#pubsub
 public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
-    private final String redisPubsubChannelName = String.format(
+    public final String redisPubsubChannelName = String.format(
         "%s:%s:%s",
         RedisPubSubChannelPrefix.SCRAPER_JOB_CHANNEL.getString(),
-        Configuration.TEST_COMPANY_INFORMATION_STRING.isEmpty()
+        // We should check `TEST_COMPANY_NAME` first, because that indicates a renewal job where the channel has to use `TEST_COMPANY_NAME`
+        // For `TEST_COMPANY_INFORMATION_STRING`, it could be provided regardless of regular or renewal job
+        !Configuration.TEST_COMPANY_NAME.isEmpty()
             ? "\"" + Configuration.TEST_COMPANY_NAME + "\""
             : Configuration.TEST_COMPANY_INFORMATION_STRING,
         Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION
