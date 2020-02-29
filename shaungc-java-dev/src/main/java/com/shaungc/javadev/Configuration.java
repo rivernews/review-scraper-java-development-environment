@@ -53,7 +53,7 @@ public final class Configuration {
     public static Integer EXPECTED_CONDITION_WAIT_SECOND_LONGER = 60;
 
     public static Long CROSS_SESSION_TIME_LIMIT_MINUTES = Float
-        .valueOf(Configuration.getenvOrDefault("CROSS_SESSION_TIME_LIMIT_MINUTES", "0.5"))
+        .valueOf(Configuration.getenvOrDefault("CROSS_SESSION_TIME_LIMIT_MINUTES", "1"))
         .longValue();
 
     // inputs

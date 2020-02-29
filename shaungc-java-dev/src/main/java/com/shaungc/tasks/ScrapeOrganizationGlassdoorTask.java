@@ -98,7 +98,11 @@ public class ScrapeOrganizationGlassdoorTask {
     }
 
     private void continueCrossSessionScraper() throws ScraperException {
-        this.scraperTaskTimer = new Timer(Configuration.TEST_COMPANY_LAST_PROGRESS_DURATION, Duration.ofMinutes(1));
+        this.scraperTaskTimer =
+            new Timer(
+                Configuration.TEST_COMPANY_LAST_PROGRESS_DURATION,
+                Duration.ofMinutes(Configuration.CROSS_SESSION_TIME_LIMIT_MINUTES)
+            );
 
         this.archiveManager = new ArchiveManager(Configuration.TEST_COMPANY_NAME, Configuration.TEST_COMPANY_ID);
 
