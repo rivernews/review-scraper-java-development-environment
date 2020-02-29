@@ -28,16 +28,19 @@ public class App {
 
         try {
             Boolean pubsubAcked;
+            final Integer pubsubAckTimedoutSeconds = Configuration.DEBUG ? 30 : 60;
             try {
                 Logger.info("waiting for pubsub countdown latch");
-                pubsubAcked = pubSubSubscription.supervisorCountDownLatch.await(30, TimeUnit.SECONDS);
+                pubsubAcked = pubSubSubscription.supervisorCountDownLatch.await(pubsubAckTimedoutSeconds, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 throw new ScraperException("Pubsub ack countdown latch interrupted: " + e.getMessage());
             }
 
             if (!pubsubAcked) {
                 throw new ScraperException(
-                    "Waiting for supervisor's confirmation timed out for 1 minute, will now abort scraper. Is the supervisor job at slack md svc still active?"
+                    "Waiting for supervisor's confirmation timed out for " +
+                    pubsubAckTimedoutSeconds +
+                    " seconds, will now abort scraper. Is the supervisor job at slack md svc still active?"
                 );
             }
 
