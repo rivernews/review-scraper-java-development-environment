@@ -99,9 +99,7 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
 
             if (messageType.equals(ScraperJobMessageType.PREFLIGHT.getString())) {
                 Logger.infoAlsoSlack(
-                    "Received acked from slack md svc, pubsub communication channel confirmed. Using redis db `" +
-                    Configuration.SUPERVISOR_PUBSUB_REDIS_DB +
-                    "`"
+                    "Received acked from supervisor, pubsub confirmed. Redis db `" + Configuration.SUPERVISOR_PUBSUB_REDIS_DB + "`"
                 );
                 this.supervisorCountDownLatch.countDown();
             }
