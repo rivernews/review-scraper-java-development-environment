@@ -1,28 +1,22 @@
 package com.shaungc.events;
 
 import com.shaungc.dataStorage.ArchiveManager;
-import com.shaungc.dataStorage.S3Service;
 import com.shaungc.dataTypes.BasicParsedData;
 import com.shaungc.dataTypes.EmployeeReviewData;
 import com.shaungc.dataTypes.EmployeeReviewTextData;
 import com.shaungc.dataTypes.GlassdoorCompanyReviewParsedData;
 import com.shaungc.dataTypes.GlassdoorReviewMetadata;
-import com.shaungc.dataTypes.ScraperJobData;
-import com.shaungc.dataTypes.ScraperProgressData;
 import com.shaungc.exceptions.ScraperException;
 import com.shaungc.javadev.Configuration;
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.LoggerLevel;
 import com.shaungc.utilities.PubSubSubscription;
-import com.shaungc.utilities.ReviewCollisionStrategy;
 import com.shaungc.utilities.ScraperJobMessageTo;
 import com.shaungc.utilities.ScraperJobMessageType;
 import com.shaungc.utilities.ScraperMode;
 import com.shaungc.utilities.Timer;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -193,12 +187,13 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 if (progressReportingTimer.doesReachCountdownDuration()) {
                     this.pubSubSubscription.publish(
                             String.format(
-                                "%s:%s:{\"processed\":%d,\"wentThrough\":%d,\"total\":%d}",
+                                "%s:%s:{\"processed\":%d,\"wentThrough\":%d,\"total\":%d,\"elapsedTimeString\":\"%s\"}",
                                 ScraperJobMessageType.PROGRESS.getString(),
                                 ScraperJobMessageTo.SLACK_MD_SVC.getString(),
                                 this.processedReviewsCount,
                                 this.wentThroughReviewsCount,
-                                this.localReviewCount
+                                this.localReviewCount,
+                                this.scraperSessionTimer.captureOverallElapseDurationString()
                             )
                         );
                     progressReportingTimer.restart();
