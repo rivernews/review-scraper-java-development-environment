@@ -395,10 +395,15 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     Integer.parseInt(countElements.get(1).getText().strip().replaceAll("\\D+", ""));
             } else {
                 final String reviewPanelElementRawContent = reviewPanelElement.getText();
+                final String htmlDumpPath =
+                    this.archiveManager.writeHtml("reviewMeta:NoLocalGlobalReviewCountWarning", this.driver.getPageSource());
                 throw new ScraperShouldHaltException(
                     "Unable to scrape local & global review count from reviewPanelElement: " +
                     reviewPanelElementRawContent.substring(0, Math.min(reviewPanelElementRawContent.length(), 500)) +
-                    "..."
+                    "...\n" +
+                    "Please check the review page html, see why scraper cannot find the review counts. Html saved on s3 at key `" +
+                    htmlDumpPath +
+                    "`"
                 );
             }
         } catch (final NoSuchElementException e) {}

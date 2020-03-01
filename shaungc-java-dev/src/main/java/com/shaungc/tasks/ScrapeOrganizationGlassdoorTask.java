@@ -214,22 +214,16 @@ public class ScrapeOrganizationGlassdoorTask {
             final String htmlDumpPath = this.archiveManager.writeHtml("reviewDataLostWarning", this.driver.getPageSource());
 
             Logger.warnAlsoSlack(
-                this.orgPrefixSlackString +
-                "Low processing rate " +
-                reviewProcessRatePercentage +
-                "% " +
-                "(" +
-                this.processedReviewsCount +
-                "/" +
-                this.localReviewsCount +
-                ")" +
-                ". Last html stored at S3: `" +
-                htmlDumpPath +
-                "`" +
-                "\nYou can access the last processed webpage at " +
-                this.driver.getCurrentUrl() +
-                ", see if there is indeed no next page available & that's all we can get." +
-                "\nIf you are running for an org w/ existing review pool, you can ignore this warning."
+                String.format(
+                    "%s Low processing rate %d% (%d/%d). If running for existing org, you can ignore this warning.\n" +
+                    "Otherwise, check the <last processed review page|%s> and see if indeed no next page available. If next page is available, please check why scraper did not capture the next page link. Last review page's html is stored on s3 at key %s",
+                    this.orgPrefixSlackString,
+                    reviewProcessRatePercentage,
+                    this.processedReviewsCount,
+                    this.localReviewsCount,
+                    this.driver.getCurrentUrl(),
+                    htmlDumpPath
+                )
             );
         }
 
