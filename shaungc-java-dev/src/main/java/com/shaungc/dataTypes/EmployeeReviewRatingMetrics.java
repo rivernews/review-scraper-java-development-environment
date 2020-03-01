@@ -1,14 +1,11 @@
 package com.shaungc.dataTypes;
 
-
 import com.shaungc.utilities.Logger;
-
 
 /**
  * EmployeeReviewRatingMetrics
  */
 public class EmployeeReviewRatingMetrics {
-
     public Float overallRating = Float.valueOf(-1);
     public Float workLifeBalanceRating = Float.valueOf(-1);
     public Float cultureAndValuesRating = Float.valueOf(-1);

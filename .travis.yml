@@ -4,7 +4,14 @@ sudo: required
 before_install:
 - |
   if [ "$SLACK_WEBHOOK_URL" != "" ]; then
-    curl -X POST --data-urlencode "payload={ \"text\": \"*(${TEST_COMPANY_INFORMATION_STRING})* TravisCI about to setup environment .\"}" ${SLACK_WEBHOOK_URL}
+
+    if [ "$TEST_COMPANY_INFORMATION_STRING" != "" ]; then
+      curl -X POST --data-urlencode "payload={ \"text\": \"*(${TEST_COMPANY_INFORMATION_STRING})* TravisCI about to setup environment .\"}" ${SLACK_WEBHOOK_URL}
+    else
+      curl -X POST --data-urlencode "payload={ \"text\": \"*(${TEST_COMPANY_NAME})* TravisCI about to setup environment .\"}" ${SLACK_WEBHOOK_URL}
+    fi
+
+    
   fi
 install:
 - sudo apt-get install google-chrome-stable
@@ -28,7 +35,7 @@ script:
 - KUBECONFIG=kubeconfig.yaml ./kubectl -n redis-cluster port-forward deploy/redis-cluster-deployment 6379:6379 &
 - export REDIS_PORT_FORWARD_PID=$!
 - echo "Port fowarding process is ${REDIS_PORT_FORWARD_PID}"
-- cd shaungc-java-dev && mvn exec:java
+- cd shaungc-java-dev && mvn clean install && mvn exec:java
 - kill ${REDIS_PORT_FORWARD_PID}
 cache:
   directories:

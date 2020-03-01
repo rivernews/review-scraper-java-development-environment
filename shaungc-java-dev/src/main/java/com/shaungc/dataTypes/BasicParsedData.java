@@ -1,10 +1,9 @@
 package com.shaungc.dataTypes;
 
-import java.time.Instant;
-
 import com.shaungc.utilities.Logger;
 
 public class BasicParsedData {
+    public String companyOverviewPageUrl;
     public String companyId;
     public String companyLogoUrl;
     public String reviewNumberText;
@@ -15,10 +14,18 @@ public class BasicParsedData {
     public String companyLocationText;
     public String companyWebsiteUrl;
 
-    public Instant scrapedTimestamp;
-
-    public BasicParsedData(String pCompanyId, String pCompanyLogoUrl, String pReviewNumberText, String pCompanySizeText,
-            String pCompanyFoundYearText, String pCompanyLocationText, String pCompanyWebsiteUrl, String pCompanyName) {
+    public BasicParsedData(
+        final String pcompanyOverviewPageUrl,
+        final String pCompanyId,
+        final String pCompanyLogoUrl,
+        final String pReviewNumberText,
+        final String pCompanySizeText,
+        final String pCompanyFoundYearText,
+        final String pCompanyLocationText,
+        final String pCompanyWebsiteUrl,
+        final String pCompanyName
+    ) {
+        this.companyOverviewPageUrl = pcompanyOverviewPageUrl;
         this.companyId = pCompanyId;
         this.companyLogoUrl = pCompanyLogoUrl;
         this.reviewNumberText = pReviewNumberText;
@@ -31,6 +38,7 @@ public class BasicParsedData {
     }
 
     public void debugPrintAllFields() {
+        Logger.debug("companyOverviewPageUrl " + this.companyOverviewPageUrl);
         Logger.debug("companyId " + this.companyId);
         Logger.debug("companyName " + this.companyName);
         Logger.debug("companyLogoUrl " + this.companyLogoUrl);
@@ -40,6 +48,5 @@ public class BasicParsedData {
         Logger.debug("companyFoundYearText " + this.companyFoundYearText);
         Logger.debug("companyLocationText " + this.companyLocationText);
         Logger.debug("companyWebsiteUrl " + this.companyWebsiteUrl);
-        Logger.debug("scrapedTimestamp " + this.scrapedTimestamp);
     }
 }

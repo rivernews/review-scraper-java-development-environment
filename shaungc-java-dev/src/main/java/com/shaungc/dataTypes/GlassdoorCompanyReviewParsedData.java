@@ -3,7 +3,6 @@ package com.shaungc.dataTypes;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * ReviewData
  */
@@ -14,7 +13,7 @@ public class GlassdoorCompanyReviewParsedData {
     public void debug() {
         this.debug(0);
     }
-    
+
     public void debug(Integer numberedMessageOffset) {
         this.reviewMetadata.debug();
 

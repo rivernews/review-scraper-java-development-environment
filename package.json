@@ -1,0 +1,20 @@
+{
+  "comments": "https://github.com/jhipster/prettier-java/blob/master/docs/advanced_usage.md",
+  "devDependencies": {
+    "husky": "^4.2.3",
+    "lint-staged": "^10.0.7",
+    "prettier": "^1.19.1",
+    "prettier-plugin-java": "^0.7.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "**/*.java": [
+      "prettier --write",
+      "git add"
+    ]
+  }
+}

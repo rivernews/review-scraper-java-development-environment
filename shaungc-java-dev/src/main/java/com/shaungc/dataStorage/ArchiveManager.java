@@ -1,18 +1,11 @@
 package com.shaungc.dataStorage;
 
-import java.time.Instant;
-import java.util.Date;
-
-import com.google.gson.Gson;
 import com.shaungc.dataTypes.BasicParsedData;
 import com.shaungc.dataTypes.EmployeeReviewData;
 import com.shaungc.dataTypes.GlassdoorReviewMetadata;
 import com.shaungc.javadev.Configuration;
-import com.shaungc.utilities.Logger;
-
-import software.amazon.awssdk.utils.BinaryUtils;
-import software.amazon.awssdk.utils.Md5Utils;
-
+import java.nio.file.Path;
+import java.time.Instant;
 
 enum FileType {
     JSON("json"),
@@ -20,7 +13,7 @@ enum FileType {
 
     private final String extension;
 
-    private FileType(String extension) {
+    private FileType(final String extension) {
         this.extension = extension;
     }
 
@@ -29,50 +22,43 @@ enum FileType {
     }
 }
 
-
 /**
  * ArchiveManager
  */
 public class ArchiveManager {
-
-    static S3Service s3Service = new S3Service();
+    public final S3Service s3Service;
 
     private static String BUCKET_NAME = Configuration.AWS_S3_ARCHIVE_BUCKET_NAME;
-    
-    // https://github.com/google/gson
-    public static Gson GSON_TOOL = new Gson();
-
-    static {
-        ArchiveManager.s3Service.createBucket(ArchiveManager.BUCKET_NAME);
-    }
 
     public String orgName;
     public String orgId;
-    
-    public ArchiveManager(String orgName, String orgId) {
+
+    // s3 does not allow a `/` at front; if you do so, you will get an empty-named folder
+    private final String gdOrgOverviewPageUrlsDirectory = Path.of("all-urls").toString();
+
+    public ArchiveManager() {
+        this.s3Service = new S3Service(ArchiveManager.BUCKET_NAME);
+        this.s3Service.createBucket();
+        // orgName and orgId will be set after org meta is scraped
+    }
+
+    public ArchiveManager(final String orgName, final String orgId) {
+        this.s3Service = new S3Service(ArchiveManager.BUCKET_NAME);
+        this.s3Service.createBucket();
+
         this.orgName = orgName;
         this.orgId = orgId;
     }
-    public ArchiveManager() {}
 
     // meta info functions
 
-    static public String doesObjectExist(String fullPath) {
-        return ArchiveManager.s3Service.doesObjectExist(ArchiveManager.BUCKET_NAME, fullPath);
+    public String doesObjectExist(final String fullPath) {
+        return this.s3Service.doesObjectExistAndGetMd5(fullPath);
     }
 
-    public String doesGlassdoorOrganizationReviewExist(String reviewId) {
-        String fullPathUntilFilename = this.getGlassdoorOrgReviewDataDirectory() + reviewId;
-        return ArchiveManager.doesObjectExist(ArchiveManager.getFullPathAsJson(fullPathUntilFilename));
-    }
-
-    // getter functions
-
-    static private String getFullPathAsJson(String fullPathUntilFilename) {
-        return fullPathUntilFilename + "." + FileType.JSON.getExtension();
-    }
-    static private String getFullPathAsHtml(String fullPathUntilFilename) {
-        return fullPathUntilFilename + "." + FileType.HTML.getExtension();
+    public String doesGlassdoorOrganizationReviewExist(final String reviewId) {
+        final String fullPathUntilFilename = this.getGlassdoorOrgReviewDataDirectory() + reviewId;
+        return this.doesObjectExist(S3Service.getFullPathAsJsonFile(fullPathUntilFilename));
     }
 
     // path generating functions
@@ -80,98 +66,109 @@ public class ArchiveManager {
     public String getOrganizationDirectory() {
         return this.orgName + "-" + this.orgId;
     }
-    static public String getOrganizationDirectory(String orgId, String orgName) {
-        return orgName + "-" + orgId;
-    }
 
     public String getGlassdoorOrgReviewDataDirectory() {
         return this.getOrganizationDirectory() + "/reviews/";
     }
 
-    static public String getGlassdoorOrgReviewDataFilenamePrefix(String reviewId) {
+    public static String getGlassdoorOrgReviewDataFilenamePrefix(final String reviewId) {
         return reviewId;
     }
 
-    static public String getGlassdoorOrgReviewDataFilename(String reviewId) {
+    public static String getGlassdoorOrgReviewDataFilename(final String reviewId) {
         // do not append timestamp for review data
         // due to its uniqueness
         return ArchiveManager.getGlassdoorOrgReviewDataFilenamePrefix(reviewId);
     }
 
-    static public String getCollidedGlassdoorOrgReviewDataFilenamePrefix(String reviewId) {
+    public static String getCollidedGlassdoorOrgReviewDataFilenamePrefix(final String reviewId) {
         return "collision." + reviewId;
     }
 
-    static public String getCollidedGlassdoorOrgReviewDataFilename(String reviewId) {
+    public static String getCollidedGlassdoorOrgReviewDataFilename(final String reviewId) {
         return ArchiveManager.getCollidedGlassdoorOrgReviewDataFilenamePrefix(reviewId) + "." + Instant.now();
     }
 
     // write out functions
 
-    static public void jsonDump(String pathUntilFilename, Object object) {
-        ArchiveManager.fileDump(pathUntilFilename, object, FileType.JSON);
+    /**
+     * Dumps an object to S3 as json file
+     *
+     * @param pathUntilFilename - the full path to the file, without extension
+     * @param object
+     */
+    public void putJsonOnS3(final String pathUntilFilename, final Object object) {
+        this.s3Service.putFileOnS3(pathUntilFilename, object, FileType.JSON);
     }
 
-    static public void htmlDump(String pathUntilFilename, Object object) {
-        ArchiveManager.fileDump(pathUntilFilename, object, FileType.HTML);
+    public void putHtmlOnS3(final String pathUntilFilename, final Object object) {
+        this.s3Service.putFileOnS3(pathUntilFilename, object, FileType.HTML);
     }
 
-    static public void fileDump(String pathUntilFilename, Object object, FileType fileType) {
-        String dumpString = ArchiveManager.serializeJavaObject(object);
+    public void writeGlassdoorOrganizationMetadataAsJson(final BasicParsedData orgMetadata) {
+        final String orgMetadataDirectory = Path.of(this.getOrganizationDirectory(), "meta").toString();
 
-        if (fileType == FileType.JSON) {
-            ArchiveManager.s3Service.putObjectOfString(ArchiveManager.BUCKET_NAME, ArchiveManager.getFullPathAsJson(pathUntilFilename), dumpString);
-            Logger.info("JSON dumped to path " + pathUntilFilename);
-        } else if (fileType == FileType.HTML) {
-            ArchiveManager.s3Service.putObjectOfString(ArchiveManager.BUCKET_NAME, ArchiveManager.getFullPathAsHtml(pathUntilFilename), dumpString);
-            Logger.info("HTML dumped to path " + pathUntilFilename);
-        } else {
-            ArchiveManager.s3Service.putObjectOfString(ArchiveManager.BUCKET_NAME, pathUntilFilename, dumpString);
-            Logger.info("file dumped to path " + pathUntilFilename);
-        }
+        final String filenameWithoutExtension = Instant.now().toString();
 
-        Logger.info("Dumped data:\n" + dumpString.substring(0, Math.min(dumpString.length(), 100)) + "...\n");
+        this.s3Service.putLatestObject(orgMetadataDirectory, filenameWithoutExtension, orgMetadata, FileType.JSON);
+
+        // also write company overview page url
+        // no need to check exist or not, just overwrite is fine
+        final String orgOverviewPageUrlObjectKey = Path.of(this.gdOrgOverviewPageUrlsDirectory, this.getOrganizationDirectory()).toString();
+
+        this.s3Service.putObjectOfString(orgOverviewPageUrlObjectKey, orgMetadata.companyOverviewPageUrl);
     }
 
-    static public void writeGlassdoorOrganizationMetadataAsJson(String orgId, String orgName, BasicParsedData orgMetadata) {
-        ArchiveManager.jsonDump(ArchiveManager.getOrganizationDirectory(orgId, orgName) + "/meta/" + orgMetadata.scrapedTimestamp, orgMetadata);
-    }
-    public void writeGlassdoorOrganizationMetadataAsJson(BasicParsedData orgMetadata) {
-        ArchiveManager.jsonDump(this.getOrganizationDirectory() + "/meta/" + orgMetadata.scrapedTimestamp, orgMetadata);
+    public void writeGlassdoorOrganizationReviewsMetadataAsJson(final GlassdoorReviewMetadata reviewMetadata) {
+        final String reviewMetadataDirectory = Path.of(this.getOrganizationDirectory(), "reviews-meta").toString();
+
+        final String filenameWithoutExtension = Instant.now().toString();
+
+        this.s3Service.putLatestObject(reviewMetadataDirectory, filenameWithoutExtension, reviewMetadata, FileType.JSON);
     }
 
-    static public void writeGlassdoorOrganizationReviewsMetadataAsJson(String orgId, String orgName, GlassdoorReviewMetadata reviewMetadata) {
-        ArchiveManager.jsonDump(ArchiveManager.getOrganizationDirectory(orgId, orgName) + "/reviews-meta/" + reviewMetadata.scrapedTimestamp, reviewMetadata);
-    }
-    public void writeGlassdoorOrganizationReviewsMetadataAsJson(GlassdoorReviewMetadata reviewMetadata) {
-        Logger.infoAlsoSlack("Local review count is " + reviewMetadata.localReviewCount + ", we will scrape within these reviews.");
-        ArchiveManager.jsonDump(this.getOrganizationDirectory() + "/reviews-meta/" + reviewMetadata.scrapedTimestamp, reviewMetadata);
+    /**
+     * @return Whether or not a new review data is written to a file on s3
+     */
+    private Boolean writeReviewData(final String reviewId, final String subDirectory, final String filename, final Object data) {
+        final String reviewDataDirectory = Path.of(this.getGlassdoorOrgReviewDataDirectory(), subDirectory, reviewId).toString();
+
+        return this.s3Service.putLatestObject(reviewDataDirectory, filename, data, FileType.JSON);
     }
 
-    static public void writeGlassdoorOrganizationReviewDataAsJson(String orgId, String orgName, EmployeeReviewData reviewData) {
-        ArchiveManager.jsonDump(ArchiveManager.getOrganizationDirectory(orgId, orgName) + "/reviews/" + reviewData.reviewId, reviewData);
-    }
-    public void writeGlassdoorOrganizationReviewDataAsJson(EmployeeReviewData reviewData) {
-        ArchiveManager.jsonDump(this.getGlassdoorOrgReviewDataDirectory() + ArchiveManager.getGlassdoorOrgReviewDataFilename(reviewData.reviewId), reviewData);
-    }
-    public String writeCollidedGlassdoorOrganizationReviewDataAsJson(EmployeeReviewData reviewData) {
-        final String pathUntilFilename = this.getGlassdoorOrgReviewDataDirectory() + ArchiveManager.getCollidedGlassdoorOrgReviewDataFilename(reviewData.reviewId);
+    public Boolean writeGlassdoorOrganizationReviewDataAsJson(final EmployeeReviewData reviewData) {
+        final String filename = Instant.now().toString();
 
-        ArchiveManager.jsonDump(pathUntilFilename, reviewData);
+        final String varyingDataDirectoryName = "varying";
+        final String stableDataDirectoryName = "stable";
 
-        return ArchiveManager.getFullPathAsJson(pathUntilFilename);
+        // consider varying data (e.g. helpful count, ...)
+        final Boolean writtenVaryingData =
+            this.writeReviewData(reviewData.stableReviewData.reviewId, varyingDataDirectoryName, filename, reviewData.varyingReviewData);
+        // consider stable data (e.g. review text, ...)
+        final Boolean writtenStableData =
+            this.writeReviewData(reviewData.stableReviewData.reviewId, stableDataDirectoryName, filename, reviewData.stableReviewData);
+
+        return writtenStableData || writtenVaryingData;
     }
 
-    public String writeHtml(String filename, String html) {
+    public String writeCollidedGlassdoorOrganizationReviewDataAsJson(final EmployeeReviewData reviewData) {
+        final String pathUntilFilename =
+            this.getGlassdoorOrgReviewDataDirectory() +
+            ArchiveManager.getCollidedGlassdoorOrgReviewDataFilename(reviewData.stableReviewData.reviewId);
+
+        this.putJsonOnS3(pathUntilFilename, reviewData);
+
+        return S3Service.getFullPathAsJsonFile(pathUntilFilename);
+    }
+
+    public String writeHtml(final String filename, final String html) {
         final String pathUntilFilename = this.getOrganizationDirectory() + "/logs/" + filename + "." + Instant.now();
-        ArchiveManager.htmlDump(pathUntilFilename, html);
-        
-        // return the complete path (key) so that caller can make good use
-        return ArchiveManager.getFullPathAsHtml(pathUntilFilename);
-    }
+        this.putHtmlOnS3(pathUntilFilename, html);
 
-    // misc helper functions
-    static public String serializeJavaObject(Object object) {
-        return ArchiveManager.GSON_TOOL.toJson(object);
+        // return the complete path (key) so that caller can make good use
+        return S3Service.getFullPathAsHtmlFile(pathUntilFilename);
     }
+    // misc helper functions
+
 }

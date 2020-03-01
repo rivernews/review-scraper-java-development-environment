@@ -1,5 +1,8 @@
 package com.shaungc.utilities;
 
+import com.shaungc.dataStorage.ArchiveManager;
+import com.shaungc.dataStorage.S3Service;
+import com.shaungc.exceptions.ScraperShouldHaltException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -10,9 +13,6 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 
-import com.shaungc.dataStorage.ArchiveManager;
-import com.shaungc.exceptions.ScraperShouldHaltException;
-
 /**
  * HttpService writing requests:
  * https://openjdk.java.net/groups/net/httpclient/recipes.html#post writing
@@ -20,23 +20,27 @@ import com.shaungc.exceptions.ScraperShouldHaltException;
  */
 public class HttpService {
 
-    static public CompletableFuture<HttpResponse<String>> asyncPost(HashMap<String, String> data, URI uri) {
-        String serializedData = ArchiveManager.serializeJavaObject(data);
+    public static CompletableFuture<HttpResponse<String>> asyncPost(HashMap<String, String> data, URI uri) {
+        String serializedData = S3Service.serializeJavaObjectAsJsonStyle(data);
 
         Logger.debug("serialized data: " + serializedData);
 
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpService.getHttpRequest(uri, serializedData);
 
-        return client.sendAsync(request, BodyHandlers.ofString()).thenApply(res -> {
-            Logger.info(res.toString());
-            return res;
-        });
+        return client
+            .sendAsync(request, BodyHandlers.ofString())
+            .thenApply(
+                res -> {
+                    Logger.info(res.toString());
+                    return res;
+                }
+            );
     }
 
-    static public HttpResponse<String> post(HashMap<String, String> data, URI uri) {
+    public static HttpResponse<String> post(HashMap<String, String> data, URI uri) {
         HttpResponse<String> res = null;
-        String serializedData = ArchiveManager.serializeJavaObject(data);
+        String serializedData = S3Service.serializeJavaObjectAsJsonStyle(data);
 
         Logger.debug("serialized data: " + serializedData);
 
@@ -56,9 +60,7 @@ public class HttpService {
         return res;
     }
 
-    static private HttpRequest getHttpRequest(URI uri, String serializedData) {
-        return HttpRequest
-        .newBuilder(uri)
-        .POST(BodyPublishers.ofString(serializedData)).build();
+    private static HttpRequest getHttpRequest(URI uri, String serializedData) {
+        return HttpRequest.newBuilder(uri).POST(BodyPublishers.ofString(serializedData)).build();
     }
 }

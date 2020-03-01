@@ -1,38 +1,73 @@
 package com.shaungc.utilities;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * Timer
  */
 public class Timer {
+    private Instant startInstant;
+    private Instant endInstant;
 
-    private LocalDateTime startDateTime;
-    private LocalDateTime endDateTime;
+    private final Duration durationOffset;
 
-    public Timer() {
+    private final Duration countdownDuration;
+
+    public Timer(final Duration countdownDuration) {
+        this.countdownDuration = countdownDuration;
+        this.durationOffset = null;
+
         this.start();
     }
 
+    public Timer(String durationInMilliString, final Duration countDownDuration) {
+        this.countdownDuration = countDownDuration;
+
+        this.start();
+
+        Long durationInMilli = Long.valueOf(durationInMilliString);
+        this.durationOffset = Duration.ofMillis(durationInMilli);
+    }
+
     public void start() {
-        this.startDateTime = LocalDateTime.now();
+        this.startInstant = Instant.now();
     }
 
     public String stop() {
-        this.endDateTime = LocalDateTime.now();
-        return Timer.getDurationString(this.startDateTime, this.endDateTime);
+        this.endInstant = Instant.now();
+        return this.getDurationString(this.captureCurrentSessionDuration(this.endInstant));
     }
 
-    public String captureElapseDurationString() {
-        final LocalDateTime nowDateTime = LocalDateTime.now();
-
-        return Timer.getDurationString(startDateTime, nowDateTime);
+    public Boolean doesReachCountdownDuration() {
+        return this.captureCurrentSessionDuration(Instant.now()).compareTo(this.countdownDuration) > 0;
     }
 
-    static private String getDurationString(LocalDateTime startDateTime, LocalDateTime endDateTime) {
-        Duration duration = Duration.between(startDateTime, endDateTime);
+    private Duration captureCurrentSessionDuration(Instant endInstant) {
+        return Duration.between(this.startInstant, endInstant);
+    }
 
+    private Duration captureOverallDuration(Instant endInstant) {
+        Duration duration = Duration.between(this.startInstant, endInstant);
+
+        if (this.durationOffset != null) {
+            duration = duration.plus(this.durationOffset);
+        }
+
+        return duration;
+    }
+
+    public String captureOverallElapseDurationString() {
+        final Duration duration = this.captureOverallDuration(Instant.now());
+        return this.getDurationString(duration);
+    }
+
+    public String captureOverallElapseDurationInMilliAsString() {
+        final Duration duration = this.captureOverallDuration(Instant.now());
+        return String.format("%s", duration.toMillis());
+    }
+
+    private String getDurationString(final Duration duration) {
         return String.format(
             // "%02dh:%02dmin:%02ds.%d milliseconds",
             "*%02d:%02d:%02d.%d*",
@@ -41,5 +76,10 @@ public class Timer {
             duration.toSecondsPart(),
             duration.toMillisPart()
         );
+    }
+
+    public void restart() {
+        this.startInstant = Instant.now();
+        this.endInstant = null;
     }
 }
