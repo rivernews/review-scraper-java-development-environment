@@ -68,7 +68,7 @@ public class ScrapeOrganizationGlassdoorTask {
     }
 
     /**
-     * Scraper task for renewal mode
+     * Constructor for renewal mode
      */
     public ScrapeOrganizationGlassdoorTask(final WebDriver driver, final PubSubSubscription pubSubSubscription) throws ScraperException {
         this.driver = driver;

@@ -52,6 +52,8 @@ public class App {
 
             driver = WebDriverFactory.create();
 
+            Logger.debug("web driver created");
+
             new LoginGlassdoorTask(driver);
 
             // launch scraping task against a company
@@ -59,10 +61,12 @@ public class App {
                 scrapeCompanyTask = new ScrapeOrganizationGlassdoorTask(driver, pubSubSubscription);
             } else {
                 try {
+                    // `TEST_COMPANY_INFORMATION_STRING` is an url
                     URL companyOverviewPageUrl = new URL(Configuration.TEST_COMPANY_INFORMATION_STRING);
                     scrapeCompanyTask = new ScrapeOrganizationGlassdoorTask(driver, pubSubSubscription, companyOverviewPageUrl);
                 } catch (MalformedURLException e) {
                     if (Configuration.TEST_COMPANY_INFORMATION_STRING != null) {
+                        // `TEST_COMPANY_INFORMATION_STRING` is a company name
                         scrapeCompanyTask =
                             new ScrapeOrganizationGlassdoorTask(driver, pubSubSubscription, Configuration.TEST_COMPANY_INFORMATION_STRING);
                     } else {

@@ -32,6 +32,7 @@ public abstract class AScraperEvent<TParsedData, TPostActionSideEffect> {
         this.wait = new WebDriverWait(this.driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND);
     }
 
+    // TODO: improve this block and remove redundant code / log
     protected List<WebElement> locate(String passedInCssSelector) {
         if (this.cssSelector != null) {
             this.cssSelector = passedInCssSelector;

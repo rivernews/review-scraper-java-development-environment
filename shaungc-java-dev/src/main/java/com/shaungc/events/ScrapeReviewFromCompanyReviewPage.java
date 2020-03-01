@@ -52,12 +52,12 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
     /** scraper session metadata */
 
-    public Integer processedReviewsCount = 0;
-    public Integer wentThroughReviewsCount = 0;
+    public Integer processedReviewsCount = Configuration.TEST_COMPANY_LAST_PROGRESS_PROCESSED;
+    public Integer wentThroughReviewsCount = Configuration.TEST_COMPANY_LAST_PROGRESS_WENTTHROUGH;
     // if scraper mode == regular, will obtain when scraping review meta
     // else if mode == renewal, will obtain from env var (Configuration)
-    public Integer localReviewCount;
-    public Integer processedReviewPages = 0;
+    public Integer localReviewCount = Configuration.TEST_COMPANY_LAST_PROGRESS_TOTAL;
+    public Integer processedReviewPages = Configuration.TEST_COMPANY_LAST_PROGRESS_PAGE;
 
     /** expose other data for external use */
 
@@ -99,11 +99,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         this.orgMetadata = null;
 
         this.orgNameSlackMessagePrefix = orgNameSlackMessagePrefix;
-
-        this.processedReviewsCount = Configuration.TEST_COMPANY_LAST_PROGRESS_PROCESSED;
-        this.wentThroughReviewsCount = Configuration.TEST_COMPANY_LAST_PROGRESS_WENTTHROUGH;
-        this.localReviewCount = Configuration.TEST_COMPANY_LAST_PROGRESS_TOTAL;
-        this.processedReviewPages = Configuration.TEST_COMPANY_LAST_PROGRESS_PAGE;
     }
 
     @Override

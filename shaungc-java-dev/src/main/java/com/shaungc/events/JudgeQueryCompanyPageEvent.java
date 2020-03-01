@@ -1,14 +1,11 @@
 package com.shaungc.events;
 
 import com.shaungc.events.AScraperEvent;
-import com.shaungc.javadev.Configuration;
 import java.util.List;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * JudgeQueryCompanyPageEvent
@@ -34,15 +31,28 @@ public class JudgeQueryCompanyPageEvent extends AScraperEvent<Boolean, Boolean> 
 
     @Override
     protected Boolean parser(List<WebElement> locatedElements) {
+        String pageType = null;
         try {
-            String pageType = this.driver.findElement(By.cssSelector("#EI-Srch")).getAttribute("data-page-type").strip();
-            if (pageType.contentEquals("OVERVIEW")) {
-                return true;
+            String pageTypeAttribute = this.driver.findElement(By.cssSelector("#EI-Srch")).getAttribute("data-page-type");
+
+            if (pageTypeAttribute == null) {
+                return false;
             }
-            return false;
+
+            pageType = pageTypeAttribute.strip();
         } catch (NoSuchElementException e) {
             return false;
         }
+
+        if (pageType == null) {
+            return false;
+        }
+
+        if (pageType.contentEquals("OVERVIEW")) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override

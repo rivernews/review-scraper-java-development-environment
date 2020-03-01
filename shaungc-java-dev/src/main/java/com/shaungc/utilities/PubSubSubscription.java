@@ -40,6 +40,8 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
             throw new ScraperShouldHaltException("SUPERVISOR_PUBSUB_REDIS_DB is not set.");
         }
 
+        Logger.debug("creating pubsub channel: " + this.redisPubsubChannelName);
+
         final String redisUrl =
             (Configuration.DEBUG ? "redis://host.docker.internal:6379/" : "redis://localhost:6379/") +
             Configuration.SUPERVISOR_PUBSUB_REDIS_DB;
@@ -55,7 +57,6 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
 
         this.subscriberRedisConnection.addListener(this);
         this.subscriberCommands.subscribe(this.redisPubsubChannelName);
-        Logger.info("Subscribed to channel " + this.redisPubsubChannelName);
     }
 
     @Override
