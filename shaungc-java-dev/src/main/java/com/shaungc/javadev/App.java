@@ -118,7 +118,7 @@ public class App {
         } catch (ScraperException e) {
             Logger.info(e.getMessage());
             Logger.errorAlsoSlack(
-                "A scraper exception is raised and its message is logged above; which is not an error of the program, but more of the webpage the scraper is dealing with. There is something special with the webpage. Refer to the current url of the scraper to investigate more: " +
+                "A scraper exception is raised and its message is logged; which is not an error of the program, but more of the webpage the scraper is dealing with. There is something special with the webpage. Refer to the current url of the scraper to investigate more: " +
                 driver.getCurrentUrl()
             );
 
@@ -138,7 +138,9 @@ public class App {
 
             return;
         } catch (Exception e) {
-            Logger.error("Program ended in exception block...!\n\n");
+            Logger.errorAlsoSlack(
+                "Program ended in exception block...! Might be a problem in either the scraper itself not handled, or an unknown change in the webpage that disrupts the scraper process. Please check the scraper log for error detail."
+            );
 
             System.out.println(e);
 

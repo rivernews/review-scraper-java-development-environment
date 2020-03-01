@@ -7,6 +7,7 @@ import com.shaungc.dataTypes.EmployeeReviewTextData;
 import com.shaungc.dataTypes.GlassdoorCompanyReviewParsedData;
 import com.shaungc.dataTypes.GlassdoorReviewMetadata;
 import com.shaungc.exceptions.ScraperException;
+import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.javadev.Configuration;
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.LoggerLevel;
@@ -390,7 +391,15 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 glassdoorReviewMetadataStore.localReviewCount =
                     Integer.parseInt(countElements.get(0).getText().strip().replaceAll("\\D+", ""));
 
-                glassdoorReviewMetadataStore.reviewCount = Integer.parseInt(countElements.get(1).getText().strip().replaceAll("\\D+", ""));
+                glassdoorReviewMetadataStore.globalReviewCount =
+                    Integer.parseInt(countElements.get(1).getText().strip().replaceAll("\\D+", ""));
+            } else {
+                final String reviewPanelElementRawContent = reviewPanelElement.getText();
+                throw new ScraperShouldHaltException(
+                    "Unable to scrape local & global review count from reviewPanelElement: " +
+                    reviewPanelElementRawContent.substring(0, Math.min(reviewPanelElementRawContent.length(), 500)) +
+                    "..."
+                );
             }
         } catch (final NoSuchElementException e) {}
     }
