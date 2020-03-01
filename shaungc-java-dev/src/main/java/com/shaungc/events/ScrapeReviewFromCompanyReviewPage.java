@@ -401,7 +401,9 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     "Unable to scrape local & global review count from reviewPanelElement: " +
                     reviewPanelElementRawContent.substring(0, Math.min(reviewPanelElementRawContent.length(), 500)) +
                     "...\n" +
-                    "Please check the review page html, see why scraper cannot find the review counts. Html saved on s3 at key `" +
+                    "Please check the review page html, see why scraper cannot find the review counts. Html saved <on s3|" +
+                    ArchiveManager.BUCKET_URL +
+                    "> at key `" +
                     htmlDumpPath +
                     "`"
                 );

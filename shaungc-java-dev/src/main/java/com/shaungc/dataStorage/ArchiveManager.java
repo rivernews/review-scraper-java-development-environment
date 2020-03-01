@@ -6,6 +6,7 @@ import com.shaungc.dataTypes.GlassdoorReviewMetadata;
 import com.shaungc.javadev.Configuration;
 import java.nio.file.Path;
 import java.time.Instant;
+import software.amazon.awssdk.regions.Region;
 
 enum FileType {
     JSON("json"),
@@ -28,7 +29,14 @@ enum FileType {
 public class ArchiveManager {
     public final S3Service s3Service;
 
-    private static String BUCKET_NAME = Configuration.AWS_S3_ARCHIVE_BUCKET_NAME;
+    private static final String BUCKET_NAME = Configuration.AWS_S3_ARCHIVE_BUCKET_NAME;
+    private static final Region BUCKET_REGION = Region.US_WEST_2;
+
+    public static String BUCKET_URL = String.format(
+        "https://s3.console.aws.amazon.com/s3/buckets/%s/?region=%s&tab=overview",
+        ArchiveManager.BUCKET_NAME,
+        ArchiveManager.BUCKET_REGION
+    );
 
     public String orgName;
     public String orgId;
@@ -37,13 +45,13 @@ public class ArchiveManager {
     private final String gdOrgOverviewPageUrlsDirectory = Path.of("all-urls").toString();
 
     public ArchiveManager() {
-        this.s3Service = new S3Service(ArchiveManager.BUCKET_NAME);
+        this.s3Service = new S3Service(ArchiveManager.BUCKET_NAME, ArchiveManager.BUCKET_REGION);
         this.s3Service.createBucket();
         // orgName and orgId will be set after org meta is scraped
     }
 
     public ArchiveManager(final String orgName, final String orgId) {
-        this.s3Service = new S3Service(ArchiveManager.BUCKET_NAME);
+        this.s3Service = new S3Service(ArchiveManager.BUCKET_NAME, ArchiveManager.BUCKET_REGION);
         this.s3Service.createBucket();
 
         this.orgName = orgName;

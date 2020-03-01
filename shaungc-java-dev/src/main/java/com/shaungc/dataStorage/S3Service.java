@@ -43,13 +43,13 @@ public class S3Service {
 
     // S3 Canned ACL:
     // https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl
-    static BucketCannedACL BUCKET_ACCESS_CANNED_ACL = BucketCannedACL.PRIVATE;
+    public static BucketCannedACL BUCKET_ACCESS_CANNED_ACL = BucketCannedACL.PRIVATE;
 
     // https://github.com/google/gson
     public static Gson GSON_TOOL = new Gson();
 
-    public S3Service(final String buketName) {
-        s3 = S3Client.builder().region(Region.US_WEST_2).build();
+    public S3Service(final String buketName, final Region bucketRegion) {
+        this.s3 = S3Client.builder().region(bucketRegion).build();
         this.bucketName = buketName;
     }
 
