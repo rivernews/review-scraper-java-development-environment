@@ -1,8 +1,6 @@
 package com.shaungc.tasks;
 
 import com.shaungc.dataStorage.ArchiveManager;
-import com.shaungc.dataTypes.BasicParsedData;
-import com.shaungc.dataTypes.GlassdoorCompanyReviewParsedData;
 import com.shaungc.events.JudgeQueryCompanyPageEvent;
 import com.shaungc.events.ScrapeBasicDataFromCompanyNamePage;
 import com.shaungc.events.ScrapeReviewFromCompanyReviewPage;
