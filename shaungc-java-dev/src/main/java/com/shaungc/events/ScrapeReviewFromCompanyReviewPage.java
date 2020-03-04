@@ -371,6 +371,10 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             this.driver.findElement(By.cssSelector("ul[class^=pagination] li[class$=next] a:not([class$=disabled])")).click();
         } catch (final NoSuchElementException e) {
             // 2nd approach
+
+            // TODO: remove this or change to debug after things get stable
+            Logger.info("Trying 2nd approach to capture next page link");
+
             List<WebElement> anchorElements =
                 this.driver.findElements(
                         By.cssSelector(
