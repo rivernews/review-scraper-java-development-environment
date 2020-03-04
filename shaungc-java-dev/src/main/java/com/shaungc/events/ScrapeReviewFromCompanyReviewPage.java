@@ -342,12 +342,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             this.processedReviewPages++;
 
             // click next page
-            Boolean noNextPageLink = false;
-            try {
-                this.driver.findElement(By.cssSelector("ul[class^=pagination] li[class$=next] a:not([class$=disabled])")).click();
-            } catch (final NoSuchElementException e) {
-                noNextPageLink = true;
-            }
+            Boolean noNextPageLink = this.judgeNoNextPageLinkOrClickNextPageLink();
 
             if (noNextPageLink) {
                 Logger.info("No next page link available, ready to wrap up scraper session.");
@@ -368,6 +363,45 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         }
 
         return glassdoorCompanyParsedData;
+    }
+
+    private Boolean judgeNoNextPageLinkOrClickNextPageLink() {
+        try {
+            // 1st approach
+            this.driver.findElement(By.cssSelector("ul[class^=pagination] li[class$=next] a:not([class$=disabled])")).click();
+        } catch (final NoSuchElementException e) {
+            // 2nd approach
+            List<WebElement> anchorElements =
+                this.driver.findElements(
+                        By.cssSelector(
+                            "div#NodeReplace > main.gdGrid > div:first-child > div[class*=eiReviews] > div[class$=pagination] > ul a"
+                        )
+                    );
+
+            // try to capture no next page cases
+            if (anchorElements.size() == 0) {
+                return true;
+            } else {
+                WebElement lastAnchorElement = anchorElements.get(anchorElements.size() - 1);
+                if (lastAnchorElement.getAttribute("class") != null) {
+                    if (lastAnchorElement.getAttribute("class").strip().equals("disabled")) {
+                        return true;
+                    }
+                }
+
+                // verify anchor is for next link, not other random link
+                try {
+                    lastAnchorElement.findElement(By.cssSelector("span[alt=Next]"));
+                } catch (Exception e2CheckAnchorIsNotNext) {
+                    return true;
+                }
+
+                lastAnchorElement.click();
+            }
+        }
+
+        // default to having next page (and is clicked)
+        return false;
     }
 
     private void scrapeReviewMetadata(final WebElement reviewPanelElement, final GlassdoorReviewMetadata glassdoorReviewMetadataStore) {
