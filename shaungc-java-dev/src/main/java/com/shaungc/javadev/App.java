@@ -139,7 +139,8 @@ public class App {
             return;
         } catch (Exception e) {
             Logger.errorAlsoSlack(
-                "Program ended in exception block...! Might be a problem in either the scraper itself not handled, or an unknown change in the webpage that disrupts the scraper process. Please check the scraper log for error detail."
+                "Program ended in exception block...! Might be a problem in either the scraper itself not handled, or an unknown change in the webpage that disrupts the scraper process. Please check the scraper log for error detail. " +
+                (driver != null ? "Last webpage: `" + driver.getCurrentUrl() + "`" : "")
             );
 
             System.out.println(e);
