@@ -114,17 +114,21 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // TODO: filter by engineering category
 
-        // TODO: remove sort if not needed - especially when we will scrape all reviews anyway, and the ordering may not matter. This is also to scrape "featured flag", which is only displayed only in popular ordering
+        // TODO: remove sort if not needed - especially when we will scrape all reviews
+        // anyway, and the ordering may not matter. This is also to scrape "featured
+        // flag", which is only displayed only in popular ordering
         // use wait which is based on this.driver to avoid click() interrupted by
         // element structure changed, or "element not attach to page document" error
         // sort by most recent
-        // final String sortDropdownElementCssSelector = "body div#PageContent article[id=MainCol] .filterSorts select[name=filterSorts]";
+        // final String sortDropdownElementCssSelector = "body div#PageContent
+        // article[id=MainCol] .filterSorts select[name=filterSorts]";
 
         // // locate sort dropdown list
         // this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(sortDropdownElementCssSelector))).click();
 
-        // this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(sortDropdownElementCssSelector + " option[value=DATE]")))
-        //     .click();
+        // this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(sortDropdownElementCssSelector
+        // + " option[value=DATE]")))
+        // .click();
 
         // // wait for loading sort
         // this.waitForReviewPanelLoading();
@@ -366,45 +370,111 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     }
 
     private Boolean judgeNoNextPageLinkOrClickNextPageLink() {
-        try {
-            // 1st approach
-            this.driver.findElement(By.cssSelector("ul[class^=pagination] li[class$=next] a:not([class$=disabled])")).click();
-        } catch (final NoSuchElementException e) {
-            // 2nd approach
+        // 1st approach
+        if (this.judgeNoNextPageLinkFirstApproach()) {
+            return true;
+        }
 
-            // TODO: remove this or change to debug after things get stable
-            Logger.info("Trying 2nd approach to capture next page link");
+        // 2nd approach
+        if (this.judgeNoNextPageLinkSecondApproach()) {
+            return true;
+        }
 
-            List<WebElement> anchorElements =
-                this.driver.findElements(
-                        By.cssSelector(
-                            "div#NodeReplace > main.gdGrid > div:first-child > div[class*=eiReviews] > div[class$=pagination] > ul a"
-                        )
-                    );
-
-            // try to capture no next page cases
-            if (anchorElements.size() == 0) {
-                return true;
-            } else {
-                WebElement lastAnchorElement = anchorElements.get(anchorElements.size() - 1);
-                if (lastAnchorElement.getAttribute("class") != null) {
-                    if (lastAnchorElement.getAttribute("class").strip().equals("disabled")) {
-                        return true;
-                    }
-                }
-
-                // verify anchor is for next link, not other random link
-                try {
-                    lastAnchorElement.findElement(By.cssSelector("span[alt=Next]"));
-                } catch (Exception e2CheckAnchorIsNotNext) {
-                    return true;
-                }
-
-                lastAnchorElement.click();
-            }
+        // 3rd approach
+        if (this.judgeNoNextPageLinkThirdApproach()) {
+            return true;
         }
 
         // default to having next page (and is clicked)
+        return false;
+    }
+
+    private Boolean judgeNoNextPageLinkThirdApproach() {
+        // example webpage in mind: https://s3.console.aws.amazon.com/s3/object/iriversland-qualitative-org-review-v3/Amazon-6036/logs/reviewDataLostWarning.2020-03-04T23%253A44%253A01.848981Z.html?region=us-west-2&tab=overview
+
+        // TODO: remove this or change to debug after things get stable
+        Logger.info("Trying 3rd approach to capture next page link");
+
+        List<WebElement> anchorElements =
+            this.driver.findElements(
+                    By.cssSelector("div#NodeReplace > main.gdGrid > div:first-child > div[class*=eiReviews] > div[class$=pagination] a")
+                );
+
+        if (anchorElements.size() == 0) {
+            return true;
+        }
+
+        if (anchorElements.size() == 1) {
+            // not sure what this case is, but we want to avoid clicking a link that goes to
+            // a previous page or current page, which will cause a inifinite loop where scraper job renews forever
+            // so we'd rather just play safe and stop here, but we'll log this incident
+            final String htmlDumpPath = this.archiveManager.writeHtml("review:nextPageLinkCheckUnknownCase", this.driver.getPageSource());
+            throw new ScraperShouldHaltException(
+                "Using third approach to capture next page link, but got an unknown case where only one `<a>` found. Please investigate further to see if the webpage structure changed. " +
+                "Html saved <" +
+                ArchiveManager.BUCKET_URL +
+                "|on s3> at key `" +
+                htmlDumpPath +
+                "`"
+            );
+        }
+
+        // just look at last anchor
+        // but still, it should contain some content related to "next",
+        // whether it is in class, some attribute, or as text displayed in UI
+        // otherwise we do not recognize this anchor as next page link
+        WebElement lastAnchorElement = anchorElements.get(anchorElements.size() - 1);
+        if (!lastAnchorElement.getText().toLowerCase().contains("next")) {
+            return true;
+        }
+
+        lastAnchorElement.click();
+
+        return false;
+    }
+
+    private Boolean judgeNoNextPageLinkSecondApproach() {
+        // TODO: remove this or change to debug after things get stable
+        Logger.info("Trying 2nd approach to capture next page link");
+
+        List<WebElement> anchorElements =
+            this.driver.findElements(
+                    By.cssSelector(
+                        "div#NodeReplace > main.gdGrid > div:first-child > div[class*=eiReviews] > div[class$=pagination] > ul a"
+                    )
+                );
+
+        // try to capture no next page cases
+        if (anchorElements.size() == 0) {
+            return true;
+        } else {
+            WebElement lastAnchorElement = anchorElements.get(anchorElements.size() - 1);
+            if (lastAnchorElement.getAttribute("class") != null) {
+                if (lastAnchorElement.getAttribute("class").strip().equals("disabled")) {
+                    return true;
+                }
+            }
+
+            // verify anchor is for next link, not other random link
+            try {
+                lastAnchorElement.findElement(By.cssSelector("span[alt=Next]"));
+            } catch (Exception e2CheckAnchorIsNotNext) {
+                return true;
+            }
+
+            lastAnchorElement.click();
+        }
+
+        return false;
+    }
+
+    private Boolean judgeNoNextPageLinkFirstApproach() {
+        try {
+            this.driver.findElement(By.cssSelector("ul[class^=pagination] li[class$=next] a:not([class$=disabled])")).click();
+        } catch (final NoSuchElementException e) {
+            return true;
+        }
+
         return false;
     }
 
@@ -513,7 +583,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         // scrape featured
         try {
             employeeReviewLiElement.findElement(By.cssSelector("div.hreview div.featuredFlag"));
-            // employeeReviewLiElement.findElement(By.cssSelector("div.hreview > div.d-flex.justify-content-between > div > div.featuredFlag"));
+            // employeeReviewLiElement.findElement(By.cssSelector("div.hreview >
+            // div.d-flex.justify-content-between > div > div.featuredFlag"));
             reviewDataStore.varyingReviewData.featured = true;
         } catch (final NoSuchElementException e) {}
 
