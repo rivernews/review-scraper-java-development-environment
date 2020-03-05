@@ -371,7 +371,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
     private Boolean judgeNoNextPageLinkOrClickNextPageLink() {
         // 1st approach
-        if (!this.judgeNoNextPageLinkFirstThenClickApproach()) {
+        if (!this.judgeNoNextPageLinkThenClickFirstApproach()) {
             return false; // has link then short-circuit
         }
 
@@ -400,6 +400,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     By.cssSelector("div#NodeReplace > main.gdGrid > div:first-child > div[class*=eiReviews] > div[class$=pagination] a")
                 );
 
+        // TODO: remove this or change to debug after things get stable
         Logger.info("found anchorElements " + anchorElements.size());
 
         if (anchorElements.size() == 0) {
@@ -427,9 +428,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         // otherwise we do not recognize this anchor as next page link
         WebElement lastAnchorElement = anchorElements.get(anchorElements.size() - 1);
 
+        // TODO: remove this or change to debug after things get stable
         Logger.info("lastAnchorElement: " + lastAnchorElement.getText());
 
         if (!lastAnchorElement.getText().toLowerCase().contains("next")) {
+            // TODO: remove this or change to debug after things get stable
             Logger.info("no `next` text exist in lastAnchorElement");
             return true;
         }
@@ -474,7 +477,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         return false;
     }
 
-    private Boolean judgeNoNextPageLinkFirstThenClickApproach() {
+    private Boolean judgeNoNextPageLinkThenClickFirstApproach() {
         try {
             this.driver.findElement(By.cssSelector("ul[class^=pagination] li[class$=next] a:not([class$=disabled])")).click();
         } catch (final NoSuchElementException e) {
