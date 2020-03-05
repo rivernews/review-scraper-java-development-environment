@@ -55,8 +55,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     public Integer processedReviewPages = Configuration.TEST_COMPANY_LAST_PROGRESS_PAGE;
 
     /** expose other data for external use */
-
-    public Boolean doesCollidedReviewExist = false;
     public Boolean isFinalSession = false;
 
     /**
@@ -181,13 +179,13 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             for (final WebElement employeeReviewElement : employeeReviewElements) {
                 final EmployeeReviewData employeeReviewData = new EmployeeReviewData();
 
-                this.scrapeEmployeeReview(employeeReviewElement, employeeReviewData);
+                if (this.scrapeEmployeeReview(employeeReviewElement, employeeReviewData)) {
+                    if (this.archiveManager.writeGlassdoorOrganizationReviewDataAsJson(employeeReviewData)) {
+                        this.processedReviewsCount++;
+                    }
+                }
 
                 this.wentThroughReviewsCount++;
-
-                if (this.archiveManager.writeGlassdoorOrganizationReviewDataAsJson(employeeReviewData)) {
-                    this.processedReviewsCount++;
-                }
 
                 if (progressReportingTimer.doesReachCountdownDuration()) {
                     this.pubSubSubscription.publish(
@@ -204,113 +202,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     progressReportingTimer.restart();
                 }
 
-                // write out review data
-                // final String md5ExistenceTest =
-                // this.archiveManager.doesGlassdoorOrganizationReviewExist(employeeReviewData.stableReviewData.reviewId);
-                // if (null == md5ExistenceTest) {
-                // Logger.info("Review hasn't existed yet, let's write to bucket.");
-                // this.archiveManager.writeGlassdoorOrganizationReviewDataAsJson(employeeReviewData);
-                // this.processedReviewsCount++;
-                // } else {
-                // if (md5ExistenceTest.isEmpty()) {
-                // // no md5 information; just follow collision strategy
-
-                // this.doesCollidedReviewExist = true;
-
-                // if (Configuration.REVIEW_COLLISION_STRATEGY ==
-                // ReviewCollisionStrategy.ALWAYS_WRITE.getValue()) {
-                // this.archiveManager.writeCollidedGlassdoorOrganizationReviewDataAsJson(employeeReviewData);
-                // Logger.warn(
-                // "Review already existed in our archive; w/o md5 cannot safely skip: " +
-                // employeeReviewData.stableReviewData.reviewId +
-                // "\nAt url: " +
-                // this.driver.getCurrentUrl() +
-                // "\nYou configured to store collision in S3 anyway and move on, but please
-                // check if it's a duplicated one in s3 by prefix `collision.`."
-                // );
-                // this.processedReviewsCount++;
-                // } else if (Configuration.REVIEW_COLLISION_STRATEGY ==
-                // ReviewCollisionStrategy.SKIP.getValue()) {
-                // // do nothing
-                // Logger.warn(
-                // "Skipping review. You configured to skip any review data collision. Review id
-                // is " +
-                // employeeReviewData.stableReviewData.reviewId +
-                // " at url " +
-                // this.driver.getCurrentUrl()
-                // );
-                // } else if (Configuration.REVIEW_COLLISION_STRATEGY ==
-                // ReviewCollisionStrategy.ABORT.getValue()) {
-                // // end review scraper task right
-                // Logger.warnAlsoSlack(
-                // this.orgNameSlackMessagePrefix +
-                // "Aborting scraper. You configured to abort upon any review collision.
-                // Collided review id is " +
-                // employeeReviewData.stableReviewData.reviewId +
-                // " at url " +
-                // this.driver.getCurrentUrl()
-                // );
-                // return glassdoorCompanyParsedData;
-                // } else if (Configuration.REVIEW_COLLISION_STRATEGY ==
-                // ReviewCollisionStrategy.OVERWRITE.getValue()) {
-                // Logger.warn(
-                // "Overwriting. You configured to overwrite regardless of collision. Bare in
-                // mind of possible data lost due to lack of md5 metadata."
-                // );
-                // this.archiveManager.writeGlassdoorOrganizationReviewDataAsJson(employeeReviewData);
-                // this.processedReviewsCount++;
-                // } else {
-                // throw new ScraperException(
-                // this.orgNameSlackMessagePrefix +
-                // "REVIEW_COLLISION_STRATEGY is misconfigured: " +
-                // Configuration.REVIEW_COLLISION_STRATEGY
-                // );
-                // }
-                // } else {
-                // // compare md5 info; if identical then skip; otherwise store and report
-                // collision
-                // if (S3Service.toMD5Base64String(employeeReviewData).equals(md5ExistenceTest))
-                // {
-                // // identical, so just safely skip & do nothing
-                // Logger.info(
-                // "Identical review data found (md5 verified), safely skipping review " +
-                // employeeReviewData.stableReviewData.reviewId
-                // );
-                // } else {
-                // // review id is same but data is different
-                // // need to raise attention to this case
-                // // and definately store the collided review
-                // // will not follow the global collision strategy in this case
-                // final String fullPath =
-                // this.archiveManager.writeCollidedGlassdoorOrganizationReviewDataAsJson(employeeReviewData);
-
-                // Logger.errorAlsoSlack(
-                // this.orgNameSlackMessagePrefix +
-                // "Collided with existing review id but their contents are different. You
-                // should investigate into this. Will now abort scraper. Collided review stored
-                // in s3 at `" +
-                // fullPath +
-                // "`" +
-                // "\nReview on S3 MD5: `" +
-                // md5ExistenceTest +
-                // "`" +
-                // "\nReview on scraper MD5: `" +
-                // S3Service.toMD5Base64String(employeeReviewData) +
-                // "`"
-                // );
-
-                // this.doesCollidedReviewExist = true;
-
-                // this.processedReviewsCount++;
-
-                // throw new ScraperException(
-                // "There's a data integrity concern and we need to abort, please refer to error
-                // log or slack message."
-                // );
-                // }
-                // }
-                // }
-
                 // TODO: remove this if not needed, since we write each review to s3 right after
                 // we parsed it, so collecting all reviews here seems unecessary
                 glassdoorCompanyParsedData.employeeReviewDataList.add(employeeReviewData);
@@ -322,7 +213,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                         : "";
                     Logger.infoAlsoSlack(
                         String.format(
-                            "%s%s <%s|Page %d> presents %d elements, processed/wentThrough/total %d/%d/%d reviews, keep processing for the next %d reviews ...\n%s\n",
+                            "%s%s <%s|Page %d> presents %d elements, processed/wentThrough/total %d/%d/%d reviews, keep processing for the next %d reviews...",
                             this.orgNameSlackMessagePrefix,
                             elapsedTimeString != "" ? "(" + elapsedTimeString + ") " : "",
                             this.driver.getCurrentUrl(),
@@ -332,8 +223,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                             this.processedReviewsCount,
                             this.wentThroughReviewsCount,
                             this.localReviewCount,
-                            reportingRate,
-                            this.doesCollidedReviewExist ? "🟠 Some reviews collided previously" : ""
+                            reportingRate
                         )
                     );
                 }
@@ -536,7 +426,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         return employeeReviewId;
     }
 
-    private void scrapeEmployeeReview(final WebElement employeeReviewLiElement, final EmployeeReviewData reviewDataStore) {
+    private Boolean scrapeEmployeeReview(final WebElement employeeReviewLiElement, final EmployeeReviewData reviewDataStore) {
         reviewDataStore.stableReviewData.reviewId = this.parseReviewId(employeeReviewLiElement);
 
         // scrape time
@@ -546,10 +436,25 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         } catch (final NoSuchElementException e) {}
 
         // scrape comment title
+        WebElement commentTitleH2Element = null;
         try {
-            reviewDataStore.stableReviewData.reviewHeaderTitle =
-                employeeReviewLiElement.findElement(By.cssSelector("h2.summary a")).getText().strip();
+            commentTitleH2Element = employeeReviewLiElement.findElement(By.cssSelector("h2.summary"));
+
+            reviewDataStore.stableReviewData.reviewHeaderTitle = commentTitleH2Element.findElement(By.cssSelector("a")).getText().strip();
         } catch (final NoSuchElementException e) {
+            // Exception case 'Content Blocked':
+            // s3://iriversland-qualitative-org-review-v3/SAP-10471/logs/review:commentTitleNotCaptured.2020-03-05T19:58:36.533556Z.html
+            if (commentTitleH2Element != null && commentTitleH2Element.getText().toLowerCase().contains("content blocked")) {
+                Logger.warnAlsoSlack(
+                    String.format(
+                        "Found a 'Content Blocked' review at <%s|current page>, skipping this review:\n```%s```",
+                        this.driver.getCurrentUrl(),
+                        commentTitleH2Element.getText()
+                    )
+                );
+                return false;
+            }
+
             final String htmlDumpPath = this.archiveManager.writeHtml("review:commentTitleNotCaptured", this.driver.getPageSource());
             throw new ScraperShouldHaltException(
                 String.format("Comment title canot be captured. Html dump on <%s|s3> at key: `%s`", ArchiveManager.BUCKET_URL, htmlDumpPath)
@@ -604,7 +509,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             reviewDataStore.varyingReviewData.featured = true;
         } catch (final NoSuchElementException e) {}
 
-        return;
+        return true;
     }
 
     private void parseReviewRatingMetrics(final WebElement employeeReviewLiElement, final EmployeeReviewData reviewDataStore) {

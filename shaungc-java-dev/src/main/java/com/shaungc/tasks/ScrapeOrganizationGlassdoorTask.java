@@ -29,7 +29,6 @@ public class ScrapeOrganizationGlassdoorTask {
 
     /** session stats */
     private String orgPrefixSlackString;
-    private Boolean doesCollidedReviewExist;
     public Integer processedReviewsCount;
     public Integer wentThroughReviewsCount;
     public Integer localReviewsCount;
@@ -120,7 +119,6 @@ public class ScrapeOrganizationGlassdoorTask {
         this.localReviewsCount = scrapeReviewFromCompanyReviewPage.localReviewCount;
         this.processedReviewPages = scrapeReviewFromCompanyReviewPage.processedReviewPages;
         // this.orgPrefixSlackString should be assigned before review scraper
-        this.doesCollidedReviewExist = scrapeReviewFromCompanyReviewPage.doesCollidedReviewExist;
         this.isFinalSession = scrapeReviewFromCompanyReviewPage.isFinalSession;
     }
 
@@ -199,7 +197,6 @@ public class ScrapeOrganizationGlassdoorTask {
         this.localReviewsCount = scrapeReviewFromCompanyReviewPage.localReviewCount;
         this.processedReviewPages = scrapeReviewFromCompanyReviewPage.processedReviewPages;
         // this.orgPrefixSlackString is set above
-        this.doesCollidedReviewExist = scrapeReviewFromCompanyReviewPage.doesCollidedReviewExist;
         this.isFinalSession = scrapeReviewFromCompanyReviewPage.isFinalSession;
     }
 
@@ -229,14 +226,6 @@ public class ScrapeOrganizationGlassdoorTask {
                     ArchiveManager.BUCKET_URL,
                     htmlDumpPath
                 )
-            );
-        }
-
-        // send other session warnings
-        if (this.doesCollidedReviewExist) {
-            Logger.warnAlsoSlack(
-                this.orgPrefixSlackString +
-                "This session has collided / duplicated review data. Please refer to travisci log and check the collision(s) in s3."
             );
         }
 
