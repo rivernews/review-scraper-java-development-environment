@@ -546,8 +546,15 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         } catch (final NoSuchElementException e) {}
 
         // scrape comment title
-        reviewDataStore.stableReviewData.reviewHeaderTitle =
-            employeeReviewLiElement.findElement(By.cssSelector("h2.summary a")).getText().strip();
+        try {
+            reviewDataStore.stableReviewData.reviewHeaderTitle =
+                employeeReviewLiElement.findElement(By.cssSelector("h2.summary a")).getText().strip();
+        } catch (final NoSuchElementException e) {
+            final String htmlDumpPath = this.archiveManager.writeHtml("review:commentTitleNotCaptured", this.driver.getPageSource());
+            throw new ScraperShouldHaltException(
+                String.format("Comment title canot be captured. Html dump on <%s|s3> at key: `%s`", ArchiveManager.BUCKET_URL, htmlDumpPath)
+            );
+        }
 
         // scrape position
         reviewDataStore.stableReviewData.reviewEmployeePositionText =

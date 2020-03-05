@@ -4,6 +4,7 @@ import com.shaungc.dataStorage.S3Service;
 import com.shaungc.dataTypes.ScraperJobData;
 import com.shaungc.dataTypes.ScraperProgressData;
 import com.shaungc.exceptions.ScraperException;
+import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.tasks.LoginGlassdoorTask;
 import com.shaungc.tasks.ScrapeOrganizationGlassdoorTask;
 import com.shaungc.utilities.Logger;
@@ -115,7 +116,7 @@ public class App {
             driver.quit();
 
             return;
-        } catch (ScraperException e) {
+        } catch (ScraperException | ScraperShouldHaltException e) {
             Logger.info(e.getMessage());
             Logger.errorAlsoSlack(
                 "A scraper exception is raised and its message is logged; which is not an error of the program, but more of the webpage the scraper is dealing with. There is something special with the webpage. Refer to the current url of the scraper to investigate more: " +
