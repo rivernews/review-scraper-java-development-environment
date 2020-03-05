@@ -400,6 +400,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     By.cssSelector("div#NodeReplace > main.gdGrid > div:first-child > div[class*=eiReviews] > div[class$=pagination] a")
                 );
 
+        Logger.info("found anchorElements " + anchorElements.size());
+
         if (anchorElements.size() == 0) {
             return true;
         }
@@ -424,7 +426,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         // whether it is in class, some attribute, or as text displayed in UI
         // otherwise we do not recognize this anchor as next page link
         WebElement lastAnchorElement = anchorElements.get(anchorElements.size() - 1);
+
+        Logger.info("lastAnchorElement: " + lastAnchorElement.getText());
+
         if (!lastAnchorElement.getText().toLowerCase().contains("next")) {
+            Logger.info("no `next` text exist in lastAnchorElement");
             return true;
         }
 
