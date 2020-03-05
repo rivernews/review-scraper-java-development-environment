@@ -371,25 +371,25 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
     private Boolean judgeNoNextPageLinkOrClickNextPageLink() {
         // 1st approach
-        if (this.judgeNoNextPageLinkFirstApproach()) {
-            return true;
+        if (!this.judgeNoNextPageLinkFirstThenClickApproach()) {
+            return false; // has link then short-circuit
         }
 
         // 2nd approach
-        if (this.judgeNoNextPageLinkSecondApproach()) {
-            return true;
+        if (!this.judgeNoNextPageLinkThenClickSecondApproach()) {
+            return false;
         }
 
         // 3rd approach
-        if (this.judgeNoNextPageLinkThirdApproach()) {
-            return true;
+        if (!this.judgeNoNextPageLinkThenClickThirdApproach()) {
+            return false;
         }
 
-        // default to having next page (and is clicked)
-        return false;
+        // default to having no next page
+        return true;
     }
 
-    private Boolean judgeNoNextPageLinkThirdApproach() {
+    private Boolean judgeNoNextPageLinkThenClickThirdApproach() {
         // example webpage in mind: https://s3.console.aws.amazon.com/s3/object/iriversland-qualitative-org-review-v3/Amazon-6036/logs/reviewDataLostWarning.2020-03-04T23%253A44%253A01.848981Z.html?region=us-west-2&tab=overview
 
         // TODO: remove this or change to debug after things get stable
@@ -433,7 +433,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         return false;
     }
 
-    private Boolean judgeNoNextPageLinkSecondApproach() {
+    private Boolean judgeNoNextPageLinkThenClickSecondApproach() {
         // TODO: remove this or change to debug after things get stable
         Logger.info("Trying 2nd approach to capture next page link");
 
@@ -468,7 +468,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         return false;
     }
 
-    private Boolean judgeNoNextPageLinkFirstApproach() {
+    private Boolean judgeNoNextPageLinkFirstThenClickApproach() {
         try {
             this.driver.findElement(By.cssSelector("ul[class^=pagination] li[class$=next] a:not([class$=disabled])")).click();
         } catch (final NoSuchElementException e) {
