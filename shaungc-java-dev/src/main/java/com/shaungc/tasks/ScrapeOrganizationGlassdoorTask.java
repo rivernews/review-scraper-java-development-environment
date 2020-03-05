@@ -205,7 +205,13 @@ public class ScrapeOrganizationGlassdoorTask {
 
     private void generateFinalSessionReport() {
         // validate scraper session
-        final Float REVIEW_PROCESSED_RATE_ALERT_THRESHOLD = Float.valueOf("0.97");
+        // process rate is expected to be at least 90% or higher, since the major factor of 'lost',
+        // except running for an existing org, is that a page might contain a duplicated review from
+        // previous page, and this should only occur up to 1 review per page. Given that 1 page contains
+        // 10 reviews, the upper bound of lost rate should be 10%.
+        // We raise the process rate alert to 98% is just to be more careful - you can easily check if
+        // indeed there's no next page link by visiting the last processed review page
+        final Float REVIEW_PROCESSED_RATE_ALERT_THRESHOLD = Float.valueOf("0.98");
         final Float reviewProcessRate = (float) (this.processedReviewsCount) / this.localReviewsCount;
         final Float reviewProcessRatePercentage = reviewProcessRate * (float) 100.0;
         if (reviewProcessRate < REVIEW_PROCESSED_RATE_ALERT_THRESHOLD) {
