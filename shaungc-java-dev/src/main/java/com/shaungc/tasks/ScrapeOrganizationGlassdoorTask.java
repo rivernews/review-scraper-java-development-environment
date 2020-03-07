@@ -208,19 +208,23 @@ public class ScrapeOrganizationGlassdoorTask {
         // 10 reviews, the upper bound of lost rate should be 10%.
         // We raise the process rate alert to 98% is just to be more careful - you can easily check if
         // indeed there's no next page link by visiting the last processed review page
-        final Float REVIEW_PROCESSED_RATE_ALERT_THRESHOLD = Float.valueOf("0.98");
-        final Float reviewProcessRate = (float) (this.processedReviewsCount) / this.localReviewsCount;
-        final Float reviewProcessRatePercentage = reviewProcessRate * (float) 100.0;
-        if (reviewProcessRate < REVIEW_PROCESSED_RATE_ALERT_THRESHOLD) {
+        final Float REVIEW_STORED_RATE_ALERT_THRESHOLD = Float.valueOf("0.98");
+        final Float reviewStoredRate = (float) (this.processedReviewsCount) / this.localReviewsCount;
+        final Float reviewWentThroughRate = (float) (this.wentThroughReviewsCount) / this.localReviewsCount;
+        final Float reviewStoredRatePercentage = reviewStoredRate * (float) 100.0;
+        final Float reviewWentThroughRatePercentage = reviewWentThroughRate * (float) 100.0;
+        if (reviewStoredRate < REVIEW_STORED_RATE_ALERT_THRESHOLD) {
             final String htmlDumpPath = this.archiveManager.writeHtml("reviewDataLostWarning", this.driver.getPageSource());
 
             Logger.warnAlsoSlack(
                 String.format(
-                    "%s Low processing rate %s%% (%d/%d). If running for existing org, you can ignore this warning.\n" +
-                    "Otherwise, check the <%s|last processed review page> and see if indeed no next page available. If next page is available, please check why scraper did not capture the next page link. Last review page's html is stored <%s|on s3> at key `%s`",
+                    "%s Low review storing rate %.2f%% (went through rate %.2f%%), %d/%d/%d. If running for existing org, you can ignore this warning.\n" +
+                    "Otherwise, check the <%s|last processed review page> and see if indeed no next page available. If next page available, please check why scraper did not capture the next page link. Last review page's html stored <%s|on s3> at key `%s`",
                     this.orgPrefixSlackString,
-                    reviewProcessRatePercentage,
+                    reviewStoredRatePercentage,
+                    reviewWentThroughRatePercentage,
                     this.processedReviewsCount,
+                    this.wentThroughReviewsCount,
                     this.localReviewsCount,
                     this.driver.getCurrentUrl(),
                     ArchiveManager.BUCKET_URL,
@@ -231,16 +235,15 @@ public class ScrapeOrganizationGlassdoorTask {
 
         // extract company basic info
         Logger.infoAlsoSlack(
-            "======= Success! =======\n" +
-            this.orgPrefixSlackString +
-            "Processed reviews count: " +
-            this.processedReviewsCount +
-            "/" +
-            this.localReviewsCount +
-            ", duration: " +
-            this.scraperTaskTimer.captureOverallElapseDurationString() +
-            ", session used: " +
-            (Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION + 1)
+            String.format(
+                "======= Success! =======\n" + "%s (%s) Processed reviews count %s/%s/%s, `%s` sessions used.",
+                this.orgPrefixSlackString,
+                this.scraperTaskTimer.captureOverallElapseDurationString(),
+                this.processedReviewPages,
+                this.wentThroughReviewsCount,
+                this.localReviewsCount,
+                (Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION + 1)
+            )
         );
     }
 
