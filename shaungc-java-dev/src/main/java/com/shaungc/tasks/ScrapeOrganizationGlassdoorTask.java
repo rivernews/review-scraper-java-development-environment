@@ -218,7 +218,7 @@ public class ScrapeOrganizationGlassdoorTask {
 
             Logger.warnAlsoSlack(
                 String.format(
-                    "%s Low review storing rate %.2f%% (went through rate %.2f%%), %d/%d/%d. If running for existing org, you can ignore this warning.\n" +
+                    "%s Low new review storing rate %.2f%% (went through rate %.2f%%), %d/%d/%d. If running for existing org, you can ignore this warning.\n" +
                     "Otherwise, check the <%s|last processed review page> and see if indeed no next page available. If next page available, please check why scraper did not capture the next page link. Last review page's html stored <%s|on s3> at key `%s`",
                     this.orgPrefixSlackString,
                     reviewStoredRatePercentage,
@@ -236,7 +236,7 @@ public class ScrapeOrganizationGlassdoorTask {
         // extract company basic info
         Logger.infoAlsoSlack(
             String.format(
-                "======= Success! =======\n" + "%s (%s) Processed reviews count %s/%s/%s, `%s` sessions used.",
+                "======= Success! =======\n" + "%s(%s) Processed reviews count %s/%s/%s, `%s` sessions used.",
                 this.orgPrefixSlackString,
                 this.scraperTaskTimer.captureOverallElapseDurationString(),
                 this.processedReviewPages,
@@ -250,13 +250,13 @@ public class ScrapeOrganizationGlassdoorTask {
     private void generateContinueSessionReport() {
         Logger.infoAlsoSlack(
             String.format(
-                "=== Session finished, continuing cross session === %sprocessed/wentThrough/total, %s/%s/%s, duration %s, session used: %d",
+                "=== Session finished, continuing cross session ===\n" + "%s(%s) Processed reviews count %s/%s/%s, `%d` sessions used.",
                 this.orgPrefixSlackString,
+                this.scraperTaskTimer.captureOverallElapseDurationString(),
                 this.processedReviewsCount,
                 this.wentThroughReviewsCount,
                 this.localReviewsCount,
-                this.scraperTaskTimer.captureOverallElapseDurationString(),
-                Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION + 1
+                (Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION + 1)
             )
         );
     }
