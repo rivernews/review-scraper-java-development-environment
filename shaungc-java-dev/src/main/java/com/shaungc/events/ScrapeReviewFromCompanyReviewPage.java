@@ -168,10 +168,24 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             this.localReviewCount = glassdoorCompanyParsedData.reviewMetadata.localReviewCount;
         }
 
-        // foreach review
+        // prepare before getting into reviews
+
         final Integer reviewReportTime = 5;
         final Integer reportingRate = (Integer) (this.localReviewCount / reviewReportTime);
         final Timer progressReportingTimer = new Timer(Duration.ofSeconds(5));
+
+        if (reportingRate.equals(0)) {
+            Logger.warnAlsoSlack(
+                String.format(
+                    "Scraped `localReviewCount=0`, will not proceed scraping review. Please <%s|check the webpage> if there's indeed no reviews, then you can skip this warning.",
+                    this.driver.getCurrentUrl()
+                )
+            );
+
+            return glassdoorCompanyParsedData;
+        }
+
+        // foreach review
         while (true) {
             // pull out review elements
             final List<WebElement> employeeReviewElements = reviewPanelElement.findElements(
