@@ -476,7 +476,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         return employeeReviewId;
     }
 
-    private Boolean scrapeEmployeeReview(final WebElement employeeReviewLiElement, final EmployeeReviewData reviewDataStore) {
+    private Boolean scrapeEmployeeReview(final WebElement employeeReviewLiElement, final EmployeeReviewData reviewDataStore)
+        throws ScraperException {
         reviewDataStore.stableReviewData.reviewId = this.parseReviewId(employeeReviewLiElement);
 
         // scrape time
@@ -493,11 +494,28 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             reviewDataStore.stableReviewData.reviewHeaderTitle = commentTitleH2Element.findElement(By.cssSelector("a")).getText().strip();
         } catch (final NoSuchElementException e) {
             // Exception case 'Content Blocked':
-            // s3://iriversland-qualitative-org-review-v3/SAP-10471/logs/review:commentTitleNotCaptured.2020-03-05T19:58:36.533556Z.html
             if (commentTitleH2Element != null && commentTitleH2Element.getText().toLowerCase().contains("content blocked")) {
+                // whitelist (known "Content Blocked" case)
+                if (
+                    // https://www.glassdoor.com/Reviews/SAP-Reviews-E10471_P329.htm
+                    // s3://iriversland-qualitative-org-review-v3/SAP-10471/logs/review:commentTitleNotCaptured.2020-03-05T19:58:36.533556Z.html
+                    !reviewDataStore.stableReviewData.reviewId.equals("31306489")
+                ) {
+                    throw new ScraperException(
+                        String.format(
+                            "Found a 'Content Blocked' review at <%s|current page>, this is a new blocked review\n```%s```\n" +
+                            "Please check if review `%s` is stored before and if so, figure out a way to store this change.\n" +
+                            "Then, add this review to whitelist (hard coded) in function `scrapeEmployeeReview()`.",
+                            this.driver.getCurrentUrl(),
+                            commentTitleH2Element.getText(),
+                            reviewDataStore.stableReviewData.reviewId
+                        )
+                    );
+                }
+
                 Logger.warnAlsoSlack(
                     String.format(
-                        "Found a 'Content Blocked' review at <%s|current page>, skipping this review:\n```%s```",
+                        "Found a known 'Content Blocked' review at <%s|current page>, skipping this review:\n```%s```",
                         this.driver.getCurrentUrl(),
                         commentTitleH2Element.getText()
                     )
