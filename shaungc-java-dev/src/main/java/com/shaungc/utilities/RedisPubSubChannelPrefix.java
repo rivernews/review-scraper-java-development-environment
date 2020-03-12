@@ -1,7 +1,8 @@
 package com.shaungc.utilities;
 
 public enum RedisPubSubChannelPrefix {
-    SCRAPER_JOB_CHANNEL("scraperJobChannel");
+    SCRAPER_JOB_CHANNEL("scraperJobChannel"),
+    ADMIN("scraperAdmin");
 
     private final String string;
 

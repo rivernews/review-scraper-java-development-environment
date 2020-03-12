@@ -54,7 +54,7 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
         supervisorCountDownLatch = new CountDownLatch(1);
 
         this.subscriberRedisConnection.addListener(this);
-        this.subscriberCommands.subscribe(this.redisPubsubChannelName);
+        this.subscriberCommands.subscribe(this.redisPubsubChannelName, RedisPubSubChannelPrefix.ADMIN.getString());
     }
 
     @Override
