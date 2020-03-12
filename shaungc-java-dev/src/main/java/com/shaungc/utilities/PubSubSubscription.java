@@ -92,14 +92,18 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
         final String messageTo = messageTokens[1];
         final String payload = messageTokens.length == 3 ? messageTokens[2] : "";
 
-        if (messageTo.equals(ScraperJobMessageTo.SCRAPER.getString())) {
-            // TODO: receive ack msg from slack md svc -> can now proceed (communication w/
-            // slack md svc confirmed)
-
+        if (messageTo.equals(ScraperJobMessageTo.ALL.getString())) {
+            if (messageType.equals(ScraperJobMessageType.TERMINATE.getString())) {
+                throw new ScraperShouldHaltException("Received terminate signal from supervisor: `" + payload + "`");
+            }
+        } else if (messageTo.equals(ScraperJobMessageTo.SCRAPER.getString())) {
             if (messageType.equals(ScraperJobMessageType.PREFLIGHT.getString())) {
                 Logger.infoAlsoSlack(
                     "Received acked from supervisor, pubsub confirmed. Redis db `" + Configuration.SUPERVISOR_PUBSUB_REDIS_DB + "`"
                 );
+
+                // received ack msg from slack md svc -> can now proceed (communication w/
+                // slack md svc confirmed)
                 this.supervisorCountDownLatch.countDown();
             }
         } else {

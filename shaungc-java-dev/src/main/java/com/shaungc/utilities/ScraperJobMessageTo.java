@@ -2,7 +2,8 @@ package com.shaungc.utilities;
 
 public enum ScraperJobMessageTo {
     SLACK_MD_SVC("slackMiddlewareService"),
-    SCRAPER("scraper");
+    SCRAPER("scraper"),
+    ALL("all");
 
     private final String string;
 

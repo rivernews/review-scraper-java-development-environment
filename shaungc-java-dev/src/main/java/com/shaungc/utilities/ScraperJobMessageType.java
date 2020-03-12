@@ -5,7 +5,8 @@ public enum ScraperJobMessageType {
     PROGRESS("progress"),
 
     FINISH("finish"),
-    ERROR("error");
+    ERROR("error"),
+    TERMINATE("terminate");
 
     private final String string;
 
