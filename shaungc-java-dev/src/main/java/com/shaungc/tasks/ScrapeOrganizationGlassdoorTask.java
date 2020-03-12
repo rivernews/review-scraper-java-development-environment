@@ -81,6 +81,10 @@ public class ScrapeOrganizationGlassdoorTask {
     }
 
     private void launch() throws ScraperException {
+        if (this.pubSubSubscription.receivedTerminationRequest) {
+            throw new ScraperException("Terminating per request");
+        }
+
         if (Configuration.SCRAPER_MODE.equals(ScraperMode.REGULAR.getString())) {
             this.launchSessionScraper();
         } else if (Configuration.SCRAPER_MODE.equals(ScraperMode.RENEWAL.getString())) {

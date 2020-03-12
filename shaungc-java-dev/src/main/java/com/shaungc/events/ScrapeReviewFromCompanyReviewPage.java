@@ -191,6 +191,10 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             );
 
             for (final WebElement employeeReviewElement : employeeReviewElements) {
+                if (this.pubSubSubscription.receivedTerminationRequest) {
+                    throw new ScraperException("Terminating per request");
+                }
+
                 final EmployeeReviewData employeeReviewData = new EmployeeReviewData();
 
                 if (this.scrapeEmployeeReview(employeeReviewElement, employeeReviewData)) {

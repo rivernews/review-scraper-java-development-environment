@@ -55,6 +55,10 @@ public class App {
 
             Logger.debug("web driver created");
 
+            if (pubSubSubscription.receivedTerminationRequest) {
+                throw new ScraperException("Terminating per request");
+            }
+
             new LoginGlassdoorTask(driver);
 
             // launch scraping task against a company

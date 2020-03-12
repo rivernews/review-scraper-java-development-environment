@@ -31,6 +31,7 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
     private final RedisPubSubCommands<String, String> publisherCommands;
 
     public final CountDownLatch supervisorCountDownLatch;
+    public Boolean receivedTerminationRequest = false;
 
     // subscribing
     // https://lettuce.io/core/release/reference/#pubsub.subscribing
@@ -94,7 +95,8 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
 
         if (messageTo.equals(ScraperJobMessageTo.ALL.getString())) {
             if (messageType.equals(ScraperJobMessageType.TERMINATE.getString())) {
-                throw new ScraperShouldHaltException("Received terminate signal from supervisor: `" + payload + "`");
+                Logger.info("Received terminate signal from supervisor: `" + payload + "`");
+                this.receivedTerminationRequest = true;
             }
         } else if (messageTo.equals(ScraperJobMessageTo.SCRAPER.getString())) {
             if (messageType.equals(ScraperJobMessageType.PREFLIGHT.getString())) {
