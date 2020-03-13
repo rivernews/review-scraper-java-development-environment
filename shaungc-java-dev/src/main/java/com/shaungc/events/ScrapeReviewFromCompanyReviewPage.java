@@ -503,7 +503,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 if (
                     // https://www.glassdoor.com/Reviews/SAP-Reviews-E10471_P329.htm
                     // s3://iriversland-qualitative-org-review-v3/SAP-10471/logs/review:commentTitleNotCaptured.2020-03-05T19:58:36.533556Z.html
-                    !reviewDataStore.stableReviewData.reviewId.equals("31306489") ||
+                    !reviewDataStore.stableReviewData.reviewId.equals("31306489") &&
                     !reviewDataStore.stableReviewData.reviewId.equals("31546268")
                 ) {
                     final String htmlDumpPath =
