@@ -503,16 +503,22 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 if (
                     // https://www.glassdoor.com/Reviews/SAP-Reviews-E10471_P329.htm
                     // s3://iriversland-qualitative-org-review-v3/SAP-10471/logs/review:commentTitleNotCaptured.2020-03-05T19:58:36.533556Z.html
-                    !reviewDataStore.stableReviewData.reviewId.equals("31306489")
+                    !reviewDataStore.stableReviewData.reviewId.equals("31306489") ||
+                    !reviewDataStore.stableReviewData.reviewId.equals("31546268")
                 ) {
+                    final String htmlDumpPath =
+                        this.archiveManager.writeHtml("review:commentTitleNotCaptured", this.driver.getPageSource());
+
                     throw new ScraperException(
                         String.format(
                             "Found a 'Content Blocked' review at <%s|current page>, this is a new blocked review\n```%s```\n" +
-                            "Please check if review `%s` is stored before and if so, figure out a way to store this change.\n" +
+                            "Please check if review `%s` is stored before and if so, figure out a way to store this change. Dumped html <%s|on s3> at key `%s`\n" +
                             "Then, add this review to whitelist (hard coded) in function `scrapeEmployeeReview()`.",
                             this.driver.getCurrentUrl(),
                             commentTitleH2Element.getText(),
-                            reviewDataStore.stableReviewData.reviewId
+                            reviewDataStore.stableReviewData.reviewId,
+                            ArchiveManager.BUCKET_URL,
+                            htmlDumpPath
                         )
                     );
                 }
