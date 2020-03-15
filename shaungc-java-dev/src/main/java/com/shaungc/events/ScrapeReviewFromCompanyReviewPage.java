@@ -429,12 +429,12 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             }
         } catch (final NoSuchElementException e) {
             // TODO: remove this after local review count gets stable
-            Logger.warnAlsoSlack("1st approach for scraping Local review count failed");
+            Logger.warnAlsoSlack("NoSuchElementException - 1st approach for scraping Local review count failed");
         }
 
         // 2nd approach regex trying to extract stuff - if doesn't even match the regex,
         // then it's likely no reviews yet\
-        String reviewCountElementTextContent = "";
+        String reviewCountElementTextContent = " ";
         try {
             reviewCountElementTextContent =
                 reviewPanelElement
@@ -458,11 +458,16 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 if (!glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
                     return;
                 }
+            } else {
+                // TODO: remove this when review count gets stable
+                Logger.warn(
+                    String.format("2nd approach for scraping review count: cannot find() in text:```%s```", reviewCountElementTextContent)
+                );
             }
         } catch (NoSuchElementException e) {
             Logger.warnAlsoSlack(
                 String.format(
-                    "2nd approach for scraping Local review count failed, `reviewCountElementTextContent`:\n```%s```",
+                    "NoSuchElementException - 2nd approach for scraping Local review count failed, `reviewCountElementTextContent`:\n```%s```",
                     reviewCountElementTextContent
                 )
             );

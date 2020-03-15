@@ -15,6 +15,8 @@ import com.shaungc.utilities.ScraperMode;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -23,7 +25,44 @@ import org.openqa.selenium.WebDriver;
  */
 public class App {
 
+    private static Boolean test() {
+        final String testString =
+            "Nokia Reviews" +
+            "Updated Mar 13, 2020" +
+            "Find Reviews" +
+            "Clear All" +
+            "Full-time, Part-time" +
+            "✕" +
+            "English" +
+            "Filter" +
+            "8,830 English reviews out of 9,861" +
+            "Sort" +
+            "Popular" +
+            "Highest Rating" +
+            "Lowest Rating";
+
+        final String sanitized = testString.strip().toLowerCase().replaceAll("[^\\d\\w\\s]", "");
+        Logger.info(sanitized);
+
+        final Pattern reviewCountPattern = Pattern.compile("(\\d+)\\s+\\w+\\s+reviews\\s+out\\s+of\\s+(\\d+)");
+        final Matcher reviewCountMatcher = reviewCountPattern.matcher(sanitized);
+        if (reviewCountMatcher.find()) {
+            final String group1 = reviewCountMatcher.group(1);
+            final String group2 = reviewCountMatcher.group(2);
+            Logger.info("group 1 " + group1);
+            Logger.info("group 2 " + group2);
+        } else {
+            Logger.error("Cannot find()");
+        }
+
+        return false;
+    }
+
     public static void main(String[] args) {
+        if (!App.test()) {
+            return;
+        }
+
         PubSubSubscription pubSubSubscription = new PubSubSubscription();
         WebDriver driver = null;
 
