@@ -438,7 +438,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         try {
             reviewCountElementTextContent =
                 reviewPanelElement
-                    .findElement(By.cssSelector("div[class$=sortsHeader] > h2 > span"))
+                    .findElement(By.cssSelector("div[class*=EIReviewsPageContainer] > div[class*=sortsHeader] > h2 > span"))
                     .getText()
                     .strip()
                     .toLowerCase()
