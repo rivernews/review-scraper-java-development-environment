@@ -523,7 +523,10 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     // https://www.glassdoor.com/Reviews/SAP-Reviews-E10471_P329.htm
                     // s3://iriversland-qualitative-org-review-v3/SAP-10471/logs/review:commentTitleNotCaptured.2020-03-05T19:58:36.533556Z.html
                     !reviewDataStore.stableReviewData.reviewId.equals("31306489") &&
-                    !reviewDataStore.stableReviewData.reviewId.equals("31546268")
+                    !reviewDataStore.stableReviewData.reviewId.equals("31546268") &&
+                    // Salesforce-11159/logs/review:commentTitleNotCaptured.2020-03-15T09:16:28.501665Z.html
+                    // https://www.glassdoor.com/Reviews/Salesforce-Reviews-E11159_P358.htm
+                    !reviewDataStore.stableReviewData.reviewId.equals("32284203")
                 ) {
                     final String htmlDumpPath =
                         this.archiveManager.writeHtml("review:commentTitleNotCaptured", this.driver.getPageSource());
