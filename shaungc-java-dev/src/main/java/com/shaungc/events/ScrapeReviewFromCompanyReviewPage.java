@@ -453,32 +453,21 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 return;
             }
         }
-        // Report abnormal case
-        // final String reviewPanelElementRawContent =
-        // reviewPanelElement.getText().toLowerCase();
-        // final String htmlDumpPath =
-        // this.archiveManager.writeHtml("reviewMeta:NoLocalGlobalReviewCountWarning",
-        // this.driver.getPageSource());
-        // throw new ScraperShouldHaltException(
-        // "Unable to scrape local & global review count from reviewPanelElement:\n```"
-        // +
-        // reviewPanelElementRawContent.substring(0,
-        // Math.min(reviewPanelElementRawContent.length(), 500)) +
-        // "...```\n" +
-        // "Please check the review page html, see why scraper cannot find the review
-        // counts. Html saved <" +
-        // ArchiveManager.BUCKET_URL +
-        // "|on s3> at key `" +
-        // htmlDumpPath +
-        // "`"
-        // );
 
         if (glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
+            // Report abnormal case - we should be scraping an org because it has reviews; otherwise it's not of our concern
+            final String reviewPanelElementRawContent = reviewPanelElement.getText();
+            final String htmlDumpPath =
+                this.archiveManager.writeHtml("reviewMeta:NoLocalGlobalReviewCountWarning", this.driver.getPageSource());
             throw new ScraperShouldHaltException(
-                String.format(
-                    "Scraped `localReviewCount=0`, will not store review meta or proceed to scraping review. Please <%s|check the webpage> if there's indeed no reviews yet, then you can skip this error.",
-                    this.driver.getCurrentUrl()
-                )
+                "Unable to scrape local & global review count or scraped `localReviewCount=0` from reviewPanelElement:\n```" +
+                reviewPanelElementRawContent.substring(0, Math.min(reviewPanelElementRawContent.length(), 500)) +
+                "...```\n" +
+                "Please check the review page html, see why scraper cannot find the review counts. Html saved <" +
+                ArchiveManager.BUCKET_URL +
+                "|on s3> at key `" +
+                htmlDumpPath +
+                "`"
             );
         }
     }
