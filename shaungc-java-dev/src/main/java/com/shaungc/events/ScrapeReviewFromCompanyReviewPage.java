@@ -162,15 +162,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             // scrape for review metadata
             this.scrapeReviewMetadata(reviewPanelElement, glassdoorCompanyParsedData.reviewMetadata);
 
-            if (glassdoorCompanyParsedData.reviewMetadata.localReviewCount.equals(0)) {
-                throw new ScraperException(
-                    String.format(
-                        "Scraped `localReviewCount=0`, will not store review meta or proceed to scraping review. Please <%s|check the webpage> if there's indeed no reviews yet, then you can skip this error.",
-                        this.driver.getCurrentUrl()
-                    )
-                );
-            }
-
             // write out review metadata
             this.archiveManager.writeGlassdoorOrganizationReviewsMetadataAsJson(glassdoorCompanyParsedData.reviewMetadata);
 
@@ -297,7 +288,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     }
 
     private Boolean judgeNoNextPageLinkThenClickThirdApproach() {
-        // example webpage in mind: https://s3.console.aws.amazon.com/s3/object/iriversland-qualitative-org-review-v3/Amazon-6036/logs/reviewDataLostWarning.2020-03-04T23%253A44%253A01.848981Z.html?region=us-west-2&tab=overview
+        // example webpage in mind:
+        // https://s3.console.aws.amazon.com/s3/object/iriversland-qualitative-org-review-v3/Amazon-6036/logs/reviewDataLostWarning.2020-03-04T23%253A44%253A01.848981Z.html?region=us-west-2&tab=overview
 
         // TODO: remove this or change to debug after things get stable
         Logger.info("Trying 3rd approach to capture next page link");
@@ -316,7 +308,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         if (anchorElements.size() == 1) {
             // not sure what this case is, but we want to avoid clicking a link that goes to
-            // a previous page or current page, which will cause a inifinite loop where scraper job renews forever
+            // a previous page or current page, which will cause a inifinite loop where
+            // scraper job renews forever
             // so we'd rather just play safe and stop here, but we'll log this incident
             final String htmlDumpPath = this.archiveManager.writeHtml("review:nextPageLinkCheckUnknownCase", this.driver.getPageSource());
             throw new ScraperShouldHaltException(
@@ -406,18 +399,19 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     }
 
     /**
-     * Scrapes two things - local review count and global review count.
-     * Usually we are finding information from text of this form `5,426 English reviews out of 6,053`.
+     * Scrapes two things - local review count and global review count. Usually we
+     * are finding information from text of this form `5,426 English reviews out of
+     * 6,053`.
      *
-     * Note that not finding such information does not necessarily means a scraper exception,
-     * org could have no reviews yet.
+     * Note that not finding such information does not necessarily means a scraper
+     * exception, org could have no reviews yet.
      *
-     * @param reviewPanelElement - uses selector `article#MainCol main`
+     * @param reviewPanelElement           - uses selector `article#MainCol main`
      * @param glassdoorReviewMetadataStore
      */
     private void scrapeReviewCount(final WebElement reviewPanelElement, final GlassdoorReviewMetadata glassdoorReviewMetadataStore) {
+        // 1st approach
         try {
-            // 1st approach
             final List<WebElement> countElements = reviewPanelElement.findElements(
                 By.cssSelector("div[class*=ReviewsPageContainer] div.mt:last-child span strong")
             );
@@ -428,46 +422,64 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
                 glassdoorReviewMetadataStore.globalReviewCount =
                     Integer.parseInt(countElements.get(1).getText().strip().replaceAll("\\D+", ""));
-            } else {
-                // 2nd approach regex trying to extract stuff - if doesn't even match the regex, then it's likely no reviews yet
-                final String reviewCountElementTextContent = reviewPanelElement
-                    .findElement(By.cssSelector("div[class$=sortsHeader] > h2 > span"))
-                    .getText()
-                    .strip()
-                    .toLowerCase()
-                    .replaceAll("[^\\d\\w\\s]", "");
-                final Pattern reviewCountPattern = Pattern.compile("\\d+\\s+\\w+\\s+reviews\\s+out\\s+of\\s+\\d+");
-                final Matcher reviewCountMatcher = reviewCountPattern.matcher(reviewCountElementTextContent);
-                if (reviewCountMatcher.find()) {
-                    final String localReviewCountString = reviewCountMatcher.group(1);
-                    final String globalReviewCountString = reviewCountMatcher.group(2);
-                    Logger.infoAlsoSlack(
-                        String.format("scraper found localCount/globalCount = %s/%s", localReviewCountString, globalReviewCountString)
-                    );
 
-                    glassdoorReviewMetadataStore.localReviewCount = Integer.valueOf(localReviewCountString);
-                    glassdoorReviewMetadataStore.globalReviewCount = Integer.valueOf(globalReviewCountString);
+                if (!glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
+                    return;
                 }
-                // Report abnormal case
-                // final String reviewPanelElementRawContent = reviewPanelElement.getText().toLowerCase();
-                // final String htmlDumpPath =
-                //     this.archiveManager.writeHtml("reviewMeta:NoLocalGlobalReviewCountWarning", this.driver.getPageSource());
-                // throw new ScraperShouldHaltException(
-                //     "Unable to scrape local & global review count from reviewPanelElement:\n```" +
-                //     reviewPanelElementRawContent.substring(0, Math.min(reviewPanelElementRawContent.length(), 500)) +
-                //     "...```\n" +
-                //     "Please check the review page html, see why scraper cannot find the review counts. Html saved <" +
-                //     ArchiveManager.BUCKET_URL +
-                //     "|on s3> at key `" +
-                //     htmlDumpPath +
-                //     "`"
-                // );
             }
-        } catch (final NoSuchElementException e) {
-            // no reviews yet - the later workflow will not proceed the review scraping part
-            // in case of the webpage structure changed and our selector does not work,
-            // will eventually report localReviewCount of zero (will show as === success === though)
-            // TODO: when local review count == 0, give a warning in the session report
+        } catch (final NoSuchElementException e) {}
+
+        // 2nd approach regex trying to extract stuff - if doesn't even match the regex,
+        // then it's likely no reviews yet
+        final String reviewCountElementTextContent = reviewPanelElement
+            .findElement(By.cssSelector("div[class$=sortsHeader] > h2 > span"))
+            .getText()
+            .strip()
+            .toLowerCase()
+            .replaceAll("[^\\d\\w\\s]", "");
+        final Pattern reviewCountPattern = Pattern.compile("\\d+\\s+\\w+\\s+reviews\\s+out\\s+of\\s+\\d+");
+        final Matcher reviewCountMatcher = reviewCountPattern.matcher(reviewCountElementTextContent);
+        if (reviewCountMatcher.find()) {
+            final String localReviewCountString = reviewCountMatcher.group(1);
+            final String globalReviewCountString = reviewCountMatcher.group(2);
+            Logger.infoAlsoSlack(
+                String.format("scraper found localCount/globalCount = %s/%s", localReviewCountString, globalReviewCountString)
+            );
+
+            glassdoorReviewMetadataStore.localReviewCount = Integer.valueOf(localReviewCountString);
+            glassdoorReviewMetadataStore.globalReviewCount = Integer.valueOf(globalReviewCountString);
+
+            if (!glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
+                return;
+            }
+        }
+        // Report abnormal case
+        // final String reviewPanelElementRawContent =
+        // reviewPanelElement.getText().toLowerCase();
+        // final String htmlDumpPath =
+        // this.archiveManager.writeHtml("reviewMeta:NoLocalGlobalReviewCountWarning",
+        // this.driver.getPageSource());
+        // throw new ScraperShouldHaltException(
+        // "Unable to scrape local & global review count from reviewPanelElement:\n```"
+        // +
+        // reviewPanelElementRawContent.substring(0,
+        // Math.min(reviewPanelElementRawContent.length(), 500)) +
+        // "...```\n" +
+        // "Please check the review page html, see why scraper cannot find the review
+        // counts. Html saved <" +
+        // ArchiveManager.BUCKET_URL +
+        // "|on s3> at key `" +
+        // htmlDumpPath +
+        // "`"
+        // );
+
+        if (glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
+            throw new ScraperShouldHaltException(
+                String.format(
+                    "Scraped `localReviewCount=0`, will not store review meta or proceed to scraping review. Please <%s|check the webpage> if there's indeed no reviews yet, then you can skip this error.",
+                    this.driver.getCurrentUrl()
+                )
+            );
         }
     }
 
