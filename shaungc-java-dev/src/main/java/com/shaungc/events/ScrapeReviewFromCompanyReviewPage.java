@@ -431,28 +431,30 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // 2nd approach regex trying to extract stuff - if doesn't even match the regex,
         // then it's likely no reviews yet
-        final String reviewCountElementTextContent = reviewPanelElement
-            .findElement(By.cssSelector("div[class$=sortsHeader] > h2 > span"))
-            .getText()
-            .strip()
-            .toLowerCase()
-            .replaceAll("[^\\d\\w\\s]", "");
-        final Pattern reviewCountPattern = Pattern.compile("\\d+\\s+\\w+\\s+reviews\\s+out\\s+of\\s+\\d+");
-        final Matcher reviewCountMatcher = reviewCountPattern.matcher(reviewCountElementTextContent);
-        if (reviewCountMatcher.find()) {
-            final String localReviewCountString = reviewCountMatcher.group(1);
-            final String globalReviewCountString = reviewCountMatcher.group(2);
-            Logger.infoAlsoSlack(
-                String.format("scraper found localCount/globalCount = %s/%s", localReviewCountString, globalReviewCountString)
-            );
+        try {
+            final String reviewCountElementTextContent = reviewPanelElement
+                .findElement(By.cssSelector("div[class$=sortsHeader] > h2 > span"))
+                .getText()
+                .strip()
+                .toLowerCase()
+                .replaceAll("[^\\d\\w\\s]", "");
+            final Pattern reviewCountPattern = Pattern.compile("\\d+\\s+\\w+\\s+reviews\\s+out\\s+of\\s+\\d+");
+            final Matcher reviewCountMatcher = reviewCountPattern.matcher(reviewCountElementTextContent);
+            if (reviewCountMatcher.find()) {
+                final String localReviewCountString = reviewCountMatcher.group(1);
+                final String globalReviewCountString = reviewCountMatcher.group(2);
+                Logger.infoAlsoSlack(
+                    String.format("scraper found localCount/globalCount = %s/%s", localReviewCountString, globalReviewCountString)
+                );
 
-            glassdoorReviewMetadataStore.localReviewCount = Integer.valueOf(localReviewCountString);
-            glassdoorReviewMetadataStore.globalReviewCount = Integer.valueOf(globalReviewCountString);
+                glassdoorReviewMetadataStore.localReviewCount = Integer.valueOf(localReviewCountString);
+                glassdoorReviewMetadataStore.globalReviewCount = Integer.valueOf(globalReviewCountString);
 
-            if (!glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
-                return;
+                if (!glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
+                    return;
+                }
             }
-        }
+        } catch (NoSuchElementException e) {}
 
         if (glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
             // Report abnormal case - we should be scraping an org because it has reviews; otherwise it's not of our concern
