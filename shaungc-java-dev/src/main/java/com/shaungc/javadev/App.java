@@ -15,8 +15,6 @@ import com.shaungc.utilities.ScraperMode;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -149,9 +147,12 @@ public class App {
                 "Program ended in exception block...! Might be a problem in either the scraper itself not handled, or an unknown change in the webpage that disrupts the scraper process. Please check the scraper log for error detail. " +
                 (driver != null ? "Last webpage: `" + driver.getCurrentUrl() + "`" : "")
             );
-            if (driver != null) {
-                Logger.errorAlsoSlack(String.format("```%s```", driver.getPageSource()));
-            }
+
+            // TODO: we cannot dump html because `archiveManager` is not yet initialized
+            // because org name and id are not yet scraped
+            // if we want archiveManager to write to a "global" folder, we need to make
+            // some methods a static one in ArchiveManager and S3Server
+
             System.out.println(e);
 
             pubSubSubscription.publish(
