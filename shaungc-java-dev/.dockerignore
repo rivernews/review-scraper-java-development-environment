@@ -1,11 +1,11 @@
 **credentials**
 **.env
 
-target
 
 # dockerignore syntax
 # https://stackoverflow.com/a/36352877/9814131
-target/**/*
+# target
+# target/**/*
 
 # Created by https://www.gitignore.io/api/java
 # Edit at https://www.gitignore.io/?templates=java
