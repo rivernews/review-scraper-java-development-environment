@@ -149,7 +149,9 @@ public class App {
                 "Program ended in exception block...! Might be a problem in either the scraper itself not handled, or an unknown change in the webpage that disrupts the scraper process. Please check the scraper log for error detail. " +
                 (driver != null ? "Last webpage: `" + driver.getCurrentUrl() + "`" : "")
             );
-
+            if (driver != null) {
+                Logger.errorAlsoSlack(String.format("```%s```", driver.getPageSource()));
+            }
             System.out.println(e);
 
             pubSubSubscription.publish(
@@ -162,10 +164,10 @@ public class App {
             );
 
             pubSubSubscription.cleanup();
+
             if (driver != null) {
                 driver.quit();
             }
-
             throw e;
         }
     }
