@@ -50,8 +50,14 @@ public class LoginGlassdoorTask {
 
         // confirm that login succeed
         final String judgeLoginSuccessElementXPath = "//*[@id=\"sc.keyword\"]";
+        final String judgeLoginSuccessElementCssSelector = "input#sc.keyword";
         Logger.info("Waiting for login success page...");
-        this.wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(judgeLoginSuccessElementXPath)));
+        this.wait.until(
+                ExpectedConditions.or(
+                    ExpectedConditions.visibilityOfElementLocated(By.xpath(judgeLoginSuccessElementXPath)),
+                    ExpectedConditions.visibilityOfElementLocated(By.cssSelector(judgeLoginSuccessElementCssSelector))
+                )
+            );
 
         Logger.infoAlsoSlack("OK, glassdoor login complete for info " + Configuration.TEST_COMPANY_INFORMATION_STRING);
     }
