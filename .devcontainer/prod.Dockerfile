@@ -4,6 +4,4 @@ WORKDIR /tmp/src
 
 COPY shaungc-java-dev/ /tmp/src/
 
-RUN mvn clean install
-
-CMD ["mvn", "exec:java"]
+CMD ["sh", "-c", "mvn clean install && mvn exec:java"]

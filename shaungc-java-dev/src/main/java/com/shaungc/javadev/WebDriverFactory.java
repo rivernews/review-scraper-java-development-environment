@@ -1,9 +1,9 @@
 package com.shaungc.javadev;
 
 import com.shaungc.exceptions.ScraperShouldHaltException;
+import com.shaungc.utilities.ExternalServiceMode;
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.RequestAddressValidator;
-import com.shaungc.utilities.WebDriverMode;
 import java.net.URL;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -28,7 +28,7 @@ public class WebDriverFactory {
             Logger.info("======PRODUCTION MODE======");
         }
 
-        if (Configuration.WEBDRIVER_MODE.equals(WebDriverMode.LOCAL_INSTALLED_DRIVER.getString())) {
+        if (Configuration.WEBDRIVER_MODE.equals(ExternalServiceMode.LOCAL_INSTALLED.getString())) {
             // use headless mode to improve performance
             chromeOptions.addArguments("--headless");
             chromeOptions.addArguments("--disable-gpu");
@@ -49,18 +49,16 @@ public class WebDriverFactory {
 
             return new ChromeDriver(chromeOptions);
         } else if (
-            Configuration.WEBDRIVER_MODE.equals(WebDriverMode.SELENIUM_SERVER_FROM_MACOS_DOCKER_CONTAINER.getString()) ||
-            Configuration.WEBDRIVER_MODE.equals(WebDriverMode.SELENIUM_SERVER_FROM_PORT_FORWARD.getString()) ||
-            Configuration.WEBDRIVER_MODE.equals(WebDriverMode.SELENIUM_SERVER_FROM_CUSTOM_HOST.getString())
+            Configuration.WEBDRIVER_MODE.equals(ExternalServiceMode.SERVER_FROM_MACOS_DOCKER_CONTAINER.getString()) ||
+            Configuration.WEBDRIVER_MODE.equals(ExternalServiceMode.SERVER_FROM_PORT_FORWARD.getString()) ||
+            Configuration.WEBDRIVER_MODE.equals(ExternalServiceMode.SERVER_FROM_CUSTOM_HOST.getString())
         ) {
             String webDriverServiceUrl = Configuration.WEBDRIVER_MODE.equals(
-                    WebDriverMode.SELENIUM_SERVER_FROM_MACOS_DOCKER_CONTAINER.getString()
+                    ExternalServiceMode.SERVER_FROM_MACOS_DOCKER_CONTAINER.getString()
                 )
-                ? // use local (on macos laptop) selenium server running in another docker container
-                "host.docker.internal"
-                : Configuration.WEBDRIVER_MODE.equals(WebDriverMode.SELENIUM_SERVER_FROM_PORT_FORWARD.getString())
-                    ? // use port-forwarding
-                    "localhost"
+                ? "host.docker.internal" // use local (on macos laptop) selenium server running in another docker container
+                : Configuration.WEBDRIVER_MODE.equals(ExternalServiceMode.SERVER_FROM_PORT_FORWARD.getString())
+                    ? "localhost" // use port-forwarding
                     : Configuration.SELENIUM_SERVER_CUSTOM_HOST;
 
             if (webDriverServiceUrl.strip().isEmpty()) {
