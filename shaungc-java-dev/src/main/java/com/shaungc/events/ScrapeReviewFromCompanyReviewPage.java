@@ -246,6 +246,9 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             this.processedReviewPages++;
 
+            // TODO: for debugging gc
+            this.orderGarbageCollectionAgainstBrowser();
+
             // click next page
             Boolean noNextPageLink = this.judgeNoNextPageLinkOrClickNextPageLink();
 
@@ -257,10 +260,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             Logger.info("Found next page link, going to continue...");
 
+            // TODO:
             // force garbage collect on both scraper and browser driver
-            if (browserGarbageCollectionTimer.doesReachCountdownDuration()) {
-                this.orderGarbageCollectionAgainstBrowser();
-            }
+            // if (browserGarbageCollectionTimer.doesReachCountdownDuration()) {
+            //     this.orderGarbageCollectionAgainstBrowser();
+            // }
 
             this.waitForReviewPanelLoading();
 
