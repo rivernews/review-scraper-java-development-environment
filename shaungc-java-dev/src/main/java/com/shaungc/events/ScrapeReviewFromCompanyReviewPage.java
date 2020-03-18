@@ -19,6 +19,7 @@ import com.shaungc.utilities.Timer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.openqa.selenium.By;
@@ -172,6 +173,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         final Integer reviewReportTime = 5;
         final Integer reportingRate = (Integer) (this.localReviewCount / reviewReportTime);
         final Timer progressReportingTimer = new Timer(Duration.ofSeconds(5));
+        final Timer browserGarbageCollectionTimer = new Timer(Duration.ofMinutes(4));
 
         // foreach review
         while (true) {
@@ -255,7 +257,10 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             Logger.info("Found next page link, going to continue...");
 
-            sleep(10);
+            // force garbage collect on both scraper and browser driver
+            if (browserGarbageCollectionTimer.doesReachCountdownDuration()) {
+                this.orderGarbageCollectionAgainstBrowser();
+            }
 
             this.waitForReviewPanelLoading();
 
@@ -794,6 +799,27 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         for (final WebElement paragraphElement : paragraphElements) {
             reviewDataStore.stableReviewData.reviewTextData.rawParagraphs.add(paragraphElement.getText().strip());
         }
+    }
+
+    public void orderGarbageCollectionAgainstBrowser() {
+        Logger.info("Starting garbage collection on both scraper and browser...");
+
+        ((JavascriptExecutor) this.driver).executeScript("window.gc()");
+
+        // also for current scraper java process
+        System.gc();
+
+        try {
+            TimeUnit.SECONDS.sleep(4);
+        } catch (InterruptedException e) {
+            throw new ScraperShouldHaltException("Sleep interrupted: while garbage collecting for javascript");
+        }
+
+        Double usedJsHeapSizeAfterGarbageCollection = (Double) ((JavascriptExecutor) this.driver).executeScript(
+                "return window.performance.memory.usedJSHeapSize/1024/1024"
+            );
+
+        Logger.infoAlsoSlack(String.format("Garbage collection ordered, memory usage `%.2f MB`", usedJsHeapSizeAfterGarbageCollection));
     }
 
     @Override
