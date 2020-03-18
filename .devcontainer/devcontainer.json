@@ -28,13 +28,17 @@
 		"--env-file", "devcontainer.env"
 	],
 
+	// add docker in container
+	// https://github.com/microsoft/vscode-dev-containers/blob/master/containers/docker-in-docker/.devcontainer/devcontainer.json
+	"mounts": [ "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind" ],
+
 	// Comment out the next line to run as root
 	// "remoteUser": "vscode",
 
 	// Add the IDs of extensions you want installed when the container is created in the array below.
 	"extensions": [
-		// "ms-azuretools.vscode-azurefunctions",
         "vscjava.vscode-java-pack",
-        "dotjoshjohnson.xml"
+		"dotjoshjohnson.xml",
+		"ms-azuretools.vscode-docker"
 	]
 }
