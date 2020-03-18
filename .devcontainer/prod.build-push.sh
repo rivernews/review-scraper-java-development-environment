@@ -4,7 +4,11 @@ export IMAGE_NAME=shaungc/gd-scraper
 
 docker build -f ./prod.Dockerfile -t "${IMAGE_NAME}:latest" ..
 
+cd ..
+
 export SHORT_COMMIT=$(git rev-parse --short HEAD)
+
+cd .devcontainer
 
 echo "docker tag '${IMAGE_NAME}:latest' '${IMAGE_NAME}:${SHORT_COMMIT}'"
 docker tag "${IMAGE_NAME}:latest" "${IMAGE_NAME}:${SHORT_COMMIT}"
