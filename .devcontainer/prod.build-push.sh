@@ -1,6 +1,6 @@
 
 
-IMAGE_NAME=shaungc/gd-scraper
+export IMAGE_NAME=shaungc/gd-scraper
 
 docker build -f ./prod.Dockerfile -t "${IMAGE_NAME}:latest" ..
 
