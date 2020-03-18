@@ -116,9 +116,6 @@ public class App {
                 );
             }
 
-            pubSubSubscription.cleanup();
-            driver.quit();
-
             return;
         } catch (ScraperException | ScraperShouldHaltException e) {
             Logger.info(e.getMessage());
@@ -135,11 +132,6 @@ public class App {
                     "ScraperException: " + e.getMessage()
                 )
             );
-
-            pubSubSubscription.cleanup();
-            if (driver != null) {
-                driver.quit();
-            }
 
             return;
         } catch (Exception e) {
@@ -164,12 +156,13 @@ public class App {
                 )
             );
 
+            throw e;
+        } finally {
             pubSubSubscription.cleanup();
 
             if (driver != null) {
                 driver.quit();
             }
-            throw e;
         }
     }
 }

@@ -212,7 +212,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
                 // TODO: remove this if not needed, since we write each review to s3 right after
                 // we parsed it, so collecting all reviews here seems unecessary
-                glassdoorCompanyParsedData.employeeReviewDataList.add(employeeReviewData);
+                // UPDATE: currently commenting this out to reduce memory usage
+                // glassdoorCompanyParsedData.employeeReviewDataList.add(employeeReviewData);
 
                 // send message per 50 reviews (5 page, each around 10 reviews)
                 if (this.wentThroughReviewsCount % (reportingRate) == 0) {
@@ -253,6 +254,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             }
 
             Logger.info("Found next page link, going to continue...");
+
+            sleep(10);
 
             this.waitForReviewPanelLoading();
 
@@ -796,6 +799,5 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     @Override
     protected void postAction(final GlassdoorCompanyReviewParsedData parsedData) {
         this.sideEffect = parsedData;
-        Logger.info("Total reviews processed: " + parsedData.employeeReviewDataList.size());
     }
 }
