@@ -43,6 +43,9 @@ public class WebDriverFactory {
             chromeOptions.addArguments("--start-maximized");
             chromeOptions.addArguments("--no-sandbox");
 
+            // enable garbage collection function
+            chromeOptions.addArguments("-js-flags=--expose-gc");
+
             // clearer log
             // https://stackoverflow.com/a/20748376/9814131
             chromeOptions.addArguments("--log-level=3");
