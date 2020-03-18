@@ -44,6 +44,7 @@ public class WebDriverFactory {
             chromeOptions.addArguments("--no-sandbox");
 
             // enable garbage collection function
+            // https://stackoverflow.com/a/54789156/9814131
             chromeOptions.addArguments("-js-flags=--expose-gc");
 
             // clearer log
@@ -72,10 +73,26 @@ public class WebDriverFactory {
 
             chromeOptions.addArguments("--disable-extensions");
             chromeOptions.addArguments("--start-maximized");
+
             // solving chrome driver issue
             // `UnknownError: session deleted because of page crash from tab crashed`
             // https://stackoverflow.com/a/53970825/9814131
             chromeOptions.addArguments("--no-sandbox");
+
+            // enable garbage collection function
+            // https://stackoverflow.com/a/54789156/9814131
+            chromeOptions.addArguments("-js-flags=--expose-gc");
+
+            // further measures on improving performance / reducing memory utilization
+
+            // use headless mode to improve performance
+            chromeOptions.addArguments("--headless");
+            chromeOptions.addArguments("--disable-gpu");
+            // chrome will fail on insecure connection in headless mode
+            chromeOptions.addArguments("--ignore-certificate-errors");
+            // added to solve no stdout issue
+            chromeOptions.addArguments("--proxy-server='direct://'");
+            chromeOptions.addArguments("--proxy-bypass-list=*");
 
             return (WebDriver) new RemoteWebDriver(
                 RequestAddressValidator.toURL("http://" + webDriverServiceUrl + ":4444/wd/hub"),
