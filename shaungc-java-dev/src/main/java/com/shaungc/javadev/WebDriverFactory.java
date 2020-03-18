@@ -83,16 +83,9 @@ public class WebDriverFactory {
             // https://stackoverflow.com/a/54789156/9814131
             chromeOptions.addArguments("-js-flags=--expose-gc");
 
+            // TODO: remove this
             // further measures on improving performance / reducing memory utilization
-
-            // use headless mode to improve performance
-            chromeOptions.addArguments("--headless");
-            chromeOptions.addArguments("--disable-gpu");
-            // chrome will fail on insecure connection in headless mode
-            chromeOptions.addArguments("--ignore-certificate-errors");
-            // added to solve no stdout issue
-            chromeOptions.addArguments("--proxy-server='direct://'");
-            chromeOptions.addArguments("--proxy-bypass-list=*");
+            chromeOptions.addArguments("--log-level=4");
 
             return (WebDriver) new RemoteWebDriver(
                 RequestAddressValidator.toURL("http://" + webDriverServiceUrl + ":4444/wd/hub"),
