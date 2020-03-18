@@ -85,6 +85,17 @@ public class WebDriverFactory {
 
             // TODO: remove this
             // further measures on improving performance / reducing memory utilization
+            // use headless mode to improve performance
+            chromeOptions.addArguments("--headless");
+            chromeOptions.addArguments("--disable-gpu");
+            // chrome will fail on insecure connection in headless mode
+            chromeOptions.addArguments("--ignore-certificate-errors");
+
+            // added to solve no stdout issue
+            chromeOptions.addArguments("--window-size=1920,1080");
+            chromeOptions.addArguments("--proxy-server='direct://'");
+            chromeOptions.addArguments("--proxy-bypass-list=*");
+
             chromeOptions.addArguments("--log-level=4");
 
             return (WebDriver) new RemoteWebDriver(
