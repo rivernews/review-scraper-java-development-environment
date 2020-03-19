@@ -148,7 +148,7 @@
                   </includes>
                 </filter>
                 <filter>
-                  <artifact>software.amazon.awssdk:http</artifact>
+                  <artifact>software.amazon.awssdk.http:apache</artifact>
                   <includes>
                     <include>**</include>
                   </includes>
