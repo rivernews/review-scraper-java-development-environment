@@ -173,7 +173,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         final Integer reviewReportTime = 5;
         final Integer reportingRate = (Integer) (this.localReviewCount / reviewReportTime);
         final Timer progressReportingTimer = new Timer(Duration.ofSeconds(5));
-        final Timer browserGarbageCollectionTimer = new Timer(Duration.ofMinutes(4));
+        // final Timer browserGarbageCollectionTimer = new Timer(Duration.ofMinutes(4));
 
         // foreach review
         while (true) {
@@ -248,10 +248,10 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             // TODO: evaluate this, if good, we can remove this comment
             // force garbage collect on both scraper and browser driver
-            if (browserGarbageCollectionTimer.doesReachCountdownDuration()) {
-                this.orderGarbageCollectionAgainstBrowser();
-                browserGarbageCollectionTimer.restart();
-            }
+            // if (browserGarbageCollectionTimer.doesReachCountdownDuration()) {
+            //     this.orderGarbageCollectionAgainstBrowser();
+            //     browserGarbageCollectionTimer.restart();
+            // }
 
             // click next page
             Boolean noNextPageLink = this.judgeNoNextPageLinkOrClickNextPageLink();
