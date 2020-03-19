@@ -138,7 +138,7 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <!-- this will cause some classes in aws s3 client be excluded so disabling minimize -->
+              <!-- this will cause some classes in aws s3 client be excluded (error: oftware.amazon.awssdk.core.exception.SdkClientException: Unable to instantiate executor interceptor for client) so disabling minimize -->
               <minimizeJar>false</minimizeJar>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
