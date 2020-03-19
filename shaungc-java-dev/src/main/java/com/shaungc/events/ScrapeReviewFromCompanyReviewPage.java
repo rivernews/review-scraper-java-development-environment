@@ -19,6 +19,7 @@ import com.shaungc.utilities.Timer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.openqa.selenium.By;
@@ -172,6 +173,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         final Integer reviewReportTime = 5;
         final Integer reportingRate = (Integer) (this.localReviewCount / reviewReportTime);
         final Timer progressReportingTimer = new Timer(Duration.ofSeconds(5));
+        // final Timer browserGarbageCollectionTimer = new Timer(Duration.ofMinutes(4));
 
         // foreach review
         while (true) {
@@ -212,7 +214,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
                 // TODO: remove this if not needed, since we write each review to s3 right after
                 // we parsed it, so collecting all reviews here seems unecessary
-                glassdoorCompanyParsedData.employeeReviewDataList.add(employeeReviewData);
+                // UPDATE: currently commenting this out to reduce memory usage
+                // glassdoorCompanyParsedData.employeeReviewDataList.add(employeeReviewData);
 
                 // send message per 50 reviews (5 page, each around 10 reviews)
                 if (this.wentThroughReviewsCount % (reportingRate) == 0) {
@@ -242,6 +245,13 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             }
 
             this.processedReviewPages++;
+
+            // TODO: evaluate this, if good, we can remove this comment
+            // force garbage collect on both scraper and browser driver
+            // if (browserGarbageCollectionTimer.doesReachCountdownDuration()) {
+            //     this.orderGarbageCollectionAgainstBrowser();
+            //     browserGarbageCollectionTimer.restart();
+            // }
 
             // click next page
             Boolean noNextPageLink = this.judgeNoNextPageLinkOrClickNextPageLink();
@@ -283,7 +293,35 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             return false;
         }
 
+        // 4th approach
+        if (!this.judgeNoNextPageLinkThenClickForthApproach()) {
+            return false;
+        }
+
         // default to having no next page
+        return true;
+    }
+
+    /**
+     * This method tries to find a next page link, then click or navigate to it.
+     * Particularly, this 4th approach looks into the html head block and try to find
+     * something like below:
+     *
+     * <link rel="next" href="https://www.glassdoor.com/Reviews/SAP-Reviews-E10471_P822.htm">
+     *
+     * @return `true` if no next page link; otherwise `false`.
+     */
+    private Boolean judgeNoNextPageLinkThenClickForthApproach() {
+        Logger.info("Trying 4th approach to capture next page link");
+
+        try {
+            final String nextPageUrl = this.driver.findElement(By.cssSelector("head > link[rel=next]")).getAttribute("href").strip();
+            if (!nextPageUrl.isEmpty()) {
+                this.driver.get(nextPageUrl);
+                return false;
+            }
+        } catch (NoSuchElementException e) {}
+
         return true;
     }
 
@@ -793,9 +831,29 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         }
     }
 
+    public void orderGarbageCollectionAgainstBrowser() {
+        Logger.info("Starting garbage collection on both scraper and browser...");
+
+        ((JavascriptExecutor) this.driver).executeScript("window.gc()");
+
+        // also for current scraper java process
+        System.gc();
+
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            throw new ScraperShouldHaltException("Sleep interrupted: while garbage collecting for javascript");
+        }
+
+        Double usedJsHeapSizeAfterGarbageCollection = (Double) ((JavascriptExecutor) this.driver).executeScript(
+                "return window.performance.memory.usedJSHeapSize/1024/1024"
+            );
+
+        Logger.infoAlsoSlack(String.format("Garbage collection ordered, memory usage `%.2f MB`", usedJsHeapSizeAfterGarbageCollection));
+    }
+
     @Override
     protected void postAction(final GlassdoorCompanyReviewParsedData parsedData) {
         this.sideEffect = parsedData;
-        Logger.info("Total reviews processed: " + parsedData.employeeReviewDataList.size());
     }
 }

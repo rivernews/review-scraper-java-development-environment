@@ -15,9 +15,11 @@ public final class Configuration {
     public static Boolean DEBUG = Boolean.parseBoolean(Configuration.getenvOrDefault("DEBUG", "true"));
     public static Integer LOGGER_LEVEL = System.getenv("LOGGER_LEVEL") != null ? Integer.parseInt(System.getenv("LOGGER_LEVEL")) : 4;
 
-    public static Boolean RUNNING_FROM_CONTAINER = System.getenv("RUNNING_FROM_CONTAINER") != null
-        ? Boolean.parseBoolean(System.getenv("RUNNING_FROM_CONTAINER"))
-        : true;
+    public static String WEBDRIVER_MODE = Configuration.getenvOrDefault("WEBDRIVER_MODE", "localInstalled");
+    public static String SELENIUM_SERVER_CUSTOM_HOST = Configuration.getenvOrDefault("SELENIUM_SERVER_CUSTOM_HOST", "");
+
+    public static String REDIS_MODE = Configuration.getenvOrDefault("REDIS_MODE", "serverFromMacosDockerContainer");
+    public static String REDIS_CUSTOM_HOST = Configuration.getenvOrDefault("REDIS_CUSTOM_HOST", "");
 
     // credentials
 

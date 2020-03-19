@@ -5,7 +5,6 @@ import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.utilities.Logger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;

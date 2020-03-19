@@ -41,9 +41,21 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
             throw new ScraperShouldHaltException("SUPERVISOR_PUBSUB_REDIS_DB is not set.");
         }
 
-        final String redisUrl =
-            (Configuration.DEBUG ? "redis://host.docker.internal:6379/" : "redis://localhost:6379/") +
-            Configuration.SUPERVISOR_PUBSUB_REDIS_DB;
+        final String redisUrl = String.format(
+            "redis://%s:6379/%s",
+            Configuration.REDIS_MODE.equals(ExternalServiceMode.SERVER_FROM_MACOS_DOCKER_CONTAINER.getString())
+                ? "host.docker.internal"
+                : Configuration.REDIS_MODE.equals(ExternalServiceMode.SERVER_FROM_PORT_FORWARD.getString())
+                    ? "localhost"
+                    : Configuration.REDIS_MODE.equals(ExternalServiceMode.SERVER_FROM_CUSTOM_HOST.getString())
+                        ? Configuration.REDIS_CUSTOM_HOST
+                        : "",
+            Configuration.SUPERVISOR_PUBSUB_REDIS_DB
+        );
+
+        if (redisUrl.strip().isEmpty()) {
+            throw new ScraperShouldHaltException("Redis misconfigured, redisUrl is empty");
+        }
 
         this.subscriberRedisClient = RedisClient.create(redisUrl);
         this.publisherRedisClient = RedisClient.create(redisUrl);

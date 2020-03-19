@@ -5,6 +5,7 @@ import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.RequestAddressValidator;
 import java.net.URL;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Navigation;
 import org.openqa.selenium.WebElement;
@@ -18,11 +19,21 @@ public class LoginGlassdoorTask {
     WebDriver driver;
     WebDriverWait wait;
 
+    static final Integer TIMEOUT_RETRIES = 2;
+    private Integer timeoutRetryCount = 0;
+
     public LoginGlassdoorTask(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND);
+        this.wait = new WebDriverWait(driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND_LONGER);
 
-        this.launchTask();
+        while (this.timeoutRetryCount <= LoginGlassdoorTask.TIMEOUT_RETRIES) {
+            try {
+                this.launchTask();
+                return;
+            } catch (TimeoutException e) {
+                this.timeoutRetryCount++;
+            }
+        }
     }
 
     public void launchTask() {
@@ -35,8 +46,7 @@ public class LoginGlassdoorTask {
         this.driver.findElement(By.cssSelector("a[href*=signIn]")).click();
 
         // wait login modal pop up
-        WebElement usernameInputElement = new WebDriverWait(driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND)
-        .until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[name=username]")));
+        WebElement usernameInputElement = this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[name=username]")));
 
         // pull out modal element to improve searching element performance
         WebElement loginModalElement = this.driver.findElement(By.cssSelector("div#LoginModal"));
@@ -50,8 +60,14 @@ public class LoginGlassdoorTask {
 
         // confirm that login succeed
         final String judgeLoginSuccessElementXPath = "//*[@id=\"sc.keyword\"]";
+        final String judgeLoginSuccessElementCssSelector = "input#sc.keyword";
         Logger.info("Waiting for login success page...");
-        this.wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(judgeLoginSuccessElementXPath)));
+        this.wait.until(
+                ExpectedConditions.or(
+                    ExpectedConditions.visibilityOfElementLocated(By.xpath(judgeLoginSuccessElementXPath)),
+                    ExpectedConditions.visibilityOfElementLocated(By.cssSelector(judgeLoginSuccessElementCssSelector))
+                )
+            );
 
         Logger.infoAlsoSlack("OK, glassdoor login complete for info " + Configuration.TEST_COMPANY_INFORMATION_STRING);
     }

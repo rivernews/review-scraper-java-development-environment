@@ -36,6 +36,7 @@ script:
 - export REDIS_PORT_FORWARD_PID=$!
 - echo "Port fowarding process is ${REDIS_PORT_FORWARD_PID}"
 - cd shaungc-java-dev && mvn clean install && mvn exec:java
+# - java -jar shaungc-java-dev/target/shaungc-java-dev-1.1.jar
 - kill ${REDIS_PORT_FORWARD_PID}
 cache:
   directories:

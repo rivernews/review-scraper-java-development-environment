@@ -15,9 +15,9 @@ import com.shaungc.utilities.ScraperMode;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.openqa.selenium.NoSuchSessionException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 
 /**
  * Hello world!
@@ -118,14 +118,11 @@ public class App {
                 );
             }
 
-            pubSubSubscription.cleanup();
-            driver.quit();
-
             return;
-        } catch (ScraperException | ScraperShouldHaltException e) {
+        } catch (ScraperException | ScraperShouldHaltException | NoSuchSessionException e) {
             Logger.info(e.getMessage());
             Logger.errorAlsoSlack(
-                "A scraper exception is raised and its message is logged; which is not an error of the program, but more of the webpage the scraper is dealing with. There is something special with the webpage. Refer to the current url of the scraper to investigate more: " +
+                "A scraper exception is raised and its message is logged; which is not an error of the program, but more of the webpage the scraper is dealing with (or the selenium server issue). Refer to the current url of the scraper to investigate more: " +
                 driver.getCurrentUrl()
             );
 
@@ -138,17 +135,17 @@ public class App {
                 )
             );
 
-            pubSubSubscription.cleanup();
-            if (driver != null) {
-                driver.quit();
-            }
-
             return;
         } catch (Exception e) {
             Logger.errorAlsoSlack(
                 "Program ended in exception block...! Might be a problem in either the scraper itself not handled, or an unknown change in the webpage that disrupts the scraper process. Please check the scraper log for error detail. " +
                 (driver != null ? "Last webpage: `" + driver.getCurrentUrl() + "`" : "")
             );
+
+            // TODO: we cannot dump html because `archiveManager` is not yet initialized
+            // because org name and id are not yet scraped
+            // if we want archiveManager to write to a "global" folder, we need to make
+            // some methods a static one in ArchiveManager and S3Server
 
             System.out.println(e);
 
@@ -161,12 +158,13 @@ public class App {
                 )
             );
 
+            throw e;
+        } finally {
             pubSubSubscription.cleanup();
+
             if (driver != null) {
                 driver.quit();
             }
-
-            throw e;
         }
     }
 }
