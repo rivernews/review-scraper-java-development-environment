@@ -12,6 +12,6 @@ FROM adoptopenjdk/openjdk11:alpine-jre
 
 WORKDIR /tmp/build
 
-COPY --from=builder target/shaungc-java-dev-1.1.jar shaungc-java-dev-1.1.jar
+COPY --from=builder /tmp/src/target/shaungc-java-dev-1.1.jar .
 
 CMD [ "java", "-jar", "shaungc-java-dev-1.1.jar" ]
