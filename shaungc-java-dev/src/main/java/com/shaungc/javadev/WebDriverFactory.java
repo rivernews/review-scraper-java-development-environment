@@ -4,7 +4,6 @@ import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.utilities.ExternalServiceMode;
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.RequestAddressValidator;
-import java.net.URL;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -86,6 +85,10 @@ public class WebDriverFactory {
             // TODO: remove this
             // further measures on improving performance / reducing memory utilization
             // use headless mode to improve performance
+            // note that headless mode may increase the chance for NoSuchElement exceptions
+            // because headless mode is fast and webpage may not be fully loaded yet
+            // but travis build are using headless and succeeded for many so should not be
+            // an issue; just increase wait timeout, and perhaps retry where possible
             chromeOptions.addArguments("--headless");
             chromeOptions.addArguments("--disable-gpu");
             // chrome will fail on insecure connection in headless mode
