@@ -847,10 +847,19 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     }
 
     public void orderGarbageCollectionAgainstBrowser() {
-        Logger.info("Starting garbage collection on both scraper and browser...");
+        Double usedJsHeapSizeAfterGarbageCollection = (Double) ((JavascriptExecutor) this.driver).executeScript(
+                "return window.performance.memory.usedJSHeapSize/1024/1024"
+            );
 
+        Logger.infoAlsoSlack(
+            String.format(
+                "Starting garbage collection on both scraper and browser, current memory usage `%.2f MB`",
+                usedJsHeapSizeAfterGarbageCollection
+            )
+        );
+
+        // start gc
         ((JavascriptExecutor) this.driver).executeScript("window.gc()");
-
         // also for current scraper java process
         System.gc();
 
@@ -860,9 +869,9 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             throw new ScraperShouldHaltException("Sleep interrupted: while garbage collecting for javascript");
         }
 
-        Double usedJsHeapSizeAfterGarbageCollection = (Double) ((JavascriptExecutor) this.driver).executeScript(
-                "return window.performance.memory.usedJSHeapSize/1024/1024"
-            );
+        // collect memory utilization stats
+        usedJsHeapSizeAfterGarbageCollection =
+            (Double) ((JavascriptExecutor) this.driver).executeScript("return window.performance.memory.usedJSHeapSize/1024/1024");
 
         final String message = String.format("Garbage collection ordered, memory usage `%.2f MB`", usedJsHeapSizeAfterGarbageCollection);
 
