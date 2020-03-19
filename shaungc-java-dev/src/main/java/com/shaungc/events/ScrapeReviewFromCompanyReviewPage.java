@@ -295,7 +295,35 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             return false;
         }
 
+        // 4th approach
+        if (!this.judgeNoNextPageLinkThenClickForthApproach()) {
+            return false;
+        }
+
         // default to having no next page
+        return true;
+    }
+
+    /**
+     * This method tries to find a next page link, then click or navigate to it.
+     * Particularly, this 4th approach looks into the html head block and try to find
+     * something like below:
+     *
+     * <link rel="next" href="https://www.glassdoor.com/Reviews/SAP-Reviews-E10471_P822.htm">
+     *
+     * @return `true` if no next page link; otherwise `false`.
+     */
+    private Boolean judgeNoNextPageLinkThenClickForthApproach() {
+        Logger.info("Trying 4th approach to capture next page link");
+
+        try {
+            final String nextPageUrl = this.driver.findElement(By.cssSelector("head > link[rel=next]")).getAttribute("href").strip();
+            if (!nextPageUrl.isEmpty()) {
+                this.driver.get(nextPageUrl);
+                return false;
+            }
+        } catch (NoSuchElementException e) {}
+
         return true;
     }
 
