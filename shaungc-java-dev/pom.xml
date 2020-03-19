@@ -138,7 +138,8 @@
               <goal>shade</goal>
             </goals>
             <configuration>
-              <minimizeJar>true</minimizeJar>
+              <!-- this will cause some classes in aws s3 client be excluded so disabling minimize -->
+              <minimizeJar>false</minimizeJar>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <manifestEntries>
