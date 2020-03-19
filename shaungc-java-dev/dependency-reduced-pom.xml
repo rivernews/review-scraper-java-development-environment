@@ -9,9 +9,6 @@
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-      </plugin>
-      <plugin>
         <artifactId>maven-shade-plugin</artifactId>
         <version>3.2.2</version>
         <executions>
@@ -22,6 +19,26 @@
             </goals>
             <configuration>
               <minimizeJar>true</minimizeJar>
+              <filters>
+                <filter>
+                  <artifact>software.amazon.awssdk:s3</artifact>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </filter>
+                <filter>
+                  <artifact>software.amazon.awssdk:http</artifact>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </filter>
+                <filter>
+                  <artifact>org.apache.http</artifact>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </filter>
+              </filters>
               <transformers>
                 <transformer>
                   <manifestEntries>
