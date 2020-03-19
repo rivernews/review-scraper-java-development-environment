@@ -1,6 +1,5 @@
 package com.shaungc.utilities;
 
-import com.shaungc.dataStorage.ArchiveManager;
 import com.shaungc.dataStorage.S3Service;
 import com.shaungc.exceptions.ScraperShouldHaltException;
 import java.io.IOException;

@@ -147,6 +147,12 @@
                     <include>**</include>
                   </includes>
                 </filter>
+                <filter>
+                  <artifact>software.amazon.awssdk:http</artifact>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </filter>
               </filters>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
