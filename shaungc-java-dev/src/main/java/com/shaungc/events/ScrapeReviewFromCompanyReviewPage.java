@@ -97,23 +97,20 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         this.orgNameSlackMessagePrefix = orgNameSlackMessagePrefix;
     }
 
-    @Override
-    protected List<WebElement> locate() {
+    protected List<WebElement> locate(final String reviewPageUrl) {
         final List<WebElement> locatedElements = new ArrayList<>();
 
         // navigate to reviews page
-        if (Configuration.SCRAPER_MODE.equals(ScraperMode.RENEWAL.getString())) {
-            this.driver.navigate().to(Configuration.TEST_COMPANY_LAST_REVIEW_PAGE_URL);
+        if (reviewPageUrl != null && !reviewPageUrl.strip().isEmpty()) {
+            this.driver.navigate().to(reviewPageUrl);
         } else {
             this.driver.findElement(By.cssSelector("article#WideCol a.eiCell.reviews")).click();
         }
 
-        // confirm that we are on review page while locating filter button
-        final WebElement filterButtonElement = wait.until(
-            ExpectedConditions.elementToBeClickable(By.cssSelector("article[id*=MainCol] main div.search > div > button"))
-        );
-
         // TODO: filter by engineering category
+        // confirm that we are on review page while locating filter button
+        // final WebElement filterButtonElement = wait.until(ExpectedConditions
+        //         .elementToBeClickable(By.cssSelector("article[id*=MainCol] main div.search > div > button")));
 
         // TODO: remove sort if not needed - especially when we will scrape all reviews
         // anyway, and the ordering may not matter. This is also to scrape "featured
@@ -142,6 +139,16 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         return locatedElements;
     }
 
+    @Override
+    protected List<WebElement> locate() {
+        if (Configuration.SCRAPER_MODE.equals(ScraperMode.RENEWAL.getString())) {
+            return this.locate(Configuration.TEST_COMPANY_LAST_REVIEW_PAGE_URL);
+        } else {
+            return this.locate(null);
+        }
+    }
+
+    // TODO: remove this if not needed
     private void waitForReviewPanelLoading() {
         this.wait.until(
                 ExpectedConditions.invisibilityOfElementLocated(
@@ -152,7 +159,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
     @Override
     protected GlassdoorCompanyReviewParsedData parser(final List<WebElement> locatedElements) throws ScraperException {
-        final WebElement reviewPanelElement = locatedElements.get(0);
+        WebElement reviewPanelElement = locatedElements.get(0);
 
         // initialize data pack to store review data
         final GlassdoorCompanyReviewParsedData glassdoorCompanyParsedData = new GlassdoorCompanyReviewParsedData();
@@ -173,7 +180,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         final Integer reviewReportTime = 5;
         final Integer reportingRate = (Integer) (this.localReviewCount / reviewReportTime);
         final Timer progressReportingTimer = new Timer(Duration.ofSeconds(5));
-        // final Timer browserGarbageCollectionTimer = new Timer(Duration.ofMinutes(4));
+        final Timer browserGarbageCollectionTimer = new Timer(Duration.ofMinutes(4));
 
         // foreach review
         while (true) {
@@ -248,23 +255,26 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             // TODO: evaluate this, if good, we can remove this comment
             // force garbage collect on both scraper and browser driver
-            // if (browserGarbageCollectionTimer.doesReachCountdownDuration()) {
-            //     this.orderGarbageCollectionAgainstBrowser();
-            //     browserGarbageCollectionTimer.restart();
-            // }
+            if (browserGarbageCollectionTimer.doesReachCountdownDuration()) {
+                this.orderGarbageCollectionAgainstBrowser();
+                browserGarbageCollectionTimer.restart();
+            }
 
             // click next page
-            Boolean noNextPageLink = this.judgeNoNextPageLinkOrClickNextPageLink();
+            // Boolean noNextPageLink = this.judgeNoNextPageLinkOrClickNextPageLink();
+            final String nextPageLink = this.judgeNoNextPageLinkOrGetLinkForthApproach();
 
-            if (noNextPageLink) {
+            // if (noNextPageLink) {
+            if (nextPageLink == null) {
                 Logger.info("No next page link available, ready to wrap up scraper session.");
                 this.isFinalSession = true;
                 break;
+            } else {
+                Logger.info("Found next page link, going to continue...");
+                reviewPanelElement = this.locate(nextPageLink).get(0);
             }
 
-            Logger.info("Found next page link, going to continue...");
-
-            this.waitForReviewPanelLoading();
+            // this.waitForReviewPanelLoading();
 
             // check if approaching travis build limit
             // if so, stop session and try to schedule a cross-session job instead
@@ -277,6 +287,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         return glassdoorCompanyParsedData;
     }
 
+    // TODO: remove this if not used
     private Boolean judgeNoNextPageLinkOrClickNextPageLink() {
         // 1st approach
         if (!this.judgeNoNextPageLinkThenClickFirstApproach()) {
@@ -294,37 +305,38 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         }
 
         // 4th approach
-        if (!this.judgeNoNextPageLinkThenClickForthApproach()) {
-            return false;
-        }
+        // if (!this.judgeNoNextPageLinkThenClickForthApproach()) {
+        //     return false;
+        // }
 
         // default to having no next page
         return true;
     }
 
     /**
-     * This method tries to find a next page link, then click or navigate to it.
-     * Particularly, this 4th approach looks into the html head block and try to find
-     * something like below:
+     * This method tries to find a next page link, then get the link.
+     * Particularly, this 4th approach looks into the html head block and try to
+     * find something like below:
      *
-     * <link rel="next" href="https://www.glassdoor.com/Reviews/SAP-Reviews-E10471_P822.htm">
+     * <link rel="next" href=
+     * "https://www.glassdoor.com/Reviews/SAP-Reviews-E10471_P822.htm">
      *
-     * @return `true` if no next page link; otherwise `false`.
+     * @return url of next page link if presents, otherwise null
      */
-    private Boolean judgeNoNextPageLinkThenClickForthApproach() {
+    private String judgeNoNextPageLinkOrGetLinkForthApproach() {
         Logger.info("Trying 4th approach to capture next page link");
 
         try {
             final String nextPageUrl = this.driver.findElement(By.cssSelector("head > link[rel=next]")).getAttribute("href").strip();
             if (!nextPageUrl.isEmpty()) {
-                this.driver.get(nextPageUrl);
-                return false;
+                return nextPageUrl;
             }
         } catch (NoSuchElementException e) {}
 
-        return true;
+        return null;
     }
 
+    // TODO: remove this if not used
     private Boolean judgeNoNextPageLinkThenClickThirdApproach() {
         // example webpage in mind:
         // https://s3.console.aws.amazon.com/s3/object/iriversland-qualitative-org-review-v3/Amazon-6036/logs/reviewDataLostWarning.2020-03-04T23%253A44%253A01.848981Z.html?region=us-west-2&tab=overview
@@ -380,6 +392,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         return false;
     }
 
+    // TODO: remove this if not used
     private Boolean judgeNoNextPageLinkThenClickSecondApproach() {
         // TODO: remove this or change to debug after things get stable
         Logger.info("Trying 2nd approach to capture next page link");
@@ -415,6 +428,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         return false;
     }
 
+    // TODO: remove this if not used
     private Boolean judgeNoNextPageLinkThenClickFirstApproach() {
         try {
             this.driver.findElement(By.cssSelector("ul[class^=pagination] li[class$=next] a:not([class$=disabled])")).click();
@@ -512,7 +526,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         }
 
         if (glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
-            // Report abnormal case - we should be scraping an org because it has reviews; otherwise it's not of our concern
+            // Report abnormal case - we should be scraping an org because it has reviews;
+            // otherwise it's not of our concern
             final String reviewPanelElementRawContent = reviewPanelElement.getText();
             final String htmlDumpPath =
                 this.archiveManager.writeHtml("reviewMeta:NoLocalGlobalReviewCountWarning", this.driver.getPageSource());
@@ -849,7 +864,13 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 "return window.performance.memory.usedJSHeapSize/1024/1024"
             );
 
-        Logger.infoAlsoSlack(String.format("Garbage collection ordered, memory usage `%.2f MB`", usedJsHeapSizeAfterGarbageCollection));
+        final String message = String.format("Garbage collection ordered, memory usage `%.2f MB`", usedJsHeapSizeAfterGarbageCollection);
+
+        if (usedJsHeapSizeAfterGarbageCollection > 200) {
+            Logger.warnAlsoSlack(message);
+        } else {
+            Logger.infoAlsoSlack(message);
+        }
     }
 
     @Override
