@@ -246,8 +246,12 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             this.processedReviewPages++;
 
-            // TODO: for debugging gc
-            this.orderGarbageCollectionAgainstBrowser();
+            // TODO: evaluate this, if good, we can remove this comment
+            // force garbage collect on both scraper and browser driver
+            if (browserGarbageCollectionTimer.doesReachCountdownDuration()) {
+                this.orderGarbageCollectionAgainstBrowser();
+                browserGarbageCollectionTimer.restart();
+            }
 
             // click next page
             Boolean noNextPageLink = this.judgeNoNextPageLinkOrClickNextPageLink();
@@ -259,12 +263,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             }
 
             Logger.info("Found next page link, going to continue...");
-
-            // TODO:
-            // force garbage collect on both scraper and browser driver
-            // if (browserGarbageCollectionTimer.doesReachCountdownDuration()) {
-            //     this.orderGarbageCollectionAgainstBrowser();
-            // }
 
             this.waitForReviewPanelLoading();
 
@@ -842,7 +840,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         System.gc();
 
         try {
-            TimeUnit.SECONDS.sleep(4);
+            TimeUnit.SECONDS.sleep(10);
         } catch (InterruptedException e) {
             throw new ScraperShouldHaltException("Sleep interrupted: while garbage collecting for javascript");
         }
