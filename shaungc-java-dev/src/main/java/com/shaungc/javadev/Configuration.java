@@ -64,7 +64,28 @@ public final class Configuration {
         ? System.getenv("TEST_COMPANY_INFORMATION_STRING")
         : "";
     public static String TEST_COMPANY_ID = Configuration.getenvOrDefault("TEST_COMPANY_ID", "");
-    public static String TEST_COMPANY_NAME = Configuration.getenvOrDefault("TEST_COMPANY_NAME", "");
+    public static String TEST_COMPANY_NAME;
+
+    static {
+        // global orgName should not include double quotes
+        // one exception is pubsub channel name - but pubsub will explicitly add double quote there
+
+        // remove double quote, if included
+        final StringBuilder noQuoteOrgName = new StringBuilder(Configuration.getenvOrDefault("TEST_COMPANY_NAME", "").strip());
+
+        if (noQuoteOrgName.length() != 0) {
+            if (
+                noQuoteOrgName.charAt(0) == '"' && noQuoteOrgName.charAt(noQuoteOrgName.length() - 1) == '"' && noQuoteOrgName.length() >= 2
+            ) {
+                noQuoteOrgName.deleteCharAt(0);
+                noQuoteOrgName.deleteCharAt(noQuoteOrgName.length() - 1);
+            }
+
+            Configuration.TEST_COMPANY_NAME = noQuoteOrgName.toString();
+        } else {
+            Configuration.TEST_COMPANY_NAME = "";
+        }
+    }
 
     public static Integer TEST_COMPANY_LAST_PROGRESS_PROCESSED = Integer.valueOf(
         Configuration.getenvOrDefault("TEST_COMPANY_LAST_PROGRESS_PROCESSED", "0")
@@ -88,8 +109,8 @@ public final class Configuration {
 
     // misc helper
 
-    public static String getenvOrDefault(String envKey, String defaultString) {
-        String envValue = System.getenv(envKey);
+    public static String getenvOrDefault(final String envKey, final String defaultString) {
+        final String envValue = System.getenv(envKey);
         return envValue != null ? envValue : defaultString;
     }
 }

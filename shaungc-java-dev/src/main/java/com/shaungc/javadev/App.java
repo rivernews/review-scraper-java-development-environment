@@ -84,13 +84,12 @@ public class App {
 
             // tell FINAL to supervisor
             if (scrapeCompanyTask.isFinalSession) {
+                // return finish message
                 pubSubSubscription.publish(
                     String.format("%s:%s:%s", ScraperJobMessageType.FINISH.getString(), ScraperJobMessageTo.SLACK_MD_SVC.getString(), "OK!")
                 );
             } else {
-                // handle env var value needs quotes when value contains spaces
-                final String doubleQuotedOrgName = "\"" + (scrapeCompanyTask.archiveManager.orgName) + "\"";
-
+                // return renewal info along with finish message
                 pubSubSubscription.publish(
                     String.format(
                         "%s:%s:%s",
@@ -99,7 +98,7 @@ public class App {
                         S3Service.serializeJavaObjectAsJsonStyle(
                             new ScraperJobData(
                                 scrapeCompanyTask.archiveManager.orgId,
-                                doubleQuotedOrgName,
+                                scrapeCompanyTask.archiveManager.orgName,
                                 new ScraperProgressData(
                                     scrapeCompanyTask.processedReviewsCount,
                                     scrapeCompanyTask.wentThroughReviewsCount,
