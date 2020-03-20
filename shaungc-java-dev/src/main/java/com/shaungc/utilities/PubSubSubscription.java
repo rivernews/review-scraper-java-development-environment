@@ -2,8 +2,6 @@ package com.shaungc.utilities;
 
 import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.javadev.Configuration;
-import com.shaungc.utilities.ScraperJobMessageTo;
-import com.shaungc.utilities.ScraperJobMessageType;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
@@ -13,16 +11,7 @@ import java.util.concurrent.CountDownLatch;
 // Writing PubSub adapter
 // https://www.baeldung.com/java-redis-lettuce#pubsub
 public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
-    public final String redisPubsubChannelName = String.format(
-        "%s:%s:%s",
-        RedisPubSubChannelPrefix.SCRAPER_JOB_CHANNEL.getString(),
-        // We should check `TEST_COMPANY_NAME` first, because that indicates a renewal job where the channel has to use `TEST_COMPANY_NAME`
-        // For `TEST_COMPANY_INFORMATION_STRING`, it could be provided regardless of regular or renewal job
-        !Configuration.TEST_COMPANY_NAME.isEmpty()
-            ? "\"" + Configuration.TEST_COMPANY_NAME + "\""
-            : Configuration.TEST_COMPANY_INFORMATION_STRING,
-        Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION
-    );
+    public final String redisPubsubChannelName;
     private final RedisClient subscriberRedisClient;
     private final RedisClient publisherRedisClient;
     private final StatefulRedisPubSubConnection<String, String> subscriberRedisConnection;
@@ -37,6 +26,34 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
     // https://lettuce.io/core/release/reference/#pubsub.subscribing
 
     public PubSubSubscription() {
+        // generate the correct channel name to subscribe to
+
+        StringBuilder orgNameForChannelName;
+        // We should check `TEST_COMPANY_NAME` first, because that indicates a renewal job where the channel has to use `TEST_COMPANY_NAME`
+        // For `TEST_COMPANY_INFORMATION_STRING`, it could be provided regardless of regular or renewal job
+        if (!Configuration.TEST_COMPANY_NAME.isEmpty()) {
+            orgNameForChannelName = new StringBuilder(Configuration.TEST_COMPANY_NAME);
+
+            if (orgNameForChannelName.charAt(0) != '"') {
+                orgNameForChannelName.insert(0, '"');
+            }
+
+            if (orgNameForChannelName.charAt(orgNameForChannelName.length() - 1) != '"') {
+                orgNameForChannelName.append('"');
+            }
+        } else {
+            orgNameForChannelName = new StringBuilder(Configuration.TEST_COMPANY_INFORMATION_STRING);
+        }
+        this.redisPubsubChannelName =
+            String.format(
+                "%s:%s:%s",
+                RedisPubSubChannelPrefix.SCRAPER_JOB_CHANNEL.getString(),
+                orgNameForChannelName.toString(),
+                Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION
+            );
+
+        // prepare redis connection
+
         if (Configuration.SUPERVISOR_PUBSUB_REDIS_DB.isEmpty()) {
             throw new ScraperShouldHaltException("SUPERVISOR_PUBSUB_REDIS_DB is not set.");
         }

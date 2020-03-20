@@ -15,9 +15,7 @@ import com.shaungc.utilities.ScraperMode;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
-import org.openqa.selenium.NoSuchSessionException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
 
 /**
  * Hello world!
@@ -119,7 +117,7 @@ public class App {
             }
 
             return;
-        } catch (ScraperException | ScraperShouldHaltException | NoSuchSessionException e) {
+        } catch (ScraperException | ScraperShouldHaltException e) {
             Logger.info(e.getMessage());
             Logger.errorAlsoSlack(
                 "A scraper exception is raised and its message is logged; which is not an error of the program, but more of the webpage the scraper is dealing with (or the selenium server issue). Refer to the current url of the scraper to investigate more: " +
