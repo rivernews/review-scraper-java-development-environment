@@ -43,9 +43,18 @@ public class Timer {
         return this.captureCurrentSessionDuration(Instant.now()).compareTo(this.countdownDuration) > 0;
     }
 
+    // current session utility function
+
     private Duration captureCurrentSessionDuration(Instant endInstant) {
         return Duration.between(this.startInstant, endInstant);
     }
+
+    public String captureCurrentSessionElapseDurationString() {
+        final Duration duration = this.captureCurrentSessionDuration(Instant.now());
+        return this.getDurationString(duration);
+    }
+
+    // capture overall duration utility function
 
     private Duration captureOverallDuration(Instant endInstant) {
         Duration duration = Duration.between(this.startInstant, endInstant);
@@ -66,6 +75,8 @@ public class Timer {
         final Duration duration = this.captureOverallDuration(Instant.now());
         return String.format("%s", duration.toMillis());
     }
+
+    // beautified string utility function
 
     private String getDurationString(final Duration duration) {
         return String.format(

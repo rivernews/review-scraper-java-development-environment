@@ -180,7 +180,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         final Integer reviewReportTime = 5;
         final Integer reportingRate = (Integer) (this.localReviewCount / reviewReportTime);
         final Timer progressReportingTimer = new Timer(Duration.ofSeconds(5));
-        final Timer browserGarbageCollectionTimer = new Timer(Duration.ofMinutes(4));
+        final Timer browserGarbageCollectionTimer = new Timer(Duration.ofMinutes(5));
 
         // foreach review
         while (true) {
@@ -253,13 +253,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             this.processedReviewPages++;
 
-            // TODO: evaluate this, if good, we can remove this comment
-            // force garbage collect on both scraper and browser driver
-            if (browserGarbageCollectionTimer.doesReachCountdownDuration()) {
-                this.orderGarbageCollectionAgainstBrowser();
-                browserGarbageCollectionTimer.restart();
-            }
-
             // click next page
             // Boolean noNextPageLink = this.judgeNoNextPageLinkOrClickNextPageLink();
             final String nextPageLink = this.judgeNoNextPageLinkOrGetLinkForthApproach();
@@ -274,6 +267,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 reviewPanelElement = this.locate(nextPageLink).get(0);
             }
 
+            // TODO: evaluate if we still need old next page link approach,
+            // if not, clean up all related code
             // this.waitForReviewPanelLoading();
 
             // check if approaching travis build limit
@@ -281,6 +276,17 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             if (this.scraperSessionTimer.doesReachCountdownDuration()) {
                 // stop current scraper session
                 return glassdoorCompanyParsedData;
+            }
+
+            // order garbage collect on both scraper and browser driver
+            // in case of danger memory utilization, schedule for cross session
+            if (browserGarbageCollectionTimer.doesReachCountdownDuration()) {
+                final Double memoryUtilizationMi = this.orderGarbageCollectionAgainstBrowser();
+                if (memoryUtilizationMi > 500) {
+                    Logger.warnAlsoSlack("Danger memory water meter, use cross session and abort current scraper");
+                    return glassdoorCompanyParsedData;
+                }
+                browserGarbageCollectionTimer.restart();
             }
         }
 
@@ -846,40 +852,35 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         }
     }
 
-    public void orderGarbageCollectionAgainstBrowser() {
-        Double usedJsHeapSizeAfterGarbageCollection = (Double) ((JavascriptExecutor) this.driver).executeScript(
-                "return window.performance.memory.usedJSHeapSize/1024/1024"
-            );
-
-        Logger.infoAlsoSlack(
-            String.format(
-                "Starting garbage collection on both scraper and browser, current memory usage `%.2f MB`",
-                usedJsHeapSizeAfterGarbageCollection
-            )
-        );
-
+    public Double orderGarbageCollectionAgainstBrowser() {
         // start gc
         ((JavascriptExecutor) this.driver).executeScript("window.gc()");
         // also for current scraper java process
         System.gc();
 
         try {
-            TimeUnit.SECONDS.sleep(10);
+            TimeUnit.SECONDS.sleep(2);
         } catch (InterruptedException e) {
             throw new ScraperShouldHaltException("Sleep interrupted: while garbage collecting for javascript");
         }
 
         // collect memory utilization stats
-        usedJsHeapSizeAfterGarbageCollection =
-            (Double) ((JavascriptExecutor) this.driver).executeScript("return window.performance.memory.usedJSHeapSize/1024/1024");
+        final Double usedJsHeapSizeAfterGarbageCollection = (Double) ((JavascriptExecutor) this.driver).executeScript(
+                "return window.performance.memory.usedJSHeapSize/1024/1024"
+            );
 
-        final String message = String.format("Garbage collection ordered, memory usage `%.2f MB`", usedJsHeapSizeAfterGarbageCollection);
+        final String message = String.format(
+            "*(%s) (current session %s)* High memory usage `%.2f MB` while ordering garbage collection",
+            this.archiveManager.orgName,
+            this.scraperSessionTimer.captureCurrentSessionElapseDurationString(),
+            usedJsHeapSizeAfterGarbageCollection
+        );
 
         if (usedJsHeapSizeAfterGarbageCollection > 200) {
             Logger.warnAlsoSlack(message);
-        } else {
-            Logger.infoAlsoSlack(message);
         }
+
+        return usedJsHeapSizeAfterGarbageCollection;
     }
 
     @Override
