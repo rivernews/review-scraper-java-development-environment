@@ -67,6 +67,7 @@ public class HttpService {
     }
 
     public static String encodeUrl(final String urlString) {
+        // https://stackoverflow.com/questions/10786042/java-url-encoding-of-query-string-parameters
         try {
             URL url = new URL(urlString);
             URI uri = new URI(
