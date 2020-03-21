@@ -34,11 +34,11 @@ public class ArchiveManager {
     private static final String BUCKET_NAME = Configuration.AWS_S3_ARCHIVE_BUCKET_NAME;
     private static final Region BUCKET_REGION = Region.US_WEST_2;
 
-    private static String BUKET_BASE_URL = String.format("https://s3.console.aws.amazon.com/s3/buckets/%s/", ArchiveManager.BUCKET_NAME);
+    private static String BUCKET_BASE_URL = String.format("https://s3.console.aws.amazon.com/s3/buckets/%s/", ArchiveManager.BUCKET_NAME);
 
     public static String BUCKET_URL = String.format(
         "%s?region=%s&tab=overview",
-        ArchiveManager.BUKET_BASE_URL,
+        ArchiveManager.BUCKET_BASE_URL,
         ArchiveManager.BUCKET_REGION
     );
 
@@ -103,10 +103,10 @@ public class ArchiveManager {
 
     public String getFullUrlOnS3FromFilePathBasedOnOrgDirectory(final String filePathBasedOnOrgDirectory) {
         final String urlString = String.format(
-            "https://%s.s3-%s.amazonaws.com/%s",
+            "https://s3.console.aws.amazon.com/s3/object/%s/%s?region=%s&tab=overview",
             ArchiveManager.BUCKET_NAME,
-            ArchiveManager.BUCKET_REGION,
-            filePathBasedOnOrgDirectory
+            filePathBasedOnOrgDirectory,
+            ArchiveManager.BUCKET_REGION
         );
 
         return HttpService.encodeUrl(urlString);
