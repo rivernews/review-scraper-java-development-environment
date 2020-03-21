@@ -102,7 +102,12 @@ public class ArchiveManager {
     }
 
     public String getFullUrlOnS3FromFilePathBasedOnOrgDirectory(final String filePathBasedOnOrgDirectory) {
-        final String urlString = String.format("%s%s/", ArchiveManager.BUKET_BASE_URL, filePathBasedOnOrgDirectory);
+        final String urlString = String.format(
+            "https://%s.s3-%s.amazonaws.com/%s",
+            ArchiveManager.BUCKET_NAME,
+            ArchiveManager.BUCKET_REGION,
+            filePathBasedOnOrgDirectory
+        );
 
         return HttpService.encodeUrl(urlString);
     }

@@ -150,7 +150,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         final String htmlDumpPath = this.archiveManager.writeHtml("review:cannotLocateReviewPanel", this.driver.getPageSource());
         throw new ScraperShouldHaltException(
             String.format(
-                "Cannot locate review panel. <Dumped html on s3|%s>, scraper was facing `%s`.",
+                "Cannot locate review panel. <%s|Dumped html on s3>, scraper was facing `%s`.",
                 this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath),
                 this.driver.getCurrentUrl()
             )
@@ -896,6 +896,12 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         if (usedJsHeapSizeAfterGarbageCollection > 200) {
             Logger.warnAlsoSlack(message);
+            // give additional idle time to try to earn time for gc to apply
+            try {
+                TimeUnit.SECONDS.sleep(30);
+            } catch (InterruptedException e) {
+                throw new ScraperShouldHaltException("Sleep interrupted: while garbage collecting for javascript");
+            }
         }
 
         return usedJsHeapSizeAfterGarbageCollection;
