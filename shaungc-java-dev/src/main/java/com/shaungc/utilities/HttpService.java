@@ -3,7 +3,10 @@ package com.shaungc.utilities;
 import com.shaungc.dataStorage.S3Service;
 import com.shaungc.exceptions.ScraperShouldHaltException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
@@ -61,5 +64,25 @@ public class HttpService {
 
     private static HttpRequest getHttpRequest(URI uri, String serializedData) {
         return HttpRequest.newBuilder(uri).POST(BodyPublishers.ofString(serializedData)).build();
+    }
+
+    public static String encodeUrl(final String urlString) {
+        try {
+            URL url = new URL(urlString);
+            URI uri = new URI(
+                url.getProtocol(),
+                url.getUserInfo(),
+                url.getHost(),
+                url.getPort(),
+                url.getPath(),
+                url.getQuery(),
+                url.getRef()
+            );
+
+            return uri.toASCIIString();
+        } catch (MalformedURLException | URISyntaxException e) {
+            e.printStackTrace();
+            throw new ScraperShouldHaltException((new StringBuilder("Malformed url ")).append(urlString).toString());
+        }
     }
 }

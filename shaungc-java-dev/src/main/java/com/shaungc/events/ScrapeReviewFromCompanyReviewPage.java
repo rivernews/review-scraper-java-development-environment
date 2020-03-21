@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -132,11 +133,28 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         // this.waitForReviewPanelLoading();
 
         // locate review panel
-        final WebElement reviewPanelElement =
-            this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(this.reviewPanelElementCssSelector)));
-        locatedElements.add(reviewPanelElement);
-
-        return locatedElements;
+        // critical mission so set retry to 2
+        final Integer FIND_REVIEW_PANEL_RETRY = 2;
+        Integer findReviewPanelRetryCounter = 0;
+        while (findReviewPanelRetryCounter <= FIND_REVIEW_PANEL_RETRY) {
+            try {
+                final WebElement reviewPanelElement =
+                    this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(this.reviewPanelElementCssSelector)));
+                locatedElements.add(reviewPanelElement);
+                return locatedElements;
+            } catch (TimeoutException e) {
+                findReviewPanelRetryCounter++;
+                continue;
+            }
+        }
+        final String htmlDumpPath = this.archiveManager.writeHtml("review:cannotLocateReviewPanel", this.driver.getPageSource());
+        throw new ScraperShouldHaltException(
+            String.format(
+                "Cannot locate review panel. <Dumped html on s3|%s>, scraper was facing `%s`.",
+                this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath),
+                this.driver.getCurrentUrl()
+            )
+        );
     }
 
     @Override

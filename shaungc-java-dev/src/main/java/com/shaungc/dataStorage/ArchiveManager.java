@@ -4,6 +4,8 @@ import com.shaungc.dataTypes.BasicParsedData;
 import com.shaungc.dataTypes.EmployeeReviewData;
 import com.shaungc.dataTypes.GlassdoorReviewMetadata;
 import com.shaungc.javadev.Configuration;
+import com.shaungc.utilities.HttpService;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Instant;
 import software.amazon.awssdk.regions.Region;
@@ -32,9 +34,11 @@ public class ArchiveManager {
     private static final String BUCKET_NAME = Configuration.AWS_S3_ARCHIVE_BUCKET_NAME;
     private static final Region BUCKET_REGION = Region.US_WEST_2;
 
+    private static String BUKET_BASE_URL = String.format("https://s3.console.aws.amazon.com/s3/buckets/%s/", ArchiveManager.BUCKET_NAME);
+
     public static String BUCKET_URL = String.format(
-        "https://s3.console.aws.amazon.com/s3/buckets/%s/?region=%s&tab=overview",
-        ArchiveManager.BUCKET_NAME,
+        "%s?region=%s&tab=overview",
+        ArchiveManager.BUKET_BASE_URL,
         ArchiveManager.BUCKET_REGION
     );
 
@@ -95,6 +99,12 @@ public class ArchiveManager {
 
     public static String getCollidedGlassdoorOrgReviewDataFilename(final String reviewId) {
         return ArchiveManager.getCollidedGlassdoorOrgReviewDataFilenamePrefix(reviewId) + "." + Instant.now();
+    }
+
+    public String getFullUrlOnS3FromFilePathBasedOnOrgDirectory(final String filePathBasedOnOrgDirectory) {
+        final String urlString = String.format("%s%s/", ArchiveManager.BUKET_BASE_URL, filePathBasedOnOrgDirectory);
+
+        return HttpService.encodeUrl(urlString);
     }
 
     // write out functions
