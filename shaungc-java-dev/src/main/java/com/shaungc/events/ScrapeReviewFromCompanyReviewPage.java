@@ -103,7 +103,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // navigate to reviews page
         if (reviewPageUrl != null && !reviewPageUrl.strip().isEmpty()) {
-            this.driver.navigate().to(reviewPageUrl);
+            this.driver.get(reviewPageUrl);
         } else {
             this.driver.findElement(By.cssSelector("article#WideCol a.eiCell.reviews")).click();
         }
@@ -143,6 +143,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 locatedElements.add(reviewPanelElement);
                 return locatedElements;
             } catch (TimeoutException e) {
+                this.driver.navigate().refresh();
                 findReviewPanelRetryCounter++;
                 continue;
             }
