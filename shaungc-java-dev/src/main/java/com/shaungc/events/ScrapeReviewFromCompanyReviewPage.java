@@ -143,8 +143,16 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 locatedElements.add(reviewPanelElement);
                 return locatedElements;
             } catch (TimeoutException e) {
-                this.driver.navigate().refresh();
                 findReviewPanelRetryCounter++;
+                Logger.warnAlsoSlack(
+                    String.format(
+                        "*(%s) (current session %s)* Cannot locate review panel, retrying %sth time",
+                        this.archiveManager.orgName,
+                        this.scraperSessionTimer.captureCurrentSessionElapseDurationString(),
+                        findReviewPanelRetryCounter
+                    )
+                );
+                this.driver.navigate().refresh();
                 continue;
             }
         }
