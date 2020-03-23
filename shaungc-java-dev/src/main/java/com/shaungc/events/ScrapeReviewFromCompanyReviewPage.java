@@ -309,7 +309,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             // in case of danger memory utilization, schedule for cross session
             if (browserGarbageCollectionTimer.doesReachCountdownDuration()) {
                 final Double memoryUtilizationMi = this.orderGarbageCollectionAgainstBrowser();
-                if (memoryUtilizationMi > 350) {
+                if (memoryUtilizationMi > 300) {
                     Logger.warnAlsoSlack("Danger memory water meter, use cross session and abort current scraper");
                     return glassdoorCompanyParsedData;
                 }
@@ -907,7 +907,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             Logger.warnAlsoSlack(message);
             // give additional idle time to try to earn time for gc to apply
             try {
-                TimeUnit.SECONDS.sleep(30);
+                TimeUnit.SECONDS.sleep(10);
             } catch (InterruptedException e) {
                 throw new ScraperShouldHaltException("Sleep interrupted: while garbage collecting for javascript");
             }
