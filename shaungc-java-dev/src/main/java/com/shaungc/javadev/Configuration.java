@@ -15,6 +15,8 @@ public final class Configuration {
     public static Boolean DEBUG = Boolean.parseBoolean(Configuration.getenvOrDefault("DEBUG", "true"));
     public static Integer LOGGER_LEVEL = System.getenv("LOGGER_LEVEL") != null ? Integer.parseInt(System.getenv("LOGGER_LEVEL")) : 4;
 
+    public static Boolean RUNNING_IN_TRAVIS = Boolean.parseBoolean(Configuration.getenvOrDefault("TRAVIS", "false"));
+
     public static String WEBDRIVER_MODE = Configuration.getenvOrDefault("WEBDRIVER_MODE", "localInstalled");
     public static String SELENIUM_SERVER_CUSTOM_HOST = Configuration.getenvOrDefault("SELENIUM_SERVER_CUSTOM_HOST", "");
 

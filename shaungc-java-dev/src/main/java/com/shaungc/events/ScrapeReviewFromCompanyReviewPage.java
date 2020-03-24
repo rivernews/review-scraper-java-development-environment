@@ -207,7 +207,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         final Integer reviewReportTime = 5;
         final Integer reportingRate = (Integer) (this.localReviewCount / reviewReportTime);
         final Timer progressReportingTimer = new Timer(Duration.ofSeconds(5));
-        final Timer browserGarbageCollectionTimer = new Timer(Duration.ofMinutes(5));
+        final Timer browserGarbageCollectionTimer = !Configuration.RUNNING_IN_TRAVIS ? new Timer(Duration.ofMinutes(5)) : null;
 
         // foreach review
         while (true) {
@@ -307,7 +307,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             // order garbage collect on both scraper and browser driver
             // in case of danger memory utilization, schedule for cross session
-            if (browserGarbageCollectionTimer.doesReachCountdownDuration()) {
+            if (browserGarbageCollectionTimer != null && browserGarbageCollectionTimer.doesReachCountdownDuration()) {
                 final Double memoryUtilizationMi = this.orderGarbageCollectionAgainstBrowser();
                 if (memoryUtilizationMi > 250) {
                     Logger.warnAlsoSlack("Danger memory water meter, use cross session and abort current scraper");
