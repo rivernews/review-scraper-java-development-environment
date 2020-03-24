@@ -309,7 +309,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             // in case of danger memory utilization, schedule for cross session
             if (browserGarbageCollectionTimer.doesReachCountdownDuration()) {
                 final Double memoryUtilizationMi = this.orderGarbageCollectionAgainstBrowser();
-                if (memoryUtilizationMi > 300) {
+                if (memoryUtilizationMi > 250) {
                     Logger.warnAlsoSlack("Danger memory water meter, use cross session and abort current scraper");
                     return glassdoorCompanyParsedData;
                 }
