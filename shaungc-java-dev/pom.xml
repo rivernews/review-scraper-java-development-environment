@@ -117,13 +117,13 @@
         </plugin> -->
 
       <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>exec-maven-plugin</artifactId>
-          <version>1.6.0</version>
-          <configuration>
-            <mainClass>com.shaungc.javadev.App</mainClass>
-          </configuration>
-        </plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
+        <configuration>
+          <mainClass>com.shaungc.javadev.App</mainClass>
+        </configuration>
+      </plugin>
 
       <!-- packaging uber jar -->
       <!-- http://maven.apache.org/plugins/maven-shade-plugin/ -->
