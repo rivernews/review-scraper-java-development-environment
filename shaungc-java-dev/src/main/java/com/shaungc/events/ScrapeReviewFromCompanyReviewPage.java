@@ -101,13 +101,51 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     protected List<WebElement> locate(final String reviewPageUrl) {
         final List<WebElement> locatedElements = new ArrayList<>();
 
-        // navigate to reviews page
-        if (reviewPageUrl != null && !reviewPageUrl.strip().isEmpty()) {
-            this.driver.get(reviewPageUrl);
-        } else {
-            this.driver.findElement(By.cssSelector("article#WideCol a.eiCell.reviews")).click();
-        }
+        // locate review panel
+        // critical mission so set retry to 2
+        final Integer FIND_REVIEW_PANEL_RETRY = 2;
+        Integer findReviewPanelRetryCounter = 0;
+        while (findReviewPanelRetryCounter <= FIND_REVIEW_PANEL_RETRY) {
+            try {
+                // navigate to reviews page
+                if (reviewPageUrl != null && !reviewPageUrl.strip().isEmpty()) {
+                    this.driver.get(reviewPageUrl);
+                } else {
+                    this.driver.findElement(By.cssSelector("article#WideCol a.eiCell.reviews")).click();
+                }
 
+                final WebElement reviewPanelElement =
+                    this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(this.reviewPanelElementCssSelector)));
+
+                locatedElements.add(reviewPanelElement);
+
+                break;
+            } catch (TimeoutException e) {
+                findReviewPanelRetryCounter++;
+                Logger.warnAlsoSlack(
+                    String.format(
+                        "*(%s) (current session %s)* Cannot locate review panel, retrying %sth time",
+                        this.archiveManager.orgName,
+                        this.scraperSessionTimer.captureCurrentSessionElapseDurationString(),
+                        findReviewPanelRetryCounter
+                    )
+                );
+
+                if (findReviewPanelRetryCounter > FIND_REVIEW_PANEL_RETRY) {
+                    final String htmlDumpPath =
+                        this.archiveManager.writeHtml("review:cannotLocateReviewPanel", this.driver.getPageSource());
+                    throw new ScraperShouldHaltException(
+                        String.format(
+                            "Cannot locate review panel. <%s|Dumped html on s3>, scraper was facing `%s`.",
+                            this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath),
+                            this.driver.getCurrentUrl()
+                        )
+                    );
+                }
+
+                continue;
+            }
+        }
         // TODO: filter by engineering category
         // confirm that we are on review page while locating filter button
         // final WebElement filterButtonElement = wait.until(ExpectedConditions
@@ -131,39 +169,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // // wait for loading sort
         // this.waitForReviewPanelLoading();
-
-        // locate review panel
-        // critical mission so set retry to 2
-        final Integer FIND_REVIEW_PANEL_RETRY = 2;
-        Integer findReviewPanelRetryCounter = 0;
-        while (findReviewPanelRetryCounter <= FIND_REVIEW_PANEL_RETRY) {
-            try {
-                final WebElement reviewPanelElement =
-                    this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(this.reviewPanelElementCssSelector)));
-                locatedElements.add(reviewPanelElement);
-                return locatedElements;
-            } catch (TimeoutException e) {
-                findReviewPanelRetryCounter++;
-                Logger.warnAlsoSlack(
-                    String.format(
-                        "*(%s) (current session %s)* Cannot locate review panel, retrying %sth time",
-                        this.archiveManager.orgName,
-                        this.scraperSessionTimer.captureCurrentSessionElapseDurationString(),
-                        findReviewPanelRetryCounter
-                    )
-                );
-                this.driver.navigate().refresh();
-                continue;
-            }
-        }
-        final String htmlDumpPath = this.archiveManager.writeHtml("review:cannotLocateReviewPanel", this.driver.getPageSource());
-        throw new ScraperShouldHaltException(
-            String.format(
-                "Cannot locate review panel. <%s|Dumped html on s3>, scraper was facing `%s`.",
-                this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath),
-                this.driver.getCurrentUrl()
-            )
-        );
     }
 
     @Override
