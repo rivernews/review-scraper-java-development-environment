@@ -143,6 +143,13 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     );
                 }
 
+                // add some sleep between retry, if it's network congestion this may mitigate it
+                try {
+                    TimeUnit.SECONDS.sleep(10 * findReviewPanelRetryCounter);
+                } catch (InterruptedException interruptedException) {
+                    throw new ScraperShouldHaltException("Sleep interrupted: while sleeping for review panel capture retry");
+                }
+
                 continue;
             }
         }
@@ -169,6 +176,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // // wait for loading sort
         // this.waitForReviewPanelLoading();
+
+        return locatedElements;
     }
 
     @Override
