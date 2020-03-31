@@ -34,6 +34,8 @@ public final class Configuration {
 
     public static URI SLACK_WEBHOOK_URL = RequestAddressValidator.toURI(System.getenv("SLACK_WEBHOOK_URL"));
 
+    public static String REDIS_PASSWORD = Configuration.getenvOrDefault("REDIS_PASSWORD", "");
+
     // external resources
 
     public static String AWS_S3_ARCHIVE_BUCKET_NAME = System.getenv("AWS_S3_ARCHIVE_BUCKET_NAME") != null

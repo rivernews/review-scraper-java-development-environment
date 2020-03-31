@@ -40,7 +40,8 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
         }
 
         final String redisUrl = String.format(
-            "redis://%s:6379/%s",
+            "redis://:%s@%s:6379/%s",
+            Configuration.REDIS_PASSWORD,
             Configuration.REDIS_MODE.equals(ExternalServiceMode.SERVER_FROM_MACOS_DOCKER_CONTAINER.getString())
                 ? "host.docker.internal"
                 : Configuration.REDIS_MODE.equals(ExternalServiceMode.SERVER_FROM_PORT_FORWARD.getString())
