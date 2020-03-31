@@ -4,6 +4,7 @@ set -e
 
 docker run \
     -v /usr/local/bin/:/usr/local/bin/ \
+    -v /usr/lib/:/usr/lib/ \
     --rm \
         --env=AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
         --env=AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
