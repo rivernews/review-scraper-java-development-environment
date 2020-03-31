@@ -34,6 +34,7 @@ public final class Configuration {
 
     public static URI SLACK_WEBHOOK_URL = RequestAddressValidator.toURI(System.getenv("SLACK_WEBHOOK_URL"));
 
+    public static String REDIS_PORT = Configuration.getenvOrDefault("REDIS_PORT", "6379");
     public static String REDIS_PASSWORD = Configuration.getenvOrDefault("REDIS_PASSWORD", "");
 
     // external resources
