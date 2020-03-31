@@ -116,6 +116,6 @@ public final class Configuration {
 
     public static String getenvOrDefault(final String envKey, final String defaultString) {
         final String envValue = System.getenv(envKey);
-        return envValue != null ? envValue : defaultString;
+        return envValue != null && !envValue.strip().isEmpty() ? envValue : defaultString;
     }
 }
