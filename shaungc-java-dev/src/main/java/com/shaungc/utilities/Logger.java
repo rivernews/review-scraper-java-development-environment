@@ -50,16 +50,15 @@ public class Logger {
         String leadingNewlines = "\n".repeat(leadingNewlineCount);
         String trailingNewlines = "\n".repeat(trailingNewlineCount);
         StringBuilder finalMessage =
-            (new StringBuilder(leadingNewlines)).append(Instant.now())
-                .append(" ")
-                .append(logLevel.getVisualCueEmoji())
+            (new StringBuilder()).append(logLevel.getVisualCueEmoji())
                 .append(logLevel.getAliasText())
                 .append(": ")
                 .append(message)
                 .append(trailingNewlines);
 
         if (Configuration.DEBUG || Configuration.LOGGER_LEVEL.compareTo(logLevel.getVerbosenessLevelValue()) >= 0) {
-            System.out.println(finalMessage);
+            StringBuilder prefix = new StringBuilder(leadingNewlines).append(Instant.now().toString()).append(" ");
+            System.out.println(prefix.append(finalMessage.toString()));
         }
 
         if (alsoSendSlackMessage) {
