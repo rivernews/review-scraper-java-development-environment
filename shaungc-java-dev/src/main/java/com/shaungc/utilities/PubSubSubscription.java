@@ -74,7 +74,7 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
     public void subscribed(final String channel, final long count) {
         super.subscribed(channel, count);
 
-        Logger.infoAlsoSlack("Scraper subscribed to PubSub channle `" + channel + "`");
+        Logger.infoAlsoSlack("Scraper subscribed to PubSub channel `" + channel + "`");
 
         this.publish(
                 String.format(

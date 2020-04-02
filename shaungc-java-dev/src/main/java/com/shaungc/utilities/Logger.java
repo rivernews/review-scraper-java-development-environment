@@ -1,6 +1,7 @@
 package com.shaungc.utilities;
 
 import com.shaungc.javadev.Configuration;
+import java.time.Instant;
 
 public class Logger {
 
@@ -48,14 +49,21 @@ public class Logger {
     ) {
         String leadingNewlines = "\n".repeat(leadingNewlineCount);
         String trailingNewlines = "\n".repeat(trailingNewlineCount);
-        String finalMessage = leadingNewlines + logLevel.getVisualCueEmoji() + logLevel.getAliasText() + ": " + message + trailingNewlines;
+        StringBuilder finalMessage =
+            (new StringBuilder(leadingNewlines)).append(Instant.now())
+                .append(" ")
+                .append(logLevel.getVisualCueEmoji())
+                .append(logLevel.getAliasText())
+                .append(": ")
+                .append(message)
+                .append(trailingNewlines);
 
         if (Configuration.DEBUG || Configuration.LOGGER_LEVEL.compareTo(logLevel.getVerbosenessLevelValue()) >= 0) {
             System.out.println(finalMessage);
         }
 
         if (alsoSendSlackMessage) {
-            SlackService.sendMessage(finalMessage);
+            SlackService.sendMessage(finalMessage.toString());
         }
     }
 }
