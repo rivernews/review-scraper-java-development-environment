@@ -136,7 +136,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                         this.archiveManager.writeHtml("review:cannotLocateReviewPanel", this.driver.getPageSource());
                     throw new ScraperShouldHaltException(
                         String.format(
-                            "Cannot locate review panel. <%s|Dumped html on s3>, scraper was facing `%s`.",
+                            "Cannot locate review panel after `%s` retries. <%s|Dumped html on s3>, scraper was facing `%s`.",
+                            findReviewPanelRetryCounter,
                             this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath),
                             this.driver.getCurrentUrl()
                         )
@@ -296,7 +297,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             // click next page
             // Boolean noNextPageLink = this.judgeNoNextPageLinkOrClickNextPageLink();
-            final String nextPageLink = this.judgeNoNextPageLinkOrGetLinkForthApproach();
+            String nextPageLink = this.judgeNoNextPageLinkOrGetLinkForthApproach();
+
+            if (nextPageLink == null) {
+                nextPageLink = this.judgeNoNextPageLinkOrGetLinkFifthApproach();
+            }
 
             // if (noNextPageLink) {
             if (nextPageLink == null) {
@@ -304,7 +309,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 this.isFinalSession = true;
                 break;
             } else {
-                Logger.info("Found next page link, going to continue...");
+                Logger.info("Found / guessed next page link, going to continue...");
                 reviewPanelElement = this.locate(nextPageLink).get(0);
             }
 
@@ -358,6 +363,28 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // default to having no next page
         return true;
+    }
+
+    /**
+     * This method try to guess next page url based on the observed pattern in url across pages
+     * sample url: https://www.glassdoor.com/Reviews/Target-Reviews-E194_P177.htm
+     */
+    private String judgeNoNextPageLinkOrGetLinkFifthApproach() {
+        StringBuilder logMessageStringBuilder = new StringBuilder();
+        logMessageStringBuilder
+            .append("*(")
+            .append(this.archiveManager.orgName)
+            .append(")* ")
+            .append("Trying 5th approach to capture next page link");
+        Logger.warnAlsoSlack(logMessageStringBuilder.toString());
+
+        // if it seems like there should be no more next page
+        // then don't use this approach of guessing next url
+        if (this.processedReviewPages * 10 >= this.localReviewCount) {
+            return null;
+        }
+
+        return this.driver.getCurrentUrl().replaceFirst("_P\\d+\\.htm$", String.format("_P%s.htm", this.processedReviewPages + 1));
     }
 
     /**

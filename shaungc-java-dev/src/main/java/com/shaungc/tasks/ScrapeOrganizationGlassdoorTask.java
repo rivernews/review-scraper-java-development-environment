@@ -212,27 +212,25 @@ public class ScrapeOrganizationGlassdoorTask {
         // 10 reviews, the upper bound of lost rate should be 10%.
         // We raise the process rate alert to 98% is just to be more careful - you can easily check if
         // indeed there's no next page link by visiting the last processed review page
-        final Float REVIEW_STORED_RATE_ALERT_THRESHOLD = Float.valueOf("0.98");
+        final Float REVIEW_WENTTHROUGH_RATE_ALERT_THRESHOLD = Float.valueOf("0.98");
         final Float reviewStoredRate = (float) (this.processedReviewsCount) / this.localReviewsCount;
         final Float reviewWentThroughRate = (float) (this.wentThroughReviewsCount) / this.localReviewsCount;
         final Float reviewStoredRatePercentage = reviewStoredRate * (float) 100.0;
         final Float reviewWentThroughRatePercentage = reviewWentThroughRate * (float) 100.0;
-        if (reviewStoredRate < REVIEW_STORED_RATE_ALERT_THRESHOLD) {
-            final String htmlDumpPath = this.archiveManager.writeHtml("reviewDataLostWarning", this.driver.getPageSource());
-
+        if (reviewWentThroughRate < REVIEW_WENTTHROUGH_RATE_ALERT_THRESHOLD) {
             Logger.warnAlsoSlack(
                 String.format(
-                    "%s Low new review storing rate %.2f%% (went through rate %.2f%%), %d/%d/%d. If running for existing org, you can ignore this warning.\n" +
-                    "Otherwise, check the <%s|last processed review page> and see if indeed no next page available. If next page available, please check why scraper did not capture the next page link. Last review page's html stored <%s|on s3> at key `%s`",
+                    "%s Low went through rate %.2f%% (write rate %.2f%%), %d/%d/%d. Visit <%s|last processed review page> and see if indeed no next page available. If next page available, please check why scraper did not capture the next page link. <%s|Download dumped html file>.",
                     this.orgPrefixSlackString,
-                    reviewStoredRatePercentage,
                     reviewWentThroughRatePercentage,
+                    reviewStoredRatePercentage,
                     this.processedReviewsCount,
                     this.wentThroughReviewsCount,
                     this.localReviewsCount,
                     this.driver.getCurrentUrl(),
-                    ArchiveManager.BUCKET_URL,
-                    htmlDumpPath
+                    this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(
+                            this.archiveManager.writeHtml("reviewLowWentThroughRateWarning", this.driver.getPageSource())
+                        )
                 )
             );
         }
