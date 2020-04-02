@@ -372,6 +372,12 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
      * @return url of next page link if presents, otherwise null
      */
     private String judgeNoNextPageLinkOrGetLinkFifthApproach() {
+        // if it seems like there should be no more next page
+        // then don't use this approach of guessing next url
+        if (this.processedReviewPages * 10 >= this.localReviewCount) {
+            return null;
+        }
+
         StringBuilder logMessageStringBuilder = new StringBuilder();
         logMessageStringBuilder
             .append("*(")
@@ -379,12 +385,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             .append(")* ")
             .append("Trying 5th approach to capture next page link");
         Logger.warnAlsoSlack(logMessageStringBuilder.toString());
-
-        // if it seems like there should be no more next page
-        // then don't use this approach of guessing next url
-        if (this.processedReviewPages * 10 >= this.localReviewCount) {
-            return null;
-        }
 
         return this.driver.getCurrentUrl().replaceFirst("_P\\d+\\.htm$", String.format("_P%s.htm", this.processedReviewPages + 1));
     }
