@@ -368,6 +368,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     /**
      * This method try to guess next page url based on the observed pattern in url across pages
      * sample url: https://www.glassdoor.com/Reviews/Target-Reviews-E194_P177.htm
+     *
+     * @return url of next page link if presents, otherwise null
      */
     private String judgeNoNextPageLinkOrGetLinkFifthApproach() {
         StringBuilder logMessageStringBuilder = new StringBuilder();
