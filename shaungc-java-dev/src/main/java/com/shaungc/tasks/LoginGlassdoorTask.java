@@ -1,10 +1,13 @@
 package com.shaungc.tasks;
 
+import com.shaungc.dataStorage.ArchiveManager;
+import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.javadev.Configuration;
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.RequestAddressValidator;
 import java.net.URL;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Navigation;
@@ -43,7 +46,19 @@ public class LoginGlassdoorTask {
         navigation.to(loginPageUrl);
 
         // click "sign in" link
-        this.driver.findElement(By.cssSelector("a[href*=signIn]")).click();
+        try {
+            this.driver.findElement(By.cssSelector("a[href*=signIn]")).click();
+        } catch (NoSuchElementException e) {
+            final ArchiveManager headlessArchiveManager = new ArchiveManager();
+            final String htmlDumpPath = headlessArchiveManager.writeHtml("login:cannotLocateSignInButton", this.driver.getPageSource());
+            throw new ScraperShouldHaltException(
+                String.format(
+                    "Cannot locate sign in button. <%s|Download dumped html on s3>, scraper was facing `%s`.",
+                    headlessArchiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath),
+                    this.driver.getCurrentUrl()
+                )
+            );
+        }
 
         // wait login modal pop up
         WebElement usernameInputElement = this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("input[name=username]")));

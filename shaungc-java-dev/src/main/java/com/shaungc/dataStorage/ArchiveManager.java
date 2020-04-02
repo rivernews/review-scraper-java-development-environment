@@ -186,12 +186,14 @@ public class ArchiveManager {
     }
 
     public String writeHtml(final String filename, final String html) {
-        final String pathUntilFilename = this.getOrganizationDirectory() + "/logs/" + filename + "." + Instant.now();
-        this.putHtmlOnS3(pathUntilFilename, html);
+        final StringBuilder directoryToWrite = this.orgId != null && this.orgName != null
+            ? new StringBuilder(this.getOrganizationDirectory())
+            : new StringBuilder();
+        final StringBuilder pathUntilFilename = directoryToWrite.append("/logs/").append(filename).append(Instant.now().toString());
+
+        this.putHtmlOnS3(pathUntilFilename.toString(), html);
 
         // return the complete path (key) so that caller can make good use
-        return S3Service.getFullPathAsHtmlFile(pathUntilFilename);
+        return S3Service.getFullPathAsHtmlFile(pathUntilFilename.toString());
     }
-    // misc helper functions
-
 }
