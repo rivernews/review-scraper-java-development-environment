@@ -243,7 +243,7 @@ public class ScrapeOrganizationGlassdoorTask {
                 "======= Success! =======\n" + "%s(%s) Processed reviews count %s/%s/%s, `%s` sessions used.",
                 this.orgPrefixSlackString,
                 this.scraperTaskTimer.captureOverallElapseDurationString(),
-                this.processedReviewPages,
+                this.processedReviewsCount,
                 this.wentThroughReviewsCount,
                 this.localReviewsCount,
                 (Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION + 1)
