@@ -5,7 +5,6 @@ import com.shaungc.dataTypes.EmployeeReviewData;
 import com.shaungc.dataTypes.GlassdoorReviewMetadata;
 import com.shaungc.javadev.Configuration;
 import com.shaungc.utilities.HttpService;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Instant;
 import software.amazon.awssdk.regions.Region;
@@ -129,8 +128,8 @@ public class ArchiveManager {
 
         // also write company overview page url
         // no need to check exist or not, just overwrite is fine
+        // TODO: since PUT and GET cost is disroportional, we may change this w/ a GET-first-then-PUT approach
         final String orgOverviewPageUrlObjectKey = Path.of(this.gdOrgOverviewPageUrlsDirectory, this.getOrganizationDirectory()).toString();
-
         this.s3Service.putObjectOfString(orgOverviewPageUrlObjectKey, orgMetadata.companyOverviewPageUrl);
     }
 
