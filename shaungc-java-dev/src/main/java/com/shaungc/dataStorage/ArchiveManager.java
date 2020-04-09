@@ -5,7 +5,6 @@ import com.shaungc.dataTypes.EmployeeReviewData;
 import com.shaungc.dataTypes.GlassdoorReviewMetadata;
 import com.shaungc.javadev.Configuration;
 import com.shaungc.utilities.HttpService;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.Instant;
 import software.amazon.awssdk.regions.Region;
@@ -93,14 +92,6 @@ public class ArchiveManager {
         return ArchiveManager.getGlassdoorOrgReviewDataFilenamePrefix(reviewId);
     }
 
-    public static String getCollidedGlassdoorOrgReviewDataFilenamePrefix(final String reviewId) {
-        return "collision." + reviewId;
-    }
-
-    public static String getCollidedGlassdoorOrgReviewDataFilename(final String reviewId) {
-        return ArchiveManager.getCollidedGlassdoorOrgReviewDataFilenamePrefix(reviewId) + "." + Instant.now();
-    }
-
     public String getFullUrlOnS3FromFilePathBasedOnOrgDirectory(final String filePathBasedOnOrgDirectory) {
         final String urlString = String.format(
             "https://s3.console.aws.amazon.com/s3/object/%s/%s?region=%s&tab=overview",
@@ -137,8 +128,8 @@ public class ArchiveManager {
 
         // also write company overview page url
         // no need to check exist or not, just overwrite is fine
+        // TODO: since PUT and GET cost is disroportional, we may change this w/ a GET-first-then-PUT approach
         final String orgOverviewPageUrlObjectKey = Path.of(this.gdOrgOverviewPageUrlsDirectory, this.getOrganizationDirectory()).toString();
-
         this.s3Service.putObjectOfString(orgOverviewPageUrlObjectKey, orgMetadata.companyOverviewPageUrl);
     }
 
@@ -173,16 +164,6 @@ public class ArchiveManager {
             this.writeReviewData(reviewData.stableReviewData.reviewId, stableDataDirectoryName, filename, reviewData.stableReviewData);
 
         return writtenStableData || writtenVaryingData;
-    }
-
-    public String writeCollidedGlassdoorOrganizationReviewDataAsJson(final EmployeeReviewData reviewData) {
-        final String pathUntilFilename =
-            this.getGlassdoorOrgReviewDataDirectory() +
-            ArchiveManager.getCollidedGlassdoorOrgReviewDataFilename(reviewData.stableReviewData.reviewId);
-
-        this.putJsonOnS3(pathUntilFilename, reviewData);
-
-        return S3Service.getFullPathAsJsonFile(pathUntilFilename);
     }
 
     public String writeHtml(final String filename, final String html) {

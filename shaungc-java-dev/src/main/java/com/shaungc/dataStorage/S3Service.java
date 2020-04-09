@@ -5,7 +5,6 @@ import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.utilities.Logger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -18,17 +17,13 @@ import software.amazon.awssdk.services.s3.model.CreateBucketConfiguration;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PublicAccessBlockConfiguration;
 import software.amazon.awssdk.services.s3.model.PutBucketTaggingRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutPublicAccessBlockRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
-import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.model.Tag;
 import software.amazon.awssdk.services.s3.model.Tagging;
-import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 import software.amazon.awssdk.utils.BinaryUtils;
 import software.amazon.awssdk.utils.Md5Utils;
 
@@ -43,6 +38,8 @@ public class S3Service {
     // S3 Canned ACL:
     // https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl
     public static BucketCannedACL BUCKET_ACCESS_CANNED_ACL = BucketCannedACL.PRIVATE;
+
+    private static String LATEST_VERSION_FILENAME_WITHOUT_EXTENSION = "latest";
 
     // https://github.com/google/gson
     public static Gson GSON_TOOL = new Gson();
@@ -95,7 +92,7 @@ public class S3Service {
 
             Logger.info("Bucket created using default configuration: " + this.bucketName);
         } catch (final BucketAlreadyOwnedByYouException e) {
-            Logger.info("Bucket already own by you, will do nothing");
+            Logger.info("Bucket already own by you, will do nothing: " + this.bucketName);
         } catch (final BucketAlreadyExistsException e) {
             Logger.info("Bucket name used by others and must be corrected first: " + this.bucketName);
             throw e;
@@ -195,10 +192,9 @@ public class S3Service {
      * This method does not handle object not exist. Please be sure the object exist
      * before using this method.
      *
-     * If you need to consider object not exist, use
-     * `this.doesObjectExistAndGetMd5()` instead.
+     * If you need to consider object not exist, @see `this.doesObjectExistAndGetMd5()` instead.
      */
-    protected String getObjectMd5(final String key) {
+    private String getObjectMd5(final String key) {
         final HeadObjectResponse res = this.s3.headObject(HeadObjectRequest.builder().bucket(this.bucketName).key(key).build());
         if (res.hasMetadata()) {
             final Map<String, String> metadata = res.metadata();
@@ -214,8 +210,10 @@ public class S3Service {
 
     /**
      * @param key
-     * @return md5 value - object exists and has md5 in metadata empty string -
-     *         object exists but has no md5 in metadata null - object does not exist
+     * @return md5 value, depending on the value:
+     *      - non-empty string: object exists and has md5 in metadata
+     *      - empty string: object exists but has no md5 in metadata
+     *      - null: object does not exist
      */
     protected String doesObjectExistAndGetMd5(final String key) {
         try {
@@ -231,38 +229,42 @@ public class S3Service {
     // listObject
     // https://docs.aws.amazon.com/cli/latest/reference/s3api/list-objects-v2.html
     // SO: https://stackoverflow.com/a/53856863/9814131
-    private ListObjectsV2Iterable listObjects(final String prefix) {
-        return this.s3.listObjectsV2Paginator(ListObjectsV2Request.builder().bucket(this.bucketName).prefix(prefix).build());
-    }
+    // private ListObjectsV2Iterable listObjects(final String prefix) {
+    //     return this.s3.listObjectsV2Paginator(ListObjectsV2Request.builder().bucket(this.bucketName).prefix(prefix).build());
+    // }
 
-    /**
-     * @param directoryAsPrefix
-     * @return objecy key; if no object exists, will return `null`
-     */
-    public String getLatestObjectKey(final String directoryAsPrefix) {
-        final ListObjectsV2Iterable paginatedList = this.listObjects(directoryAsPrefix);
-        Instant latestTime = null;
-        String key = null;
-        for (final ListObjectsV2Response page : paginatedList) {
-            for (final S3Object object : page.contents()) {
-                final String objectKey = object.key();
+    // /**
+    //  * An example method to demonstrate how to LIST objects on S3, then iterate the list
+    //  * @param directoryAsPrefix
+    //  * @return objecy key; if no object exists, will return `null`
+    //  */
+    // private String getLatestObjectKey(final String directoryAsPrefix) {
+    //     final ListObjectsV2Iterable paginatedList = this.listObjects(directoryAsPrefix);
+    //     Instant latestTime = null;
+    //     String key = null;
+    //     for (final ListObjectsV2Response page : paginatedList) {
+    //         for (final S3Object object : page.contents()) {
+    //             // you have access to key and meta of the object now
+    //             // (but not the object content itself! You'll need GET object to do that)
 
-                final String[] objectKeyTokensSplitBySlash = objectKey.split("/");
+    //             final String objectKey = object.key();
 
-                final String filenameWithExtension = objectKeyTokensSplitBySlash[objectKeyTokensSplitBySlash.length - 1];
+    //             final String[] objectKeyTokensSplitBySlash = objectKey.split("/");
 
-                final String objectTimestamp = filenameWithExtension.substring(0, filenameWithExtension.lastIndexOf("."));
+    //             final String filenameWithExtension = objectKeyTokensSplitBySlash[objectKeyTokensSplitBySlash.length - 1];
 
-                final Instant objectTime = Instant.parse(objectTimestamp);
-                if (latestTime == null || objectTime.isAfter(latestTime)) {
-                    latestTime = objectTime;
-                    key = objectKey;
-                }
-            }
-        }
+    //             final String objectTimestamp = filenameWithExtension.substring(0, filenameWithExtension.lastIndexOf("."));
 
-        return key;
-    }
+    //             final Instant objectTime = Instant.parse(objectTimestamp);
+    //             if (latestTime == null || objectTime.isAfter(latestTime)) {
+    //                 latestTime = objectTime;
+    //                 key = objectKey;
+    //             }
+    //         }
+    //     }
+
+    //     return key;
+    // }
 
     public Boolean putLatestObject(
         final String directoryAsPrefix,
@@ -270,25 +272,38 @@ public class S3Service {
         final Object data,
         FileType fileType
     ) {
-        final String latestObjectKey = this.getLatestObjectKey(directoryAsPrefix);
+        final String latestObjectPathUntilFilenameWithoutExtension = Path
+            .of(directoryAsPrefix, S3Service.LATEST_VERSION_FILENAME_WITHOUT_EXTENSION)
+            .toString();
+        final String latestObjectFullPath =
+            (new StringBuilder(latestObjectPathUntilFilenameWithoutExtension)).append(".").append(fileType.getExtension()).toString();
+        final String latestObjectMd5 = this.doesObjectExistAndGetMd5(latestObjectFullPath);
 
         // filter out cases where no need to write, or illegal cases
-        if (latestObjectKey != null) {
-            final String md5OnS3 = this.getObjectMd5(latestObjectKey);
-
-            if (md5OnS3.strip().isEmpty()) {
-                throw new ScraperShouldHaltException(this.getNoMd5ErrorMessage(latestObjectKey));
+        if (latestObjectMd5 != null) {
+            if (latestObjectMd5.strip().isEmpty()) {
+                throw new ScraperShouldHaltException(this.getNoMd5ErrorMessage(latestObjectFullPath));
             }
 
-            if (S3Service.toMD5Base64String(data).equals(md5OnS3)) {
-                Logger.debug(directoryAsPrefix + ", latest object " + latestObjectKey + " md5 is identical to our data, will not write.");
+            if (S3Service.toMD5Base64String(data).equals(latestObjectMd5)) {
+                Logger.debug(
+                    (new StringBuilder()).append("Latest object ")
+                        .append(latestObjectFullPath)
+                        .append(" md5 is identical to our data, will not write.")
+                        .toString()
+                );
                 return false;
             }
         }
 
-        final String pathUntilFilenameWithoutExtension = Path.of(directoryAsPrefix, filenameWithoutExtension).toString();
-        this.putFileOnS3(pathUntilFilenameWithoutExtension, data, fileType);
+        // write data on s3
+        final String objectPathUntilFilenameWithoutExtension = Path.of(directoryAsPrefix, filenameWithoutExtension).toString();
+        this.putFileOnS3(objectPathUntilFilenameWithoutExtension, data, fileType);
         Logger.info(directoryAsPrefix + ", new object, or latest md5 not the same, writing to s3.");
+
+        // also write the same data to .../latest.json
+        this.putFileOnS3(latestObjectPathUntilFilenameWithoutExtension, data, fileType);
+
         return true;
     }
 
