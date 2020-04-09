@@ -5,7 +5,6 @@ import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.utilities.Logger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -18,17 +17,13 @@ import software.amazon.awssdk.services.s3.model.CreateBucketConfiguration;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 import software.amazon.awssdk.services.s3.model.PublicAccessBlockConfiguration;
 import software.amazon.awssdk.services.s3.model.PutBucketTaggingRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutPublicAccessBlockRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
-import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.model.Tag;
 import software.amazon.awssdk.services.s3.model.Tagging;
-import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 import software.amazon.awssdk.utils.BinaryUtils;
 import software.amazon.awssdk.utils.Md5Utils;
 
@@ -280,20 +275,19 @@ public class S3Service {
         final String latestObjectPathUntilFilenameWithoutExtension = Path
             .of(directoryAsPrefix, S3Service.LATEST_VERSION_FILENAME_WITHOUT_EXTENSION)
             .toString();
-        final String latestObjectMd5 = this.doesObjectExistAndGetMd5(latestObjectPathUntilFilenameWithoutExtension);
+        final String latestObjectFullPath = Path.of(latestObjectPathUntilFilenameWithoutExtension, fileType.toString()).toString();
+        final String latestObjectMd5 = this.doesObjectExistAndGetMd5(latestObjectFullPath);
 
         // filter out cases where no need to write, or illegal cases
         if (latestObjectMd5 != null) {
             if (latestObjectMd5.strip().isEmpty()) {
-                throw new ScraperShouldHaltException(this.getNoMd5ErrorMessage(latestObjectPathUntilFilenameWithoutExtension));
+                throw new ScraperShouldHaltException(this.getNoMd5ErrorMessage(latestObjectFullPath));
             }
 
             if (S3Service.toMD5Base64String(data).equals(latestObjectMd5)) {
                 Logger.debug(
-                    (new StringBuilder(directoryAsPrefix)).append(", latest object ")
-                        .append(latestObjectPathUntilFilenameWithoutExtension)
-                        .append(".")
-                        .append(fileType.toString())
+                    (new StringBuilder()).append("Latest object ")
+                        .append(latestObjectFullPath)
                         .append(" md5 is identical to our data, will not write.")
                         .toString()
                 );
