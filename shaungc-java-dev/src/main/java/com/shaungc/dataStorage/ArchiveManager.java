@@ -93,14 +93,6 @@ public class ArchiveManager {
         return ArchiveManager.getGlassdoorOrgReviewDataFilenamePrefix(reviewId);
     }
 
-    public static String getCollidedGlassdoorOrgReviewDataFilenamePrefix(final String reviewId) {
-        return "collision." + reviewId;
-    }
-
-    public static String getCollidedGlassdoorOrgReviewDataFilename(final String reviewId) {
-        return ArchiveManager.getCollidedGlassdoorOrgReviewDataFilenamePrefix(reviewId) + "." + Instant.now();
-    }
-
     public String getFullUrlOnS3FromFilePathBasedOnOrgDirectory(final String filePathBasedOnOrgDirectory) {
         final String urlString = String.format(
             "https://s3.console.aws.amazon.com/s3/object/%s/%s?region=%s&tab=overview",
@@ -173,16 +165,6 @@ public class ArchiveManager {
             this.writeReviewData(reviewData.stableReviewData.reviewId, stableDataDirectoryName, filename, reviewData.stableReviewData);
 
         return writtenStableData || writtenVaryingData;
-    }
-
-    public String writeCollidedGlassdoorOrganizationReviewDataAsJson(final EmployeeReviewData reviewData) {
-        final String pathUntilFilename =
-            this.getGlassdoorOrgReviewDataDirectory() +
-            ArchiveManager.getCollidedGlassdoorOrgReviewDataFilename(reviewData.stableReviewData.reviewId);
-
-        this.putJsonOnS3(pathUntilFilename, reviewData);
-
-        return S3Service.getFullPathAsJsonFile(pathUntilFilename);
     }
 
     public String writeHtml(final String filename, final String html) {
