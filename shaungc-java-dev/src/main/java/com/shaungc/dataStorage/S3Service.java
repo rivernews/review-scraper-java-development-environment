@@ -92,7 +92,7 @@ public class S3Service {
 
             Logger.info("Bucket created using default configuration: " + this.bucketName);
         } catch (final BucketAlreadyOwnedByYouException e) {
-            Logger.info("Bucket already own by you, will do nothing");
+            Logger.info("Bucket already own by you, will do nothing: " + this.bucketName);
         } catch (final BucketAlreadyExistsException e) {
             Logger.info("Bucket name used by others and must be corrected first: " + this.bucketName);
             throw e;
@@ -275,7 +275,8 @@ public class S3Service {
         final String latestObjectPathUntilFilenameWithoutExtension = Path
             .of(directoryAsPrefix, S3Service.LATEST_VERSION_FILENAME_WITHOUT_EXTENSION)
             .toString();
-        final String latestObjectFullPath = Path.of(latestObjectPathUntilFilenameWithoutExtension, fileType.toString()).toString();
+        final String latestObjectFullPath =
+            (new StringBuilder(latestObjectPathUntilFilenameWithoutExtension)).append(".").append(fileType.toString()).toString();
         final String latestObjectMd5 = this.doesObjectExistAndGetMd5(latestObjectFullPath);
 
         // filter out cases where no need to write, or illegal cases
