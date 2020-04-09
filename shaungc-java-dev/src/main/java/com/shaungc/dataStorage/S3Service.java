@@ -276,7 +276,7 @@ public class S3Service {
             .of(directoryAsPrefix, S3Service.LATEST_VERSION_FILENAME_WITHOUT_EXTENSION)
             .toString();
         final String latestObjectFullPath =
-            (new StringBuilder(latestObjectPathUntilFilenameWithoutExtension)).append(".").append(fileType.toString()).toString();
+            (new StringBuilder(latestObjectPathUntilFilenameWithoutExtension)).append(".").append(fileType.getExtension()).toString();
         final String latestObjectMd5 = this.doesObjectExistAndGetMd5(latestObjectFullPath);
 
         // filter out cases where no need to write, or illegal cases
