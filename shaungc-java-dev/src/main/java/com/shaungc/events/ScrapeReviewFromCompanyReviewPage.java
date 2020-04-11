@@ -220,6 +220,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // TODO: debug use - only for writing review page url
         if (true) {
+            this.isFinalSession = true;
             return glassdoorCompanyParsedData;
         }
 
