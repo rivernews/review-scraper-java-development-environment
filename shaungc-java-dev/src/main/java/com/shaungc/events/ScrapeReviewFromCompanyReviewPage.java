@@ -524,6 +524,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // scrape ovwerall review counts
         this.scrapeReviewCount(reviewPanelElement, glassdoorReviewMetadataStore);
+
+        glassdoorReviewMetadataStore.reviewPageUrl = this.driver.getCurrentUrl();
     }
 
     /**
