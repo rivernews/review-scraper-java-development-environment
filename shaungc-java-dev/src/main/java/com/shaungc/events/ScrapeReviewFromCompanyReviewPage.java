@@ -218,6 +218,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             this.localReviewCount = glassdoorCompanyParsedData.reviewMetadata.localReviewCount;
         }
 
+        // TODO: debug use - only for writing review page url
+        if (true) {
+            return glassdoorCompanyParsedData;
+        }
+
         // prepare before getting into reviews
         final Integer reviewReportTime = 5;
         final Integer reportingRate = (Integer) (this.localReviewCount / reviewReportTime);
