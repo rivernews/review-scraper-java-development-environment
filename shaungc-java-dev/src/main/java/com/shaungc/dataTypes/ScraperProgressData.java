@@ -8,8 +8,8 @@ public class ScraperProgressData {
     private final Integer wentThrough;
     private final Integer total;
     private final String durationInMilli;
-    private final Integer page;
-    private final Integer processedSession;
+    public final Integer page;
+    public final Integer processedSession;
 
     public ScraperProgressData(
         final Integer processed,

@@ -48,6 +48,7 @@ public final class Configuration {
     }
 
     public static String SUPERVISOR_PUBSUB_REDIS_DB = Configuration.getenvOrDefault("SUPERVISOR_PUBSUB_REDIS_DB", "");
+    public static String SUPERVISOR_PUBSUB_CHANNEL_NAME = Configuration.getenvOrDefault("SUPERVISOR_PUBSUB_CHANNEL_NAME", "");
 
     static {
         Logger.debug("SUPERVISOR_PUBSUB_REDIS_DB is " + Configuration.SUPERVISOR_PUBSUB_REDIS_DB);
@@ -109,8 +110,11 @@ public final class Configuration {
         Configuration.getenvOrDefault("TEST_COMPANY_LAST_PROGRESS_SESSION", "0")
     );
 
-    public static String TEST_COMPANY_LAST_REVIEW_PAGE_URL = Configuration.getenvOrDefault("TEST_COMPANY_LAST_REVIEW_PAGE_URL", "");
+    public static String TEST_COMPANY_NEXT_REVIEW_PAGE_URL = Configuration.getenvOrDefault("TEST_COMPANY_NEXT_REVIEW_PAGE_URL", "");
+
     public static String SCRAPER_MODE = Configuration.getenvOrDefault("SCRAPER_MODE", ScraperMode.REGULAR.getString());
+
+    public static Integer TEST_COMPANY_STOP_AT_PAGE = Integer.valueOf(Configuration.getenvOrDefault("TEST_COMPANY_STOP_AT_PAGE", "0"));
 
     // misc helper
 

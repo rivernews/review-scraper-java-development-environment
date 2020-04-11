@@ -74,7 +74,7 @@ public class ScrapeOrganizationGlassdoorTask {
         this.pubSubSubscription = pubSubSubscription;
 
         Logger.infoAlsoSlack(
-            "Renewal task for: " + Configuration.TEST_COMPANY_NAME + ", from review page " + Configuration.TEST_COMPANY_LAST_REVIEW_PAGE_URL
+            "Renewal task for: " + Configuration.TEST_COMPANY_NAME + ", from review page " + Configuration.TEST_COMPANY_NEXT_REVIEW_PAGE_URL
         );
 
         this.launch();
