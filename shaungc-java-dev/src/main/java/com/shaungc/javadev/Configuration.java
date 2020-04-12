@@ -32,6 +32,8 @@ public final class Configuration {
         ? System.getenv("GLASSDOOR_PASSWORD")
         : System.getProperty("GLASSDOOR_PASSWORD");
 
+    public static Integer GLASSDOOR_REVIEW_COUNT_PER_PAGE = 10;
+
     public static URI SLACK_WEBHOOK_URL = RequestAddressValidator.toURI(System.getenv("SLACK_WEBHOOK_URL"));
 
     public static String REDIS_PORT = Configuration.getenvOrDefault("REDIS_PORT", "6379");
