@@ -226,6 +226,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // foreach review
         while (true) {
+            // Travis requires us to output something every minute
+            if (Configuration.RUNNING_IN_TRAVIS) {
+                System.out.println("Processing page " + (this.processedReviewPages + 1));
+            }
+
             // pull out review elements
             final List<WebElement> employeeReviewElements = reviewPanelElement.findElements(
                 By.cssSelector(this.employeeReviewElementsLocalCssSelector)
