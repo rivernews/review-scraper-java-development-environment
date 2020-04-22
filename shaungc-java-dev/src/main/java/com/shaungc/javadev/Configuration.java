@@ -118,6 +118,8 @@ public final class Configuration {
 
     public static Integer TEST_COMPANY_STOP_AT_PAGE = Integer.valueOf(Configuration.getenvOrDefault("TEST_COMPANY_STOP_AT_PAGE", "0"));
 
+    public static Integer TEST_COMPANY_SHARD_INDEX = Integer.valueOf(Configuration.getenvOrDefault("TEST_COMPANY_SHARD_INDEX", "0"));
+
     // misc helper
 
     public static String getenvOrDefault(final String envKey, final String defaultString) {

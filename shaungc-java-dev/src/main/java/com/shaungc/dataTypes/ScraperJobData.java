@@ -13,18 +13,23 @@ public class ScraperJobData {
     private final String nextReviewPageUrl;
     private final String scrapeMode;
 
+    private final Integer stopPage;
+    private final Integer shardIndex;
+
     public ScraperJobData(
         final String orgId,
         final String orgName,
         final ScraperProgressData scraperProgressData,
         final String nextReviewPageUrl,
-        final String scrapeMode
+        final String scrapeMode,
+        final Integer stopPage,
+        final Integer shardIndex
     ) {
         this.pubsubChannelName =
             String.format(
                 "%s:%s:%s:startAtPage%s",
                 RedisPubSubChannelPrefix.SCRAPER_JOB_CHANNEL.getString(),
-                orgName,
+                orgName.replaceAll("[\\D\\W]", "-"),
                 scraperProgressData.processedSession,
                 scraperProgressData.page
             );
@@ -33,5 +38,8 @@ public class ScraperJobData {
         this.lastProgress = scraperProgressData;
         this.nextReviewPageUrl = nextReviewPageUrl;
         this.scrapeMode = scrapeMode;
+
+        this.stopPage = stopPage;
+        this.shardIndex = shardIndex;
     }
 }
