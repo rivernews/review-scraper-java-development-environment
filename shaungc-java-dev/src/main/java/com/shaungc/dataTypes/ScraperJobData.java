@@ -29,7 +29,7 @@ public class ScraperJobData {
             String.format(
                 "%s:%s:%s:startAtPage%s",
                 RedisPubSubChannelPrefix.SCRAPER_JOB_CHANNEL.getString(),
-                orgName.replaceAll("[\\D\\W]", "-"),
+                orgName.replaceAll("[^0-9a-zA-Z]", "-"),
                 scraperProgressData.processedSession,
                 scraperProgressData.page
             );
