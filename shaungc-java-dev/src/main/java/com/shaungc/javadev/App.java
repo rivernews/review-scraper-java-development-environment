@@ -102,14 +102,7 @@ public class App {
                                 new ScraperProgressData(
                                     scrapeCompanyTask.processedReviewsCount,
                                     scrapeCompanyTask.wentThroughReviewsCount,
-                                    !Configuration.TEST_COMPANY_STOP_AT_PAGE.equals(0)
-                                        ? (
-                                            // for splitted job renewal
-                                            Configuration.GLASSDOOR_REVIEW_COUNT_PER_PAGE *
-                                            (Configuration.TEST_COMPANY_STOP_AT_PAGE - Configuration.TEST_COMPANY_LAST_PROGRESS_PAGE)
-                                            // for non-splitted job renewal
-                                        )
-                                        : scrapeCompanyTask.localReviewsCount,
+                                    scrapeCompanyTask.localReviewsCount,
                                     scrapeCompanyTask.scraperTaskTimer.captureOverallElapseDurationInMilliAsString(),
                                     scrapeCompanyTask.processedReviewPages,
                                     Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION + 1
