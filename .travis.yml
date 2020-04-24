@@ -1,6 +1,5 @@
 language: java
 dist: trusty
-sudo: required
 before_install:
 - |
   if [ "$SLACK_WEBHOOK_URL" != "" ]; then
