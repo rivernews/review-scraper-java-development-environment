@@ -108,7 +108,9 @@ public class App {
                                     Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION + 1
                                 ),
                                 driver.getCurrentUrl(),
-                                ScraperMode.RENEWAL.getString()
+                                ScraperMode.RENEWAL.getString(),
+                                Configuration.TEST_COMPANY_STOP_AT_PAGE,
+                                Configuration.TEST_COMPANY_SHARD_INDEX
                             )
                         )
                     )

@@ -184,7 +184,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     @Override
     protected List<WebElement> locate() {
         if (Configuration.SCRAPER_MODE.equals(ScraperMode.RENEWAL.getString())) {
-            return this.locate(Configuration.TEST_COMPANY_LAST_REVIEW_PAGE_URL);
+            return this.locate(Configuration.TEST_COMPANY_NEXT_REVIEW_PAGE_URL);
         } else {
             return this.locate(null);
         }
@@ -226,6 +226,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // foreach review
         while (true) {
+            // Travis requires us to output something every minute
+            if (Configuration.RUNNING_IN_TRAVIS) {
+                System.out.println("Processing page " + (this.processedReviewPages + 1));
+            }
+
             // pull out review elements
             final List<WebElement> employeeReviewElements = reviewPanelElement.findElements(
                 By.cssSelector(this.employeeReviewElementsLocalCssSelector)
@@ -294,6 +299,18 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             }
 
             this.processedReviewPages++;
+
+            // instructed to stop & wrap up if reached stop page
+            if (
+                !Configuration.TEST_COMPANY_STOP_AT_PAGE.equals(0) &&
+                Configuration.TEST_COMPANY_STOP_AT_PAGE.compareTo(this.processedReviewPages) <= 0
+            ) {
+                Logger.debug("Will now wrap up scraper session because we reached stop page " + Configuration.TEST_COMPANY_STOP_AT_PAGE);
+                this.isFinalSession = true;
+                break;
+            }
+
+            // proceed to next page
 
             // click next page
             // Boolean noNextPageLink = this.judgeNoNextPageLinkOrClickNextPageLink();

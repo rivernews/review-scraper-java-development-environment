@@ -11,16 +11,7 @@ import java.util.concurrent.CountDownLatch;
 // Writing PubSub adapter
 // https://www.baeldung.com/java-redis-lettuce#pubsub
 public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
-    public final String redisPubsubChannelName = String.format(
-        "%s:%s:%s",
-        RedisPubSubChannelPrefix.SCRAPER_JOB_CHANNEL.getString(),
-        // We should check `TEST_COMPANY_NAME` first, because that indicates a renewal job where the channel has to use `TEST_COMPANY_NAME`
-        // For `TEST_COMPANY_INFORMATION_STRING`, it could be provided regardless of regular or renewal job
-        !Configuration.TEST_COMPANY_NAME.isEmpty()
-            ? "\"" + Configuration.TEST_COMPANY_NAME + "\""
-            : Configuration.TEST_COMPANY_INFORMATION_STRING,
-        Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION
-    );
+    public final String redisPubsubChannelName;
     private final RedisClient subscriberRedisClient;
     private final RedisClient publisherRedisClient;
     private final StatefulRedisPubSubConnection<String, String> subscriberRedisConnection;
@@ -35,8 +26,12 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
     // https://lettuce.io/core/release/reference/#pubsub.subscribing
 
     public PubSubSubscription() {
-        if (Configuration.SUPERVISOR_PUBSUB_REDIS_DB.isEmpty()) {
+        if (Configuration.SUPERVISOR_PUBSUB_REDIS_DB.isBlank()) {
             throw new ScraperShouldHaltException("SUPERVISOR_PUBSUB_REDIS_DB is not set.");
+        }
+
+        if (Configuration.SUPERVISOR_PUBSUB_CHANNEL_NAME.isBlank()) {
+            throw new ScraperShouldHaltException("SUPERVISOR_PUBSUB_CHANNEL_NAME is not set.");
         }
 
         final String redisUrl = String.format(
@@ -57,6 +52,7 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
             throw new ScraperShouldHaltException("Redis misconfigured, redisUrl is empty");
         }
 
+        this.redisPubsubChannelName = Configuration.SUPERVISOR_PUBSUB_CHANNEL_NAME;
         this.subscriberRedisClient = RedisClient.create(redisUrl);
         this.publisherRedisClient = RedisClient.create(redisUrl);
         this.subscriberRedisConnection = this.subscriberRedisClient.connectPubSub();
