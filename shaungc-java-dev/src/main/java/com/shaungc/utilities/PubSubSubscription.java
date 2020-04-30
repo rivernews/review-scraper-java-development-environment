@@ -2,20 +2,23 @@ package com.shaungc.utilities;
 
 import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.javadev.Configuration;
+import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisClient;
+import io.lettuce.core.TimeoutOptions;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 
 // Writing PubSub adapter
 // https://www.baeldung.com/java-redis-lettuce#pubsub
 public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
     public final String redisPubsubChannelName;
-    private final RedisClient subscriberRedisClient;
-    private final RedisClient publisherRedisClient;
-    private final StatefulRedisPubSubConnection<String, String> subscriberRedisConnection;
-    private final StatefulRedisPubSubConnection<String, String> publisherRedisConnection;
+    private RedisClient subscriberRedisClient;
+    private RedisClient publisherRedisClient;
+    private StatefulRedisPubSubConnection<String, String> subscriberRedisConnection;
+    private StatefulRedisPubSubConnection<String, String> publisherRedisConnection;
     private final RedisPubSubCommands<String, String> subscriberCommands;
     private final RedisPubSubCommands<String, String> publisherCommands;
 
@@ -53,8 +56,18 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
         }
 
         this.redisPubsubChannelName = Configuration.SUPERVISOR_PUBSUB_CHANNEL_NAME;
+
+        // initiate redis clients
+        ClientOptions redisOptions = ClientOptions
+            .builder()
+            .timeoutOptions(TimeoutOptions.builder().fixedTimeout(Duration.ofSeconds(30)).build())
+            .build();
         this.subscriberRedisClient = RedisClient.create(redisUrl);
+        this.subscriberRedisClient.setOptions(redisOptions);
         this.publisherRedisClient = RedisClient.create(redisUrl);
+        this.publisherRedisClient.setOptions(redisOptions);
+
+        // connect
         this.subscriberRedisConnection = this.subscriberRedisClient.connectPubSub();
         this.publisherRedisConnection = this.publisherRedisClient.connectPubSub();
         this.subscriberCommands = this.subscriberRedisConnection.sync();
@@ -130,5 +143,14 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
     public void cleanup() {
         this.subscriberRedisConnection.close();
         this.subscriberRedisClient.shutdown();
+        this.publisherRedisConnection.close();
+        this.publisherRedisClient.shutdown();
+
+        // after calling close() and shutdown(), they can no longer be used
+        // to avoid accidental usage, setting them to null
+        this.subscriberRedisConnection = null;
+        this.subscriberRedisClient = null;
+        this.publisherRedisConnection = null;
+        this.publisherRedisClient = null;
     }
 }
