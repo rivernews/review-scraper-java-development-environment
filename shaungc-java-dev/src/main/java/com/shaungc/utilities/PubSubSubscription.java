@@ -2,9 +2,7 @@ package com.shaungc.utilities;
 
 import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.javadev.Configuration;
-import io.lettuce.core.ClientOptions;
 import io.lettuce.core.RedisClient;
-import io.lettuce.core.TimeoutOptions;
 import io.lettuce.core.pubsub.RedisPubSubAdapter;
 import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.pubsub.api.sync.RedisPubSubCommands;
@@ -58,14 +56,11 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
         this.redisPubsubChannelName = Configuration.SUPERVISOR_PUBSUB_CHANNEL_NAME;
 
         // initiate redis clients
-        ClientOptions redisOptions = ClientOptions
-            .builder()
-            .timeoutOptions(TimeoutOptions.builder().fixedTimeout(Duration.ofSeconds(30)).build())
-            .build();
+        final Duration redisConnectAndCommandTimeout = Duration.ofSeconds(60);
         this.subscriberRedisClient = RedisClient.create(redisUrl);
-        this.subscriberRedisClient.setOptions(redisOptions);
+        this.subscriberRedisClient.setDefaultTimeout(redisConnectAndCommandTimeout);
         this.publisherRedisClient = RedisClient.create(redisUrl);
-        this.publisherRedisClient.setOptions(redisOptions);
+        this.publisherRedisClient.setDefaultTimeout(redisConnectAndCommandTimeout);
 
         // connect
         this.subscriberRedisConnection = this.subscriberRedisClient.connectPubSub();
