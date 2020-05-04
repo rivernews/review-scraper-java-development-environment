@@ -144,7 +144,12 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     );
                 }
 
+                // try to mitigate redis disconnection & avoid SLK timeout by keeping some publish commands out there
+                Logger.warn("Publish progress before cooling down");
+                this.publishProgress();
+
                 // add some sleep between retry, if it's network congestion this may mitigate it
+                Logger.warn("Cooling down before next retry for seconds: " + (10 * findReviewPanelRetryCounter));
                 try {
                     TimeUnit.SECONDS.sleep(10 * findReviewPanelRetryCounter);
                 } catch (InterruptedException interruptedException) {
@@ -252,17 +257,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 this.wentThroughReviewsCount++;
 
                 if (progressReportingTimer.doesReachCountdownDuration()) {
-                    this.pubSubSubscription.publish(
-                            String.format(
-                                "%s:%s:{\"processed\":%d,\"wentThrough\":%d,\"total\":%d,\"elapsedTimeString\":\"%s\"}",
-                                ScraperJobMessageType.PROGRESS.getString(),
-                                ScraperJobMessageTo.SLACK_MD_SVC.getString(),
-                                this.processedReviewsCount,
-                                this.wentThroughReviewsCount,
-                                this.localReviewCount,
-                                this.scraperSessionTimer.captureOverallElapseDurationString()
-                            )
-                        );
+                    this.publishProgress();
                     progressReportingTimer.restart();
                 }
 
@@ -354,6 +349,20 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         }
 
         return glassdoorCompanyParsedData;
+    }
+
+    private void publishProgress() {
+        this.pubSubSubscription.publish(
+                String.format(
+                    "%s:%s:{\"processed\":%d,\"wentThrough\":%d,\"total\":%d,\"elapsedTimeString\":\"%s\"}",
+                    ScraperJobMessageType.PROGRESS.getString(),
+                    ScraperJobMessageTo.SLACK_MD_SVC.getString(),
+                    this.processedReviewsCount,
+                    this.wentThroughReviewsCount,
+                    this.localReviewCount,
+                    this.scraperSessionTimer.captureOverallElapseDurationString()
+                )
+            );
     }
 
     // TODO: remove this if not used

@@ -58,6 +58,7 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
         this.redisPubsubChannelName = Configuration.SUPERVISOR_PUBSUB_CHANNEL_NAME;
 
         // prepare redis client
+        // https://github.com/lettuce-io/lettuce-core/wiki/Client-Options
         ClientOptions clientOptions = ClientOptions
             .builder()
             .timeoutOptions(TimeoutOptions.enabled(Duration.ofSeconds(60)))

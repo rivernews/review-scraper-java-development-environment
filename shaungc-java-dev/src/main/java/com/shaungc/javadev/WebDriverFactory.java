@@ -46,6 +46,13 @@ public class WebDriverFactory {
             // https://stackoverflow.com/a/54789156/9814131
             chromeOptions.addArguments("-js-flags=--expose-gc");
 
+            // extra stuff trying to avoid rendering timeout
+            // https://stackoverflow.com/a/52340526
+            chromeOptions.addArguments("enable-automation");
+            chromeOptions.addArguments("--disable-infobars");
+            chromeOptions.addArguments("--disable-dev-shm-usage");
+            chromeOptions.addArguments("--disable-browser-side-navigation");
+
             // clearer log
             // https://stackoverflow.com/a/20748376/9814131
             chromeOptions.addArguments("--log-level=3");
