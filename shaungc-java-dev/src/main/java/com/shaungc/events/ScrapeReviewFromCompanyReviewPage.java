@@ -103,9 +103,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // locate review panel
         // critical mission so set retry to 2
-        final Integer FIND_REVIEW_PANEL_RETRY = 2;
+        // TODO: we're currently debugging so disable retry
+        final Integer FIND_REVIEW_PANEL_RETRY = 0;
         Integer findReviewPanelRetryCounter = 0;
         while (findReviewPanelRetryCounter <= FIND_REVIEW_PANEL_RETRY) {
+            findReviewPanelRetryCounter++;
             try {
                 // navigate to reviews page
                 if (reviewPageUrl != null && !reviewPageUrl.strip().isEmpty()) {
@@ -121,7 +123,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
                 break;
             } catch (TimeoutException e) {
-                findReviewPanelRetryCounter++;
                 Logger.warnAlsoSlack(
                     String.format(
                         "*(%s) (current session %s)* Cannot locate review panel, retrying %sth time",
@@ -155,8 +156,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 } catch (InterruptedException interruptedException) {
                     throw new ScraperShouldHaltException("Sleep interrupted: while sleeping for review panel capture retry");
                 }
-
-                continue;
             }
         }
         // TODO: filter by engineering category
