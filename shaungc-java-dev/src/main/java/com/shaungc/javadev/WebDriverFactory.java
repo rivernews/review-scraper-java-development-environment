@@ -75,6 +75,7 @@ public class WebDriverFactory {
         // Generate driver object
 
         if (Configuration.WEBDRIVER_MODE.equals(ExternalServiceMode.LOCAL_INSTALLED.getString())) {
+            Logger.debug("Creating chrome driver from localhost");
             return new ChromeDriver(chromeOptions);
         } else if (
             Configuration.WEBDRIVER_MODE.equals(ExternalServiceMode.SERVER_FROM_MACOS_DOCKER_CONTAINER.getString()) ||
@@ -96,10 +97,12 @@ public class WebDriverFactory {
                 );
             }
 
-            return (WebDriver) new RemoteWebDriver(
-                RequestAddressValidator.toURL("http://" + webDriverServiceUrl + ":4444/wd/hub"),
-                chromeOptions
-            );
+            final String remoteDriverUrl =
+                (new StringBuilder()).append("http://").append(webDriverServiceUrl).append(":4444/wd/hub").toString();
+
+            Logger.debug("creating chrome driver from " + remoteDriverUrl);
+
+            return (WebDriver) new RemoteWebDriver(RequestAddressValidator.toURL(remoteDriverUrl), chromeOptions);
         } else {
             throw new ScraperShouldHaltException("Webdriver mode is misconfigured");
         }
