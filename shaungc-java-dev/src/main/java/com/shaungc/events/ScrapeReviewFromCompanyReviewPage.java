@@ -581,6 +581,12 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 if (!glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
                     return;
                 }
+            } else {
+                final StringBuilder countElementsDump = new StringBuilder();
+                for (final WebElement countElement : countElements) {
+                    countElementsDump.append("\n\n").append(countElement.getText()).append("\n\n");
+                }
+                Logger.warn("1st approach for scraping Local review count failed: " + countElementsDump);
             }
         } catch (final NoSuchElementException e) {
             // TODO: remove this after local review count gets stable
@@ -588,50 +594,42 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         }
 
         // 2nd approach regex trying to extract stuff - if doesn't even match the regex,
-        // then it's likely no reviews yet\
+        // then it's likely no reviews yet
         String reviewCountElementTextContent = " ";
         try {
             reviewCountElementTextContent =
                 reviewPanelElement
                     .findElement(By.cssSelector("div[class*=EIReviewsPageContainer] > div[class*=sortsHeader] > h2 > span"))
-                    .getText()
-                    .strip()
-                    .toLowerCase()
-                    .replaceAll("[^\\d\\w\\s]", "");
-            final Pattern reviewCountPattern = Pattern.compile("(\\d+)\\s+\\w+\\s+reviews\\s+out\\s+of\\s+(\\d+)");
-            final Matcher reviewCountMatcher = reviewCountPattern.matcher(reviewCountElementTextContent);
-            if (reviewCountMatcher.find()) {
-                final String localReviewCountString = reviewCountMatcher.group(1);
-                final String globalReviewCountString = reviewCountMatcher.group(2);
-                Logger.infoAlsoSlack(
-                    String.format("scraper found localCount/globalCount = %s/%s", localReviewCountString, globalReviewCountString)
-                );
+                    .getText();
 
-                glassdoorReviewMetadataStore.localReviewCount = Integer.valueOf(localReviewCountString);
-                glassdoorReviewMetadataStore.globalReviewCount = Integer.valueOf(globalReviewCountString);
-
-                if (!glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
-                    return;
-                }
-            } else {
-                // TODO: remove this when review count gets stable
-                Logger.warn(
-                    String.format("2nd approach for scraping review count: cannot find() in text:```%s```", reviewCountElementTextContent)
-                );
+            if (!this.parseReviewCountsFromText(reviewCountElementTextContent, glassdoorReviewMetadataStore)) {
+                Logger.warn("2nd approach for scraping local review count: cannot parse review count");
             }
         } catch (NoSuchElementException e) {
+            Logger.warn("2nd approach for local review count: No such element.");
+        }
+        if (glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
             Logger.warnAlsoSlack(
                 String.format(
-                    "NoSuchElementException - 2nd approach for scraping Local review count failed, `reviewCountElementTextContent`:\n```%s```",
+                    "2nd approach for scraping Local review count failed, `reviewCountElementTextContent`:\n```%s```",
                     reviewCountElementTextContent
                 )
             );
         }
 
+        // 3rd approach
+        // last check in case previous approaches cannot capture the right element, perhaps the website structure changed
+        final String reviewPanelElementRawContent = reviewPanelElement.getText();
+        if (this.parseReviewCountsFromText(reviewPanelElementRawContent, glassdoorReviewMetadataStore)) {
+            Logger.info("3rd approach for local review count succeed");
+        } else {
+            Logger.warn("3rd approach for local review count failed");
+        }
+
+        // Verify
         if (glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
             // Report abnormal case - we should be scraping an org because it has reviews;
             // otherwise it's not of our concern
-            final String reviewPanelElementRawContent = reviewPanelElement.getText();
             final String htmlDumpPath =
                 this.archiveManager.writeHtml("reviewMeta:NoLocalGlobalReviewCountWarning", this.driver.getPageSource());
             throw new ScraperShouldHaltException(
@@ -645,6 +643,37 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 "`"
             );
         }
+    }
+
+    private Boolean parseReviewCountsFromText(final String text, final GlassdoorReviewMetadata glassdoorReviewMetadataStore) {
+        final String sanitizedText = text.strip().toLowerCase().replaceAll("[^\\d\\w\\s]", "");
+
+        if (sanitizedText.isBlank()) {
+            return false;
+        }
+
+        final Pattern reviewCountPattern = Pattern.compile("(\\d+)\\s+\\w+\\s+reviews\\s+out\\s+of\\s+(\\d+)");
+        final Matcher reviewCountMatcher = reviewCountPattern.matcher(sanitizedText);
+        if (reviewCountMatcher.find()) {
+            final String localReviewCountString = reviewCountMatcher.group(1);
+            final String globalReviewCountString = reviewCountMatcher.group(2);
+            Logger.infoAlsoSlack(
+                String.format("scraper found localCount/globalCount = %s/%s", localReviewCountString, globalReviewCountString)
+            );
+
+            glassdoorReviewMetadataStore.localReviewCount = Integer.valueOf(localReviewCountString);
+            glassdoorReviewMetadataStore.globalReviewCount = Integer.valueOf(globalReviewCountString);
+
+            if (!glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
+                return true;
+            }
+        } else {
+            Logger.debug(
+                (new StringBuilder()).append("Cannot parse review counts from text. Sanitized text: ").append(sanitizedText).toString()
+            );
+        }
+
+        return false;
     }
 
     private String parseReviewId(final WebElement employeeReviewLiElement) {
