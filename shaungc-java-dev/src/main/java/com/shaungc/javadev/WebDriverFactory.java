@@ -4,6 +4,7 @@ import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.utilities.ExternalServiceMode;
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.RequestAddressValidator;
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -62,6 +63,12 @@ public class WebDriverFactory {
         chromeOptions.addArguments("--disable-dev-shm-usage");
         chromeOptions.addArguments("--disable-browser-side-navigation");
 
+        // avoid chrome timed out like '[SEVERE]: Timed out receiving message from renderer: 0.100'
+        // the use of `EAGER` - which waits on event `DOMContentLoaded`, but not for Ajax,
+        // is fine because most of glassdoor website are pre-regenerated static pages
+        // https://stackoverflow.com/a/60167733/9814131
+        chromeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
+
         // clearer log
         // https://stackoverflow.com/a/20748376/9814131
         chromeOptions.addArguments("--log-level=5");
@@ -75,8 +82,7 @@ public class WebDriverFactory {
             Configuration.WEBDRIVER_MODE.equals(ExternalServiceMode.SERVER_FROM_PORT_FORWARD.getString()) ||
             Configuration.WEBDRIVER_MODE.equals(ExternalServiceMode.SERVER_FROM_CUSTOM_HOST.getString())
         ) {
-            String webDriverServiceUrl = Configuration.WEBDRIVER_MODE// use local (on macos laptop) selenium server running in another docker
-                // container
+            String webDriverServiceUrl = Configuration.WEBDRIVER_MODE// container // use local (on macos laptop) selenium server running in another docker
                 .equals(ExternalServiceMode.SERVER_FROM_MACOS_DOCKER_CONTAINER.getString())
                 ? "host.docker.internal"
                 // use port-forwarding
