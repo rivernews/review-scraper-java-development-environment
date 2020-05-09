@@ -47,8 +47,14 @@ public class LoginGlassdoorTask {
 
         // click "sign in" link
         try {
-            this.driver.findElement(By.cssSelector("a[href*=signIn]")).click();
-        } catch (NoSuchElementException e) {
+            // TODO: remove this
+            // this.driver.findElement(By.cssSelector("a[href*=signIn]")).click();
+
+            this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a[href*=signIn]"))).click();
+        } catch (
+            // NoSuchElementException e
+            TimeoutException e
+        ) {
             final ArchiveManager headlessArchiveManager = new ArchiveManager();
             final String htmlDumpPath = headlessArchiveManager.writeHtml("login:cannotLocateSignInButton", this.driver.getPageSource());
             throw new ScraperShouldHaltException(

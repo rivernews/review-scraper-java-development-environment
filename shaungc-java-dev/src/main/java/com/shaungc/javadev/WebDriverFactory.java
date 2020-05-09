@@ -62,7 +62,6 @@ public class WebDriverFactory {
         chromeOptions.addArguments("--disable-infobars");
         chromeOptions.addArguments("--disable-dev-shm-usage");
         chromeOptions.addArguments("--disable-browser-side-navigation");
-
         // avoid chrome timed out like '[SEVERE]: Timed out receiving message from renderer: 0.100'
         // the use of `EAGER` - which waits on event `DOMContentLoaded`, but not for Ajax,
         // is fine because most of glassdoor website are pre-regenerated static pages
@@ -82,8 +81,9 @@ public class WebDriverFactory {
             Configuration.WEBDRIVER_MODE.equals(ExternalServiceMode.SERVER_FROM_PORT_FORWARD.getString()) ||
             Configuration.WEBDRIVER_MODE.equals(ExternalServiceMode.SERVER_FROM_CUSTOM_HOST.getString())
         ) {
-            String webDriverServiceUrl = Configuration.WEBDRIVER_MODE// container // use local (on macos laptop) selenium server running in another docker
-                .equals(ExternalServiceMode.SERVER_FROM_MACOS_DOCKER_CONTAINER.getString())
+            String webDriverServiceUrl = Configuration.WEBDRIVER_MODE.equals( // container // use local (on macos laptop) selenium server running in another docker
+                    ExternalServiceMode.SERVER_FROM_MACOS_DOCKER_CONTAINER.getString()
+                )
                 ? "host.docker.internal"
                 // use port-forwarding
                 : Configuration.WEBDRIVER_MODE.equals(ExternalServiceMode.SERVER_FROM_PORT_FORWARD.getString())
