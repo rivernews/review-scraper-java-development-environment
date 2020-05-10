@@ -104,7 +104,7 @@ public class WebDriverFactory {
 
             Logger.debug("creating chrome driver from " + remoteDriverUrl);
 
-            final Integer ATTEMPT_LIMIT = 10;
+            final Integer ATTEMPT_LIMIT = 30;
             Integer attemptCount = 0;
             while (attemptCount.compareTo(ATTEMPT_LIMIT) <= 0) {
                 try {
@@ -114,7 +114,7 @@ public class WebDriverFactory {
                     Logger.warn(e.getMessage());
                     Logger.warnAlsoSlack("Cannot reach remote web driver, will sleep 4 seconds; so far retried " + attemptCount);
                     try {
-                        TimeUnit.SECONDS.sleep(4);
+                        TimeUnit.SECONDS.sleep(10);
                     } catch (InterruptedException interruptedException) {
                         Logger.warn("sleep interrupted");
                         break;
