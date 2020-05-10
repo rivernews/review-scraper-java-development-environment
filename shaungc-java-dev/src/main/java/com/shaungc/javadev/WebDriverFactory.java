@@ -4,11 +4,13 @@ import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.utilities.ExternalServiceMode;
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.RequestAddressValidator;
+import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.UnreachableBrowserException;
 
 /**
  * ContainerRemoteWebDriver
@@ -102,7 +104,25 @@ public class WebDriverFactory {
 
             Logger.debug("creating chrome driver from " + remoteDriverUrl);
 
-            return (WebDriver) new RemoteWebDriver(RequestAddressValidator.toURL(remoteDriverUrl), chromeOptions);
+            final Integer ATTEMPT_LIMIT = 10;
+            Integer attemptCount = 0;
+            while (attemptCount.compareTo(ATTEMPT_LIMIT) <= 0) {
+                try {
+                    attemptCount++;
+                    return (WebDriver) new RemoteWebDriver(RequestAddressValidator.toURL(remoteDriverUrl), chromeOptions);
+                } catch (UnreachableBrowserException e) {
+                    Logger.warn(e.getMessage());
+                    Logger.warn("Cannot reach remote web driver, will sleep 4 seconds; so far retried " + attemptCount);
+                    try {
+                        TimeUnit.SECONDS.sleep(4);
+                    } catch (InterruptedException interruptedException) {
+                        Logger.warn("sleep interrupted");
+                        break;
+                    }
+                }
+            }
+
+            throw new ScraperShouldHaltException("fatal: cannot create remote web driver even after attempts of " + attemptCount);
         } else {
             throw new ScraperShouldHaltException("Webdriver mode is misconfigured");
         }
