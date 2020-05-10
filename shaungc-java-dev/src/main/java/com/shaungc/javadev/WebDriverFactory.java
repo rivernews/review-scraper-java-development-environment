@@ -105,7 +105,7 @@ public class WebDriverFactory {
 
             Logger.debug("creating chrome driver from " + remoteDriverUrl);
 
-            final Integer ATTEMPT_LIMIT = 999;
+            final Integer ATTEMPT_LIMIT = 9999;
             Integer attemptCount = 0;
             while (attemptCount.compareTo(ATTEMPT_LIMIT) <= 0) {
                 if (pubSubSubscription.receivedTerminationRequest) {
@@ -117,7 +117,13 @@ public class WebDriverFactory {
                     return (WebDriver) new RemoteWebDriver(RequestAddressValidator.toURL(remoteDriverUrl), chromeOptions);
                 } catch (UnreachableBrowserException e) {
                     Logger.warn(e.getMessage());
-                    Logger.warnAlsoSlack("Cannot reach remote web driver, will sleep 10 seconds; so far retried " + attemptCount);
+                    Logger.warnAlsoSlack(
+                        (new StringBuilder("*(")).append(Configuration.SUPERVISOR_PUBSUB_CHANNEL_NAME)
+                            .append(")* - Cannot reach remote web driver, will sleep 10 seconds; so far retried `")
+                            .append(attemptCount)
+                            .append("`")
+                            .toString()
+                    );
                     try {
                         TimeUnit.SECONDS.sleep(10);
                     } catch (InterruptedException interruptedException) {
