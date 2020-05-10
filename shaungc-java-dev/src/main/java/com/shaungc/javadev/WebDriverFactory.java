@@ -105,7 +105,7 @@ public class WebDriverFactory {
 
             Logger.debug("creating chrome driver from " + remoteDriverUrl);
 
-            final Integer ATTEMPT_LIMIT = 30;
+            final Integer ATTEMPT_LIMIT = 999;
             Integer attemptCount = 0;
             while (attemptCount.compareTo(ATTEMPT_LIMIT) <= 0) {
                 if (pubSubSubscription.receivedTerminationRequest) {
