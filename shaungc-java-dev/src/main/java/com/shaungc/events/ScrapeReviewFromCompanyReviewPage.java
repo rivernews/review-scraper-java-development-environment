@@ -107,6 +107,10 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         final Integer FIND_REVIEW_PANEL_RETRY = 0;
         Integer findReviewPanelRetryCounter = 0;
         while (findReviewPanelRetryCounter <= FIND_REVIEW_PANEL_RETRY) {
+            if (pubSubSubscription.receivedTerminationRequest) {
+                throw new ScraperShouldHaltException("Termination request received.");
+            }
+
             findReviewPanelRetryCounter++;
             try {
                 // navigate to reviews page

@@ -52,7 +52,7 @@ public class App {
 
                 ScrapeOrganizationGlassdoorTask scrapeCompanyTask = null;
 
-                driver = WebDriverFactory.create();
+                driver = WebDriverFactory.create(pubSubSubscription);
 
                 Logger.debug("web driver created");
 

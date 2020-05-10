@@ -3,6 +3,7 @@ package com.shaungc.javadev;
 import com.shaungc.exceptions.ScraperShouldHaltException;
 import com.shaungc.utilities.ExternalServiceMode;
 import com.shaungc.utilities.Logger;
+import com.shaungc.utilities.PubSubSubscription;
 import com.shaungc.utilities.RequestAddressValidator;
 import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.PageLoadStrategy;
@@ -22,7 +23,7 @@ public class WebDriverFactory {
     // ChromeOptions());
     // }
 
-    public static WebDriver create() {
+    public static WebDriver create(PubSubSubscription pubSubSubscription) {
         final ChromeOptions chromeOptions = new ChromeOptions();
 
         if (Configuration.DEBUG) {
@@ -107,6 +108,10 @@ public class WebDriverFactory {
             final Integer ATTEMPT_LIMIT = 30;
             Integer attemptCount = 0;
             while (attemptCount.compareTo(ATTEMPT_LIMIT) <= 0) {
+                if (pubSubSubscription.receivedTerminationRequest) {
+                    throw new ScraperShouldHaltException("Termination request received.");
+                }
+
                 try {
                     attemptCount++;
                     return (WebDriver) new RemoteWebDriver(RequestAddressValidator.toURL(remoteDriverUrl), chromeOptions);
