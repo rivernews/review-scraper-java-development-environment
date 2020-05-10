@@ -112,7 +112,7 @@ public class WebDriverFactory {
                     return (WebDriver) new RemoteWebDriver(RequestAddressValidator.toURL(remoteDriverUrl), chromeOptions);
                 } catch (UnreachableBrowserException e) {
                     Logger.warn(e.getMessage());
-                    Logger.warnAlsoSlack("Cannot reach remote web driver, will sleep 4 seconds; so far retried " + attemptCount);
+                    Logger.warnAlsoSlack("Cannot reach remote web driver, will sleep 10 seconds; so far retried " + attemptCount);
                     try {
                         TimeUnit.SECONDS.sleep(10);
                     } catch (InterruptedException interruptedException) {
