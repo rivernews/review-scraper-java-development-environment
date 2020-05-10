@@ -145,7 +145,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     );
                 }
 
-                // try to mitigate redis disconnection & avoid SLK timeout by keeping some publish commands out there
+                // try to mitigate redis disconnection & avoid SLK timeout by keeping some
+                // publish commands out there
                 Logger.warn("Publish progress before cooling down");
                 this.publishProgress();
 
@@ -161,7 +162,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         // TODO: filter by engineering category
         // confirm that we are on review page while locating filter button
         // final WebElement filterButtonElement = wait.until(ExpectedConditions
-        //         .elementToBeClickable(By.cssSelector("article[id*=MainCol] main div.search > div > button")));
+        // .elementToBeClickable(By.cssSelector("article[id*=MainCol] main div.search >
+        // div > button")));
 
         // TODO: remove sort if not needed - especially when we will scrape all reviews
         // anyway, and the ordering may not matter. This is also to scrape "featured
@@ -383,7 +385,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // 4th approach
         // if (!this.judgeNoNextPageLinkThenClickForthApproach()) {
-        //     return false;
+        // return false;
         // }
 
         // default to having no next page
@@ -391,8 +393,9 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     }
 
     /**
-     * This method try to guess next page url based on the observed pattern in url across pages
-     * sample url: https://www.glassdoor.com/Reviews/Target-Reviews-E194_P177.htm
+     * This method try to guess next page url based on the observed pattern in url
+     * across pages sample url:
+     * https://www.glassdoor.com/Reviews/Target-Reviews-E194_P177.htm
      *
      * @return url of next page link if presents, otherwise null
      */
@@ -415,9 +418,9 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     }
 
     /**
-     * This method tries to find a next page link, then get the link.
-     * Particularly, this 4th approach looks into the html head block and try to
-     * find something like below:
+     * This method tries to find a next page link, then get the link. Particularly,
+     * this 4th approach looks into the html head block and try to find something
+     * like below:
      *
      * <link rel="next" href=
      * "https://www.glassdoor.com/Reviews/SAP-Reviews-E10471_P822.htm">
@@ -581,15 +584,18 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 if (!glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
                     return;
                 }
-            } else {
-                final StringBuilder countElementsDump = new StringBuilder();
-                for (final WebElement countElement : countElements) {
-                    countElementsDump.append("\n\n").append(countElement.getText()).append("\n\n");
-                }
-                Logger.warn("1st approach for scraping Local review count failed: " + countElementsDump);
             }
+
+            // abnormal countElements; print out warnings
+            final StringBuilder countElementsDump = new StringBuilder();
+            for (final WebElement countElement : countElements) {
+                countElementsDump.append("\n\n").append(countElement.getText()).append("\n\n");
+            }
+            Logger.warn("1st approach for scraping Local review count: abnormal countElementsDump: " + countElementsDump);
         } catch (final NoSuchElementException e) {
-            // TODO: remove this after local review count gets stable
+            Logger.warn("1st approach for local review count: No such element.");
+        }
+        if (glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
             Logger.warnAlsoSlack("NoSuchElementException - 1st approach for scraping Local review count failed");
         }
 
@@ -618,7 +624,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         }
 
         // 3rd approach
-        // last check in case previous approaches cannot capture the right element, perhaps the website structure changed
+        // last check in case previous approaches cannot capture the right element,
+        // perhaps the website structure changed
         final String reviewPanelElementRawContent = reviewPanelElement.getText();
         if (this.parseReviewCountsFromText(reviewPanelElementRawContent, glassdoorReviewMetadataStore)) {
             Logger.info("3rd approach for local review count succeed");
