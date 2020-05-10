@@ -139,6 +139,39 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
         }
     }
 
+    public void publishProgress(
+        final Integer processedReviewsCount,
+        final Integer wentThroughReviewsCount,
+        final Integer localReviewCount,
+        final String elapsedTimeString
+    ) {
+        this.publish(
+                String.format(
+                    "%s:%s:{\"processed\":%d,\"wentThrough\":%d,\"total\":%d,\"elapsedTimeString\":\"%s\"}",
+                    ScraperJobMessageType.PROGRESS.getString(),
+                    ScraperJobMessageTo.SLACK_MD_SVC.getString(),
+                    processedReviewsCount,
+                    wentThroughReviewsCount,
+                    localReviewCount,
+                    elapsedTimeString
+                )
+            );
+    }
+
+    public void publishProgress(final String elapsedTimeString) {
+        this.publish(
+                String.format(
+                    "%s:%s:{\"processed\":%d,\"wentThrough\":%d,\"total\":%d,\"elapsedTimeString\":\"%s\"}",
+                    ScraperJobMessageType.PROGRESS.getString(),
+                    ScraperJobMessageTo.SLACK_MD_SVC.getString(),
+                    Configuration.TEST_COMPANY_LAST_PROGRESS_PROCESSED,
+                    Configuration.TEST_COMPANY_LAST_PROGRESS_WENTTHROUGH,
+                    Configuration.TEST_COMPANY_LAST_PROGRESS_TOTAL,
+                    elapsedTimeString
+                )
+            );
+    }
+
     @Override
     public void unsubscribed(final String channel, final long count) {
         // TODO Auto-generated method stub

@@ -12,8 +12,6 @@ import com.shaungc.javadev.Configuration;
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.LoggerLevel;
 import com.shaungc.utilities.PubSubSubscription;
-import com.shaungc.utilities.ScraperJobMessageTo;
-import com.shaungc.utilities.ScraperJobMessageType;
 import com.shaungc.utilities.ScraperMode;
 import com.shaungc.utilities.Timer;
 import java.time.Duration;
@@ -357,16 +355,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     }
 
     private void publishProgress() {
-        this.pubSubSubscription.publish(
-                String.format(
-                    "%s:%s:{\"processed\":%d,\"wentThrough\":%d,\"total\":%d,\"elapsedTimeString\":\"%s\"}",
-                    ScraperJobMessageType.PROGRESS.getString(),
-                    ScraperJobMessageTo.SLACK_MD_SVC.getString(),
-                    this.processedReviewsCount,
-                    this.wentThroughReviewsCount,
-                    this.localReviewCount,
-                    this.scraperSessionTimer.captureOverallElapseDurationString()
-                )
+        this.pubSubSubscription.publishProgress(
+                this.processedReviewsCount,
+                this.wentThroughReviewsCount,
+                this.localReviewCount,
+                this.scraperSessionTimer.captureOverallElapseDurationString()
             );
     }
 

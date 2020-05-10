@@ -129,8 +129,14 @@ public class App {
             } catch (ScraperException | ScraperShouldHaltException e) {
                 Logger.info(e.getMessage());
                 Logger.errorAlsoSlack(
-                    "A scraper exception is raised and its message is logged; which is not an error of the program, but more of the webpage the scraper is dealing with (or the selenium server issue). Refer to the current url of the scraper to investigate more: " +
-                    driver.getCurrentUrl()
+                    (new StringBuilder()).append(
+                            "A scraper exception is raised and its message is logged; which is not an error of the program, but more of the webpage the scraper is dealing with (or the selenium server issue). Refer to the current url of the scraper to investigate more: "
+                        )
+                        .append(driver.getCurrentUrl())
+                        .append("\n```")
+                        .append(e.getMessage())
+                        .append("```\n")
+                        .toString()
                 );
 
                 pubSubSubscription.publish(
@@ -171,8 +177,14 @@ public class App {
                     }
                 }
                 Logger.errorAlsoSlack(
-                    "Program ended in exception block...! Might be a problem in either the scraper itself not handled, or an unknown change in the webpage that disrupts the scraper process. Please check the scraper log for error detail. " +
-                    currentFacingPage
+                    (new StringBuilder()).append(
+                            "Program ended in exception block...! Might be a problem in either the scraper itself not handled, or an unknown change in the webpage that disrupts the scraper process. Please check the scraper log for error detail. "
+                        )
+                        .append(currentFacingPage)
+                        .append("\n```")
+                        .append(e.getMessage())
+                        .append("```\n")
+                        .toString()
                 );
             } finally {
                 pubSubSubscription.cleanup();

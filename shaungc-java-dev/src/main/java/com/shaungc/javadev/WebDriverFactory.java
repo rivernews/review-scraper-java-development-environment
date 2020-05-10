@@ -112,20 +112,27 @@ public class WebDriverFactory {
                     throw new ScraperShouldHaltException("Termination request received.");
                 }
 
+                // prevent from SLK timeout
+                pubSubSubscription.publishProgress("-- creating remote driver, no elapsed time info yet --");
+
                 try {
                     attemptCount++;
                     return (WebDriver) new RemoteWebDriver(RequestAddressValidator.toURL(remoteDriverUrl), chromeOptions);
                 } catch (UnreachableBrowserException e) {
+                    final Integer coolDownSecond = Double.valueOf(10 + attemptCount * 0.01).intValue();
                     Logger.warn(e.getMessage());
                     Logger.warnAlsoSlack(
                         (new StringBuilder("*(")).append(Configuration.SUPERVISOR_PUBSUB_CHANNEL_NAME)
-                            .append(")* - Cannot reach remote web driver, will sleep 10 seconds; so far retried `")
+                            .append(")* - Cannot reach remote web driver, so far retried `")
                             .append(attemptCount)
+                            .append("`")
+                            .append("; will cool down for seconds `")
+                            .append(coolDownSecond)
                             .append("`")
                             .toString()
                     );
                     try {
-                        TimeUnit.SECONDS.sleep(10);
+                        TimeUnit.SECONDS.sleep(coolDownSecond);
                     } catch (InterruptedException interruptedException) {
                         Logger.warn("sleep interrupted");
                         break;
