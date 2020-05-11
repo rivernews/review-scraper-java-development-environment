@@ -5,6 +5,7 @@ import com.shaungc.utilities.ExternalServiceMode;
 import com.shaungc.utilities.Logger;
 import com.shaungc.utilities.PubSubSubscription;
 import com.shaungc.utilities.RequestAddressValidator;
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
@@ -113,7 +114,12 @@ public class WebDriverFactory {
                 }
 
                 // prevent from SLK timeout
-                pubSubSubscription.publishProgress("-- creating remote driver, no elapsed time info yet --");
+                pubSubSubscription.publishProgress(
+                    (new StringBuilder()).append("-- creating remote driver, no elapsed time info yet ")
+                        .append(Instant.now())
+                        .append(" --")
+                        .toString()
+                );
 
                 try {
                     attemptCount++;

@@ -1,19 +1,18 @@
+# make sure every command succeed
+# https://stackoverflow.com/a/19622569/9814131
 
+export IMAGE_NAME=shaungc/gd-selenium-standalone
 
-export IMAGE_NAME=shaungc/gd-scraper
-
-if docker build -f ./prod.Dockerfile -t "${IMAGE_NAME}:latest" .. ; then
+if docker build -f ./Dockerfile -t "${IMAGE_NAME}:latest" . ; then
     echo 'Build success'
 else
     echo 'Build failed'
     return
 fi
 
-cd ..
+set -e
 
-export SHORT_COMMIT=$(git rev-parse --short HEAD)
-
-cd .devcontainer
+export SHORT_COMMIT=$(openssl rand -hex 12)
 
 echo "docker tag '${IMAGE_NAME}:latest' '${IMAGE_NAME}:${SHORT_COMMIT}'"
 docker tag "${IMAGE_NAME}:latest" "${IMAGE_NAME}:${SHORT_COMMIT}"

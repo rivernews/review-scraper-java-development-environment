@@ -14,4 +14,10 @@ WORKDIR /tmp/build
 
 COPY --from=builder /tmp/src/target/shaungc-java-dev-1.1.jar .
 
-CMD [ "java", "-jar", "shaungc-java-dev-1.1.jar" ]
+# setup our entry point
+
+COPY .devcontainer/entry_point.sh /tmp/entry_point.sh
+
+RUN chmod +x /tmp/entry_point.sh
+
+ENTRYPOINT [ "/tmp/entry_point.sh" ]
