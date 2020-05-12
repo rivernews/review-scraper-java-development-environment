@@ -18,6 +18,10 @@ fi
 
 SUPERVISOR_PID=$!
 
+# creating sidecar selenium server container
+# https://medium.com/@cotton_ori/how-to-terminate-a-side-car-container-in-kubernetes-job-2468f435ca99
+# https://www.kalc.io/blog/kubernetes-jobs-and-the-sidecar-problem
+
 # wait for scraper job container (kubernetes job) to finish
 #
 # make sure your pod configs volume:

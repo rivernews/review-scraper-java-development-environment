@@ -44,7 +44,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
     /** element locating resources */
 
-    private final String reviewPanelElementCssSelector = "article#MainCol main";
+    private String reviewPanelElementCssSelector = "article#MainCol main";
     private final String employeeReviewElementsLocalCssSelector = "div#ReviewsFeed ol > li";
 
     /** scraper session metadata */
@@ -102,11 +102,17 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         // locate review panel
         // critical mission so set retry to 2
         // TODO: we're currently debugging so disable retry
-        final Integer FIND_REVIEW_PANEL_RETRY = 0;
+        final Integer FIND_REVIEW_PANEL_RETRY = 3;
         Integer findReviewPanelRetryCounter = 0;
         while (findReviewPanelRetryCounter <= FIND_REVIEW_PANEL_RETRY) {
             if (pubSubSubscription.receivedTerminationRequest) {
-                throw new ScraperShouldHaltException("Termination request received.");
+                throw new ScraperShouldHaltException(
+                    (new StringBuilder()).append(this.orgNameSlackMessagePrefix)
+                        .append(" ")
+                        .append(this.scraperSessionTimer.captureCurrentSessionElapseDurationString())
+                        .append(" Termination request received")
+                        .toString()
+                );
             }
 
             findReviewPanelRetryCounter++;
@@ -118,8 +124,26 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     this.driver.findElement(By.cssSelector("article#WideCol a.eiCell.reviews")).click();
                 }
 
-                final WebElement reviewPanelElement =
-                    this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(this.reviewPanelElementCssSelector)));
+                // 1st appraoch
+                WebElement reviewPanelElement = null;
+                try {
+                    reviewPanelElement =
+                        this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(this.reviewPanelElementCssSelector)));
+                } catch (TimeoutException e) {
+                    Logger.warnAlsoSlack(
+                        (new StringBuilder()).append(this.orgNameSlackMessagePrefix)
+                            .append(" ")
+                            .append("locating review panel, 1st approach failed")
+                            .toString()
+                    );
+                }
+
+                // 2nd approach
+                if (reviewPanelElement == null) {
+                    this.reviewPanelElementCssSelector = "div[data-test=EIReviewsPage]";
+                    reviewPanelElement =
+                        this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(this.reviewPanelElementCssSelector)));
+                }
 
                 locatedElements.add(reviewPanelElement);
 
@@ -127,7 +151,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             } catch (TimeoutException e) {
                 Logger.warnAlsoSlack(
                     String.format(
-                        "*(%s) (current session %s)* Cannot locate review panel, retrying %sth time",
+                        "*(%s)* (current session %s) Cannot locate review panel, tried %sth time(s)",
                         this.archiveManager.orgName,
                         this.scraperSessionTimer.captureCurrentSessionElapseDurationString(),
                         findReviewPanelRetryCounter
