@@ -104,7 +104,12 @@ public class WebDriverFactory {
             final String remoteDriverUrl =
                 (new StringBuilder()).append("http://").append(webDriverServiceUrl).append(":4444/wd/hub").toString();
 
-            Logger.debug("creating chrome driver from " + remoteDriverUrl);
+            Logger.debug("Cooling down a bit, creating chrome driver from " + remoteDriverUrl);
+            try {
+                TimeUnit.SECONDS.sleep(10);
+            } catch (InterruptedException interruptedException) {
+                Logger.warn("sleep interrupted");
+            }
 
             final Integer ATTEMPT_LIMIT = 9999;
             Integer attemptCount = 0;
@@ -125,7 +130,7 @@ public class WebDriverFactory {
                     attemptCount++;
                     return (WebDriver) new RemoteWebDriver(RequestAddressValidator.toURL(remoteDriverUrl), chromeOptions);
                 } catch (UnreachableBrowserException e) {
-                    final Integer coolDownSecond = Double.valueOf(10 + attemptCount * 0.01).intValue();
+                    final Integer coolDownSecond = Double.valueOf(20 + attemptCount * 0.01).intValue();
                     Logger.warn(e.getMessage());
                     Logger.warnAlsoSlack(
                         (new StringBuilder("*(")).append(Configuration.SUPERVISOR_PUBSUB_CHANNEL_NAME)
