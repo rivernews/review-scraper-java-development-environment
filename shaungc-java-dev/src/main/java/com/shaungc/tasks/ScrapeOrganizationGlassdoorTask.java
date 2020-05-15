@@ -245,7 +245,8 @@ public class ScrapeOrganizationGlassdoorTask {
                 this.wentThroughReviewsCount,
                 this.localReviewsCount,
                 (Configuration.TEST_COMPANY_LAST_PROGRESS_SESSION + 1)
-            )
+            ),
+            true
         );
     }
 

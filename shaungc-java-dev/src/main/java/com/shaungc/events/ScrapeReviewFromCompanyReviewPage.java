@@ -311,7 +311,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                             this.wentThroughReviewsCount,
                             this.localReviewCount,
                             reportingRate
-                        )
+                        ),
+                        true
                     );
                 }
 

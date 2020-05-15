@@ -47,9 +47,6 @@ public class LoginGlassdoorTask {
 
         // click "sign in" link
         try {
-            // TODO: remove this
-            // this.driver.findElement(By.cssSelector("a[href*=signIn]")).click();
-
             this.wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a[href*=signIn]"))).click();
         } catch (
             // NoSuchElementException e
