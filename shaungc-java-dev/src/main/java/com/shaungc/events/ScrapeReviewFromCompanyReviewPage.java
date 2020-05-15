@@ -253,7 +253,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         // prepare before getting into reviews
         final Integer reviewReportTime = 5;
         final Integer reportingRate = (Integer) (this.localReviewCount / reviewReportTime);
-        final Timer progressReportingTimer = new Timer(Duration.ofSeconds(5));
+        final Timer progressReportingTimer = new Timer(Duration.ofSeconds(10));
         final Timer browserGarbageCollectionTimer = !Configuration.RUNNING_IN_TRAVIS ? new Timer(Duration.ofMinutes(5)) : null;
 
         // foreach review
