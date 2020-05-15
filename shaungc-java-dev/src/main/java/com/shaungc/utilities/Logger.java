@@ -57,12 +57,14 @@ public class Logger {
                 .append(trailingNewlines);
 
         if (Configuration.DEBUG || Configuration.LOGGER_LEVEL.compareTo(logLevel.getVerbosenessLevelValue()) >= 0) {
+            // print system log
             StringBuilder prefix = new StringBuilder(leadingNewlines).append(Instant.now().toString()).append(" ");
             System.out.println(prefix.append(finalMessage.toString()));
-        }
 
-        if (alsoSendSlackMessage) {
-            SlackService.sendMessage(finalMessage.toString());
+            // send slack if needed
+            if (alsoSendSlackMessage) {
+                SlackService.sendMessage(finalMessage.toString());
+            }
         }
     }
 }

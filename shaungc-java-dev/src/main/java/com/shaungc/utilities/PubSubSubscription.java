@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 
 // Writing PubSub adapter
+// https://stackoverflow.com/questions/40839956/how-to-get-a-message-from-a-lettuce-redispubsublistener-in-java
 // https://www.baeldung.com/java-redis-lettuce#pubsub
 public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
     public final String redisPubsubChannelName;
@@ -123,6 +124,7 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
             if (messageType.equals(ScraperJobMessageType.TERMINATE.getString())) {
                 Logger.info("Received terminate signal from supervisor: `" + payload + "`");
                 this.receivedTerminationRequest = true;
+                return;
             }
         } else if (messageTo.equals(ScraperJobMessageTo.SCRAPER.getString())) {
             if (messageType.equals(ScraperJobMessageType.PREFLIGHT.getString())) {
@@ -133,10 +135,12 @@ public class PubSubSubscription extends RedisPubSubAdapter<String, String> {
                 // received ack msg from slack md svc -> can now proceed (communication w/
                 // slack md svc confirmed)
                 this.supervisorCountDownLatch.countDown();
+
+                return;
             }
-        } else {
-            Logger.debug("Ignoring message that's not for ours: " + message);
         }
+
+        Logger.debug("Ignoring message that's not for ours: " + message);
     }
 
     public void publishProgress(
