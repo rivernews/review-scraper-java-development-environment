@@ -277,9 +277,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             }
 
             // pull out review elements
-            final List<WebElement> employeeReviewElements = reviewPanelElement.findElements(
-                By.cssSelector(this.employeeReviewElementsLocalCssSelector)
-            );
+            final List<WebElement> employeeReviewElements =
+                this.driver.findElements(By.cssSelector(this.employeeReviewElementsLocalCssSelector));
 
             for (final WebElement employeeReviewElement : employeeReviewElements) {
                 if (this.pubSubSubscription.receivedTerminationRequest) {
