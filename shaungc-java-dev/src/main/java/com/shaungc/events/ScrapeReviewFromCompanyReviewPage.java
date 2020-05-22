@@ -96,7 +96,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         this.orgNameSlackMessagePrefix = orgNameSlackMessagePrefix;
     }
 
-    protected List<WebElement> locate(final String reviewPageUrl) {
+    protected List<WebElement> locate(final String reviewPageUrl, final WebElement nextPageLinkElement, final Boolean throwException) {
         final List<WebElement> locatedElements = new ArrayList<>();
 
         // locate review panel
@@ -120,6 +120,12 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 // navigate to reviews page
                 if (reviewPageUrl != null && !reviewPageUrl.strip().isEmpty()) {
                     this.driver.get(reviewPageUrl);
+                } else if (nextPageLinkElement != null) {
+                    nextPageLinkElement.click();
+                    try {
+                        TimeUnit.SECONDS.sleep(2);
+                    } catch (InterruptedException e) {}
+                    this.waitForReviewPanelLoading();
                 } else {
                     this.driver.findElement(By.cssSelector("article#WideCol a.eiCell.reviews")).click();
                 }
@@ -159,16 +165,20 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 );
 
                 if (findReviewPanelRetryCounter > FIND_REVIEW_PANEL_RETRY) {
-                    final String htmlDumpPath =
-                        this.archiveManager.writeHtml("review:cannotLocateReviewPanel", this.driver.getPageSource());
-                    throw new ScraperShouldHaltException(
-                        String.format(
-                            "Cannot locate review panel after `%s` retries. <%s|Dumped html on s3>, scraper was facing `%s`.",
-                            findReviewPanelRetryCounter,
-                            this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath),
-                            this.driver.getCurrentUrl()
-                        )
-                    );
+                    if (throwException) {
+                        final String htmlDumpPath =
+                            this.archiveManager.writeHtml("review:cannotLocateReviewPanel", this.driver.getPageSource());
+                        throw new ScraperShouldHaltException(
+                            String.format(
+                                "Cannot locate review panel after `%s` retries. <%s|Dumped html on s3>, scraper was facing `%s`.",
+                                findReviewPanelRetryCounter,
+                                this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath),
+                                this.driver.getCurrentUrl()
+                            )
+                        );
+                    } else {
+                        return null;
+                    }
                 }
 
                 // try to mitigate redis disconnection & avoid SLK timeout by keeping some
@@ -216,9 +226,9 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     @Override
     protected List<WebElement> locate() {
         if (Configuration.SCRAPER_MODE.equals(ScraperMode.RENEWAL.getString())) {
-            return this.locate(Configuration.TEST_COMPANY_NEXT_REVIEW_PAGE_URL);
+            return this.locate(Configuration.TEST_COMPANY_NEXT_REVIEW_PAGE_URL, null, true);
         } else {
-            return this.locate(null);
+            return this.locate(null, null, true);
         }
     }
 
@@ -335,22 +345,25 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             // proceed to next page
 
-            // click next page
-            // Boolean noNextPageLink = this.judgeNoNextPageLinkOrClickNextPageLink();
+            // try direct url approaches first
             String nextPageLink = this.judgeNoNextPageLinkOrGetLinkForthApproach();
 
             if (nextPageLink == null) {
                 nextPageLink = this.judgeNoNextPageLinkOrGetLinkFifthApproach();
             }
 
-            // if (noNextPageLink) {
             if (nextPageLink == null) {
                 Logger.info("No next page link available, ready to wrap up scraper session.");
                 this.isFinalSession = true;
                 break;
             } else {
                 Logger.info("Found / guessed next page link, going to continue...");
-                reviewPanelElement = this.locate(nextPageLink).get(0);
+                reviewPanelElement = this.locate(nextPageLink, null, false).get(0);
+            }
+
+            // try click approach
+            if (reviewPanelElement == null) {
+                reviewPanelElement = this.locate(null, this.getNextPageLinkElement(), true).get(0);
             }
 
             // TODO: evaluate if we still need old next page link approach,
@@ -389,29 +402,24 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     }
 
     // TODO: remove this if not used
-    private Boolean judgeNoNextPageLinkOrClickNextPageLink() {
+    private WebElement getNextPageLinkElement() {
+        WebElement nextPageLinkElement;
         // 1st approach
-        if (!this.judgeNoNextPageLinkThenClickFirstApproach()) {
-            return false; // has link then short-circuit
+        if ((nextPageLinkElement = this.getNextPageLinkElementFirstApproach()) != null) {
+            return nextPageLinkElement; // has link then short-circuit
         }
 
         // 2nd approach
-        if (!this.judgeNoNextPageLinkThenClickSecondApproach()) {
-            return false;
+        if ((nextPageLinkElement = this.getNextPageLinkElementSecondApproach()) != null) {
+            return nextPageLinkElement;
         }
 
         // 3rd approach
-        if (!this.judgeNoNextPageLinkThenClickThirdApproach()) {
-            return false;
+        if ((nextPageLinkElement = this.getNextPageLinkElementThirdApproach()) != null) {
+            return nextPageLinkElement;
         }
 
-        // 4th approach
-        // if (!this.judgeNoNextPageLinkThenClickForthApproach()) {
-        // return false;
-        // }
-
-        // default to having no next page
-        return true;
+        return null;
     }
 
     /**
@@ -463,7 +471,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     }
 
     // TODO: remove this if not used
-    private Boolean judgeNoNextPageLinkThenClickThirdApproach() {
+    private WebElement getNextPageLinkElementThirdApproach() {
         // example webpage in mind:
         // https://s3.console.aws.amazon.com/s3/object/iriversland-qualitative-org-review-v3/Amazon-6036/logs/reviewDataLostWarning.2020-03-04T23%253A44%253A01.848981Z.html?region=us-west-2&tab=overview
 
@@ -479,7 +487,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         Logger.info("found anchorElements " + anchorElements.size());
 
         if (anchorElements.size() == 0) {
-            return true;
+            return null;
         }
 
         if (anchorElements.size() == 1) {
@@ -487,15 +495,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             // a previous page or current page, which will cause a inifinite loop where
             // scraper job renews forever
             // so we'd rather just play safe and stop here, but we'll log this incident
-            final String htmlDumpPath = this.archiveManager.writeHtml("review:nextPageLinkCheckUnknownCase", this.driver.getPageSource());
-            throw new ScraperShouldHaltException(
-                "Using third approach to capture next page link, but got an unknown case where only one `<a>` found. Please investigate further to see if the webpage structure changed. " +
-                "Html saved <" +
-                ArchiveManager.BUCKET_URL +
-                "|on s3> at key `" +
-                htmlDumpPath +
-                "`"
-            );
+            Logger.warn("Using third approach to capture next page link, but got an unknown case where only one `<a>` found");
+            return null;
         }
 
         // just look at last anchor
@@ -510,16 +511,14 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         if (!lastAnchorElement.getText().toLowerCase().contains("next")) {
             // TODO: remove this or change to debug after things get stable
             Logger.info("no `next` text exist in lastAnchorElement");
-            return true;
+            return null;
         }
 
-        lastAnchorElement.click();
-
-        return false;
+        return lastAnchorElement;
     }
 
     // TODO: remove this if not used
-    private Boolean judgeNoNextPageLinkThenClickSecondApproach() {
+    private WebElement getNextPageLinkElementSecondApproach() {
         // TODO: remove this or change to debug after things get stable
         Logger.info("Trying 2nd approach to capture next page link");
 
@@ -532,12 +531,12 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         // try to capture no next page cases
         if (anchorElements.size() == 0) {
-            return true;
+            return null;
         } else {
             WebElement lastAnchorElement = anchorElements.get(anchorElements.size() - 1);
             if (lastAnchorElement.getAttribute("class") != null) {
                 if (lastAnchorElement.getAttribute("class").strip().equals("disabled")) {
-                    return true;
+                    return null;
                 }
             }
 
@@ -545,24 +544,20 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             try {
                 lastAnchorElement.findElement(By.cssSelector("span[alt=Next]"));
             } catch (Exception e2CheckAnchorIsNotNext) {
-                return true;
+                return null;
             }
 
-            lastAnchorElement.click();
+            return lastAnchorElement;
         }
-
-        return false;
     }
 
     // TODO: remove this if not used
-    private Boolean judgeNoNextPageLinkThenClickFirstApproach() {
+    private WebElement getNextPageLinkElementFirstApproach() {
         try {
-            this.driver.findElement(By.cssSelector("ul[class^=pagination] li[class$=next] a:not([class$=disabled])")).click();
+            return this.driver.findElement(By.cssSelector("ul[class^=pagination] li[class$=next] a:not([class$=disabled])"));
         } catch (final NoSuchElementException e) {
-            return true;
+            return null;
         }
-
-        return false;
     }
 
     private void scrapeReviewMetadata(final WebElement reviewPanelElement, final GlassdoorReviewMetadata glassdoorReviewMetadataStore) {

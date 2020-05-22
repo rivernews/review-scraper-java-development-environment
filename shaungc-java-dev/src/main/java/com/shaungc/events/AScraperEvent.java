@@ -20,20 +20,20 @@ public abstract class AScraperEvent<TParsedData, TPostActionSideEffect> {
 
     protected final ArchiveManager archiveManager;
 
-    public AScraperEvent(WebDriver passedInRemoteWebDriver) {
+    public AScraperEvent(final WebDriver passedInRemoteWebDriver) {
         this.driver = passedInRemoteWebDriver;
         this.archiveManager = null;
         this.wait = new WebDriverWait(this.driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND);
     }
 
-    public AScraperEvent(WebDriver passedInRemoteWebDriver, ArchiveManager archiveManager) {
+    public AScraperEvent(final WebDriver passedInRemoteWebDriver, final ArchiveManager archiveManager) {
         this.driver = passedInRemoteWebDriver;
         this.archiveManager = archiveManager;
         this.wait = new WebDriverWait(this.driver, Configuration.EXPECTED_CONDITION_WAIT_SECOND);
     }
 
     // TODO: improve this block and remove redundant code / log
-    protected List<WebElement> locate(String passedInCssSelector) {
+    protected List<WebElement> locate(final String passedInCssSelector) {
         if (this.cssSelector != null) {
             this.cssSelector = passedInCssSelector;
             return this.driver.findElements(By.cssSelector(this.cssSelector));
@@ -51,8 +51,8 @@ public abstract class AScraperEvent<TParsedData, TPostActionSideEffect> {
     protected abstract void postAction(TParsedData parsedData);
 
     public void run() throws ScraperException {
-        List<WebElement> webElements = locate();
-        TParsedData parsedData = parser(webElements);
-        postAction(parsedData);
+        final List<WebElement> webElements = this.locate();
+        final TParsedData parsedData = this.parser(webElements);
+        this.postAction(parsedData);
     }
 }
