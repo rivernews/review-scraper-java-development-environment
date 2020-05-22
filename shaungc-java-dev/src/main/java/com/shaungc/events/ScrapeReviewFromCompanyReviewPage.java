@@ -157,10 +157,13 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             } catch (TimeoutException e) {
                 Logger.warnAlsoSlack(
                     String.format(
-                        "*(%s)* (current session %s) Cannot locate review panel, tried %sth time(s)",
+                        "*(%s)* (current session %s) Cannot locate review panel, tried %sth time(s), approach type %s",
                         this.archiveManager.orgName,
                         this.scraperSessionTimer.captureCurrentSessionElapseDurationString(),
-                        findReviewPanelRetryCounter
+                        findReviewPanelRetryCounter,
+                        reviewPageUrl != null
+                            ? "`direct review page url`"
+                            : nextPageLinkElement != null ? "`click next page link`" : "`initial review tab click`"
                     )
                 );
 
