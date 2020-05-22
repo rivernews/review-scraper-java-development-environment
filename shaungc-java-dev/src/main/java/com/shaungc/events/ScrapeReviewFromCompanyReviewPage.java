@@ -102,7 +102,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         // locate review panel
         // critical mission so set retry to 2
         // TODO: we're currently debugging so disable retry
-        final Integer FIND_REVIEW_PANEL_RETRY = 3;
+        final Integer FIND_REVIEW_PANEL_RETRY = 2;
         Integer findReviewPanelRetryCounter = 0;
         while (findReviewPanelRetryCounter <= FIND_REVIEW_PANEL_RETRY) {
             if (pubSubSubscription.receivedTerminationRequest) {
@@ -349,6 +349,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             // proceed to next page
 
             // try direct url approaches first
+            final String currentPageLink = this.driver.getCurrentUrl();
             String nextPageLink = this.judgeNoNextPageLinkOrGetLinkForthApproach();
 
             if (nextPageLink == null) {
@@ -365,6 +366,10 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             }
 
             // try click approach
+            this.driver.get(currentPageLink);
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (InterruptedException e) {}
             if (reviewPanelElement == null) {
                 reviewPanelElement = this.locate(null, this.getNextPageLinkElement(), true).get(0);
             }
