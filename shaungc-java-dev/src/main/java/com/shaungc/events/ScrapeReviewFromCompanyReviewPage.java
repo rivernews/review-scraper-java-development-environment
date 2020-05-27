@@ -270,7 +270,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         final Timer browserGarbageCollectionTimer = !Configuration.RUNNING_IN_TRAVIS ? new Timer(Duration.ofMinutes(5)) : null;
 
         // foreach review
-        while (true) {
+        while (this.wentThroughReviewsCount < this.localReviewCount) {
             // Travis requires us to output something every minute
             if (Configuration.RUNNING_IN_TRAVIS) {
                 System.out.println("Processing page " + (this.processedReviewPages + 1));
@@ -335,36 +335,35 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             this.processedReviewPages++;
 
-            // instructed to stop & wrap up if reached stop page
+            // instructed to stop & wrap up if reached stop page (for splitted job, specifically)
             if (
                 !Configuration.TEST_COMPANY_STOP_AT_PAGE.equals(0) &&
                 Configuration.TEST_COMPANY_STOP_AT_PAGE.compareTo(this.processedReviewPages) <= 0
             ) {
                 Logger.debug("Will now wrap up scraper session because we reached stop page " + Configuration.TEST_COMPANY_STOP_AT_PAGE);
-                this.isFinalSession = true;
                 break;
             }
 
-            // proceed to next page
+            // Proceed to next page while WHILE LOOP condition remains true
 
-            // try direct url approaches first
+            // Attempting next page: try direct url approaches first
             final String currentPageLink = this.driver.getCurrentUrl();
             String nextPageLink = this.judgeNoNextPageLinkOrGetLinkForthApproach();
 
             if (nextPageLink == null) {
+                // this approach will always give us a link, so make sure we also check for an actual review panel
                 nextPageLink = this.judgeNoNextPageLinkOrGetLinkFifthApproach();
             }
 
             if (nextPageLink == null) {
                 Logger.info("No next page link available, ready to wrap up scraper session.");
-                this.isFinalSession = true;
                 break;
             } else {
                 Logger.info("Found / guessed next page link, going to continue...");
                 reviewPanelElement = this.locate(nextPageLink, null, false).get(0);
             }
 
-            // try click approach
+            // Attempting next page: try click approach
             this.driver.get(currentPageLink);
             try {
                 TimeUnit.SECONDS.sleep(2);
@@ -373,14 +372,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 reviewPanelElement = this.locate(null, this.getNextPageLinkElement(), true).get(0);
             }
 
-            // TODO: evaluate if we still need old next page link approach,
-            // if not, clean up all related code
-            // this.waitForReviewPanelLoading();
-
             // check if approaching travis build limit
             // if so, stop session and try to schedule a cross-session job instead
             if (this.scraperSessionTimer.doesReachCountdownDuration()) {
                 // stop current scraper session
+                this.isFinalSession = false;
                 return glassdoorCompanyParsedData;
             }
 
@@ -390,12 +386,15 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 final Double memoryUtilizationMi = this.orderGarbageCollectionAgainstBrowser();
                 if (memoryUtilizationMi > 250) {
                     Logger.warnAlsoSlack("Danger memory water meter, use cross session and abort current scraper");
+                    this.isFinalSession = false;
                     return glassdoorCompanyParsedData;
                 }
                 browserGarbageCollectionTimer.restart();
             }
         }
 
+        // default to finalize (not interrupted by timer)
+        this.isFinalSession = true;
         return glassdoorCompanyParsedData;
     }
 
@@ -437,12 +436,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
      * @return url of next page link if presents, otherwise null
      */
     private String judgeNoNextPageLinkOrGetLinkFifthApproach() {
-        // if it seems like there should be no more next page
-        // then don't use this approach of guessing next url
-        if (this.processedReviewPages * 10 >= this.localReviewCount) {
-            return null;
-        }
-
         StringBuilder logMessageStringBuilder = new StringBuilder();
         logMessageStringBuilder
             .append("*(")
