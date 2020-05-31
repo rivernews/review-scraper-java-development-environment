@@ -177,7 +177,10 @@ public class App {
                     }
                 }
                 Logger.errorAlsoSlack(
-                    (new StringBuilder()).append(
+                    (new StringBuilder()).append("`")
+                        .append(Configuration.SUPERVISOR_PUBSUB_CHANNEL_NAME)
+                        .append("` ")
+                        .append(
                             "Program ended in exception block...! Might be a problem in either the scraper itself not handled, or an unknown change in the webpage that disrupts the scraper process. Please check the scraper log for error detail. "
                         )
                         .append(currentFacingPage)
