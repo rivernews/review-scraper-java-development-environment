@@ -173,18 +173,18 @@ public class App {
                     try {
                         currentFacingPage = (driver != null ? "Last webpage: `" + driver.getCurrentUrl() + "`" : "");
                     } catch (Exception driverException) {
-                        currentFacingPage = "(Cannot get current url because driver session corrupted) " + driverException.getMessage();
+                        currentFacingPage = "(Cannot get current url because driver session corrupted): " + driverException.getMessage();
                     }
                 }
                 Logger.errorAlsoSlack(
                     (new StringBuilder()).append("`")
                         .append(Configuration.SUPERVISOR_PUBSUB_CHANNEL_NAME)
                         .append("` ")
-                        .append(
-                            "Program ended in exception block...! Might be a problem in either the scraper itself not handled, or an unknown change in the webpage that disrupts the scraper process. Please check the scraper log for error detail. "
-                        )
+                        .append("Program ended in exception block! ")
+                        .append("`")
                         .append(currentFacingPage)
-                        .append("\n```")
+                        .append("`")
+                        .append("\nException message:\n```")
                         .append(e.getMessage())
                         .append("```\n")
                         .toString()
