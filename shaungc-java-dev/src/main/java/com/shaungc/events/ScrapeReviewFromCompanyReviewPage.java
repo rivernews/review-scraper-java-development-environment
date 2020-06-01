@@ -123,6 +123,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             try {
                 // navigate to reviews page
                 if (reviewPageUrl != null && !reviewPageUrl.strip().isEmpty()) {
+                    // TODO: remove this log
+                    Logger.infoAlsoSlack("Now accessing review page url `" + reviewPageUrl + "`");
                     this.driver.get(reviewPageUrl);
                 } else if (nextPageLinkElement != null) {
                     nextPageLinkElement.click();
