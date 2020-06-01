@@ -14,6 +14,7 @@ import com.shaungc.utilities.ScraperJobMessageType;
 import com.shaungc.utilities.ScraperMode;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import org.openqa.selenium.WebDriver;
 
@@ -184,7 +185,9 @@ public class App {
                         .append("`")
                         .append(currentFacingPage)
                         .append("`")
-                        .append("\nException message:\n```")
+                        .append("\nException Stack Trace:\n```")
+                        .append(Arrays.toString(e.getStackTrace()))
+                        .append("\n\nException Name and Description:\n```")
                         .append(e.getMessage())
                         .append("```\n")
                         .toString()
