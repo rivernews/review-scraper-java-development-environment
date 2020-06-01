@@ -397,7 +397,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 this.driver.get(currentPageLink);
 
                 final WebElement nextPageLinkElement = this.getNextPageLinkElement();
-                if (nextPageLinkElement.isEnabled() && nextPageLinkElement.isDisplayed()) {
+                if (nextPageLinkElement != null && nextPageLinkElement.isEnabled() && nextPageLinkElement.isDisplayed()) {
                     employeeReviewElements = this.locate(null, nextPageLinkElement, true, false);
                 }
             }
