@@ -479,7 +479,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             .append(this.archiveManager.orgName)
             .append(")* ")
             .append("Trying 5th approach to capture next page link");
-        Logger.warnAlsoSlack(logMessageStringBuilder.toString());
+        Logger.info(logMessageStringBuilder.toString());
 
         return this.driver.getCurrentUrl().replaceFirst("_P\\d+\\.htm$", String.format("_P%s.htm", this.processedReviewPages + 1));
     }
