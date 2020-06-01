@@ -134,12 +134,14 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 } else if (nextPageLinkElement != null) {
                     nextPageLinkElement.click();
 
-                    Logger.infoAlsoSlack("Now clicking element `" + nextPageLinkElement.getText() + "`");
-
                     try {
                         TimeUnit.SECONDS.sleep(2);
                     } catch (InterruptedException e) {}
                     this.waitForReviewPanelLoading();
+
+                    Logger.infoAlsoSlack(
+                        "Now clicking element `" + nextPageLinkElement.getText() + "`" + ", url is `" + this.driver.getCurrentUrl() + "`"
+                    );
                 } else {
                     this.driver.findElement(By.cssSelector("article#WideCol a.eiCell.reviews")).click();
                 }
