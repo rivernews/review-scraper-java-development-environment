@@ -187,7 +187,7 @@ public class App {
                         .append("```")
                         .append("\nException Stack Trace:\n```")
                         .append(Arrays.toString(e.getStackTrace()))
-                        .append("\n\nException Name and Description:\n```")
+                        .append("```\n\nException Name and Description:\n```")
                         .append(e.getMessage())
                         .append("```\n")
                         .toString()
