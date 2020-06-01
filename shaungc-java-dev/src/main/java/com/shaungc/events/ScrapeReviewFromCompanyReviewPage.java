@@ -96,7 +96,12 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         this.orgNameSlackMessagePrefix = orgNameSlackMessagePrefix;
     }
 
-    protected List<WebElement> locate(final String reviewPageUrl, final WebElement nextPageLinkElement, final Boolean throwException) {
+    protected List<WebElement> locate(
+        final String reviewPageUrl,
+        final WebElement nextPageLinkElement,
+        final Boolean onlyLocateReviewCards,
+        final Boolean throwException
+    ) {
         final List<WebElement> locatedElements = new ArrayList<>();
 
         final String appraochType = reviewPageUrl != null
@@ -235,21 +240,22 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         // + " option[value=DATE]")))
         // .click();
 
-        // // wait for loading sort
-        // this.waitForReviewPanelLoading();
-        if (locatedElements.size() > 0) {
-            return locatedElements;
-        } else {
+        if (locatedElements.size() == 0) {
             return null;
         }
+        if (onlyLocateReviewCards) {
+            return locatedElements.get(0).findElements(By.cssSelector(this.employeeReviewElementsLocalCssSelector));
+        }
+
+        return locatedElements;
     }
 
     @Override
     protected List<WebElement> locate() {
         if (Configuration.SCRAPER_MODE.equals(ScraperMode.RENEWAL.getString())) {
-            return this.locate(Configuration.TEST_COMPANY_NEXT_REVIEW_PAGE_URL, null, true);
+            return this.locate(Configuration.TEST_COMPANY_NEXT_REVIEW_PAGE_URL, null, false, true);
         } else {
-            return this.locate(null, null, true);
+            return this.locate(null, null, false, true);
         }
     }
 
@@ -264,14 +270,14 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
     @Override
     protected GlassdoorCompanyReviewParsedData parser(final List<WebElement> locatedElements) throws ScraperException {
-        WebElement reviewPanelElement = locatedElements.get(0);
+        final WebElement reviewPanelElement = locatedElements.get(0);
 
         // initialize data pack to store review data
         final GlassdoorCompanyReviewParsedData glassdoorCompanyParsedData = new GlassdoorCompanyReviewParsedData();
 
-        if (Configuration.SCRAPER_MODE.equals(ScraperMode.REGULAR.getString())) {
-            // Scrape Review Metadata
+        // Scrape Review Metadata
 
+        if (Configuration.SCRAPER_MODE.equals(ScraperMode.REGULAR.getString())) {
             // scrape for review metadata
             this.scrapeReviewMetadata(reviewPanelElement, glassdoorCompanyParsedData.reviewMetadata);
 
@@ -281,22 +287,23 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             this.localReviewCount = glassdoorCompanyParsedData.reviewMetadata.localReviewCount;
         }
 
-        // prepare before getting into reviews
+        // Scrape Reviews
+
+        // narrow down locating to review cards
+        List<WebElement> employeeReviewElements = reviewPanelElement.findElements(
+            By.cssSelector(this.employeeReviewElementsLocalCssSelector)
+        );
+        // meta info
         final Integer reviewReportTime = 5;
         final Integer reportingRate = (Integer) (this.localReviewCount / reviewReportTime);
         final Timer progressReportingTimer = new Timer(Duration.ofSeconds(10));
         final Timer browserGarbageCollectionTimer = !Configuration.RUNNING_IN_TRAVIS ? new Timer(Duration.ofMinutes(5)) : null;
 
-        // foreach review
         while (this.wentThroughReviewsCount < this.localReviewCount) {
             // Travis requires us to output something every minute
             if (Configuration.RUNNING_IN_TRAVIS) {
                 System.out.println("Processing page " + (this.processedReviewPages + 1));
             }
-
-            // pull out review elements
-            final List<WebElement> employeeReviewElements =
-                this.driver.findElements(By.cssSelector(this.employeeReviewElementsLocalCssSelector));
 
             for (final WebElement employeeReviewElement : employeeReviewElements) {
                 if (this.pubSubSubscription.receivedTerminationRequest) {
@@ -363,7 +370,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             // Proceed to next page
 
-            reviewPanelElement = null;
+            employeeReviewElements = null;
 
             // approach type: try direct url first
 
@@ -378,29 +385,23 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 nextPageLink = this.judgeNoNextPageLinkOrGetLinkFifthApproach();
             }
 
-            List<WebElement> retriedlocatedElements = this.locate(nextPageLink, null, false);
-            if (retriedlocatedElements != null && retriedlocatedElements.size() > 0) {
-                reviewPanelElement = retriedlocatedElements.get(0);
-            }
+            employeeReviewElements = this.locate(nextPageLink, null, true, false);
 
             // approach type: try finding a next link and click on it
 
-            if (reviewPanelElement == null) {
+            if (employeeReviewElements == null || employeeReviewElements.size() == 0) {
                 this.driver.get(currentPageLink);
                 try {
                     TimeUnit.SECONDS.sleep(2);
                 } catch (InterruptedException e) {}
-                retriedlocatedElements = this.locate(null, this.getNextPageLinkElement(), true);
-                if (retriedlocatedElements != null && retriedlocatedElements.size() > 0) {
-                    reviewPanelElement = retriedlocatedElements.get(0);
-                }
+                employeeReviewElements = this.locate(null, this.getNextPageLinkElement(), true, true);
             }
 
-            // if still no review panel, probably we reached the bottom page
-            // (we cannot completely rely on went through count vs total count, because the last splitted job's total is the org's total,
+            // if still no any review card, probably we reached the bottom page (review panel exists but empty)
+            // (we cannot completely rely on went through count vs total count to detect bottom or not, because the last splitted job's total is the org's total,
             // not the total of the very last splitted job itself)
-            // (thus will have to identify bottom page by failing review panel element check)
-            if (reviewPanelElement == null) {
+            // (thus will have to identify bottom page by failing review card element check above)
+            if (employeeReviewElements == null || employeeReviewElements.size() == 0) {
                 break;
             }
 
