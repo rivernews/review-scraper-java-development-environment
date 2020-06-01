@@ -128,11 +128,14 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             try {
                 // navigate to reviews page
                 if (reviewPageUrl != null && !reviewPageUrl.strip().isEmpty()) {
-                    // TODO: remove this log
                     Logger.infoAlsoSlack("Now accessing review page url `" + reviewPageUrl + "`");
+
                     this.driver.get(reviewPageUrl);
                 } else if (nextPageLinkElement != null) {
                     nextPageLinkElement.click();
+
+                    Logger.infoAlsoSlack("Now clicking element `" + nextPageLinkElement.getText() + "`");
+
                     try {
                         TimeUnit.SECONDS.sleep(2);
                     } catch (InterruptedException e) {}
@@ -394,7 +397,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 try {
                     TimeUnit.SECONDS.sleep(2);
                 } catch (InterruptedException e) {}
-                employeeReviewElements = this.locate(null, this.getNextPageLinkElement(), true, true);
+
+                WebElement nextPageLinkElement = this.getNextPageLinkElement();
+                if (nextPageLinkElement.isEnabled() && nextPageLinkElement.isDisplayed()) {
+                    employeeReviewElements = this.locate(null, this.getNextPageLinkElement(), true, true);
+                }
             }
 
             // if still no any review card, probably we reached the bottom page (review panel exists but empty)
