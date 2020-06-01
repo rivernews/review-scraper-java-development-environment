@@ -172,7 +172,7 @@ public class App {
                 String currentFacingPage = null;
                 if (driver != null) {
                     try {
-                        currentFacingPage = (driver != null ? "Last webpage: `" + driver.getCurrentUrl() + "`" : "");
+                        currentFacingPage = (driver != null ? "Last webpage: " + driver.getCurrentUrl() : "");
                     } catch (Exception driverException) {
                         currentFacingPage = "(Cannot get current url because driver session corrupted): " + driverException.getMessage();
                     }
@@ -181,10 +181,10 @@ public class App {
                     (new StringBuilder()).append("`")
                         .append(Configuration.SUPERVISOR_PUBSUB_CHANNEL_NAME)
                         .append("` ")
-                        .append("Program ended in exception block! ")
-                        .append("`")
+                        .append("Program ended in exception block!\n")
+                        .append("```")
                         .append(currentFacingPage)
-                        .append("`")
+                        .append("```")
                         .append("\nException Stack Trace:\n```")
                         .append(Arrays.toString(e.getStackTrace()))
                         .append("\n\nException Name and Description:\n```")
