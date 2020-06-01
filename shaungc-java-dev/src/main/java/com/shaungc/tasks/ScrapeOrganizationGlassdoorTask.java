@@ -121,7 +121,7 @@ public class ScrapeOrganizationGlassdoorTask {
         this.processedReviewsCount = scrapeReviewFromCompanyReviewPage.processedReviewsCount;
         this.wentThroughReviewsCount = scrapeReviewFromCompanyReviewPage.wentThroughReviewsCount;
         this.localReviewsCount = scrapeReviewFromCompanyReviewPage.localReviewCount;
-        this.processedReviewPages = scrapeReviewFromCompanyReviewPage.processedReviewPages;
+        this.processedReviewPages = scrapeReviewFromCompanyReviewPage.wentThroughReviewPages;
         // this.orgPrefixSlackString should be assigned before review scraper
         this.isFinalSession = scrapeReviewFromCompanyReviewPage.isFinalSession;
     }
@@ -199,7 +199,7 @@ public class ScrapeOrganizationGlassdoorTask {
         this.processedReviewsCount = scrapeReviewFromCompanyReviewPage.processedReviewsCount;
         this.wentThroughReviewsCount = scrapeReviewFromCompanyReviewPage.wentThroughReviewsCount;
         this.localReviewsCount = scrapeReviewFromCompanyReviewPage.localReviewCount;
-        this.processedReviewPages = scrapeReviewFromCompanyReviewPage.processedReviewPages;
+        this.processedReviewPages = scrapeReviewFromCompanyReviewPage.wentThroughReviewPages;
         // this.orgPrefixSlackString is set above
         this.isFinalSession = scrapeReviewFromCompanyReviewPage.isFinalSession;
     }

@@ -54,7 +54,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     // if scraper mode == regular, will obtain when scraping review meta
     // else if mode == renewal, will obtain from env var (Configuration)
     public Integer localReviewCount = Configuration.TEST_COMPANY_LAST_PROGRESS_TOTAL;
-    public Integer processedReviewPages = Configuration.TEST_COMPANY_LAST_PROGRESS_PAGE;
+    public Integer wentThroughReviewPages = Configuration.TEST_COMPANY_LAST_PROGRESS_PAGE;
 
     /** expose other data for external use */
     public Boolean isFinalSession = false;
@@ -302,7 +302,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         while (this.wentThroughReviewsCount < this.localReviewCount) {
             // Travis requires us to output something every minute
             if (Configuration.RUNNING_IN_TRAVIS) {
-                System.out.println("Processing page " + (this.processedReviewPages + 1));
+                System.out.println("Scraping reviews on page " + (this.wentThroughReviewPages + 1));
             }
 
             for (final WebElement employeeReviewElement : employeeReviewElements) {
@@ -342,7 +342,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                             elapsedTimeString != "" ? "(" + elapsedTimeString + ") " : "",
                             this.driver.getCurrentUrl(),
                             // + 1 to get current page number
-                            this.processedReviewPages + 1,
+                            this.wentThroughReviewPages + 1,
                             employeeReviewElements.size(),
                             this.processedReviewsCount,
                             this.wentThroughReviewsCount,
@@ -357,12 +357,12 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 }
             }
 
-            this.processedReviewPages++;
+            this.wentThroughReviewPages++;
 
             // instructed to stop & wrap up if reached stop page (for splitted job, specifically)
             if (
                 !Configuration.TEST_COMPANY_STOP_AT_PAGE.equals(0) &&
-                Configuration.TEST_COMPANY_STOP_AT_PAGE.compareTo(this.processedReviewPages) <= 0
+                Configuration.TEST_COMPANY_STOP_AT_PAGE.compareTo(this.wentThroughReviewPages) <= 0
             ) {
                 Logger.debug("Will now wrap up scraper session because we reached stop page " + Configuration.TEST_COMPANY_STOP_AT_PAGE);
                 break;
@@ -484,7 +484,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             .append("Trying 5th approach to capture next page link");
         Logger.info(logMessageStringBuilder.toString());
 
-        return this.driver.getCurrentUrl().replaceFirst("_P\\d+\\.htm$", String.format("_P%s.htm", this.processedReviewPages + 1));
+        return this.driver.getCurrentUrl().replaceFirst("_P\\d+\\.htm$", String.format("_P%s.htm", this.wentThroughReviewPages + 1));
     }
 
     /**
