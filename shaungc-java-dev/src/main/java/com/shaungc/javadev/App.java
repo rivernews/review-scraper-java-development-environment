@@ -134,7 +134,9 @@ public class App {
                             "A scraper exception is raised and its message is logged; which is not an error of the program, but more of the webpage the scraper is dealing with (or the selenium server issue). Refer to the current url of the scraper to investigate more: "
                         )
                         .append(driver.getCurrentUrl())
-                        .append("\n```")
+                        .append("\nException Stack Trace:\n```")
+                        .append(Arrays.toString(e.getStackTrace()))
+                        .append("```\n\nException Name and Description:\n```")
                         .append(e.getMessage())
                         .append("```\n")
                         .toString()

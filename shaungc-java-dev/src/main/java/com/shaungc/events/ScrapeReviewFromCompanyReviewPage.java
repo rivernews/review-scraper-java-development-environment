@@ -109,8 +109,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             : nextPageLinkElement != null ? "click next page link" : "initial review tab click";
 
         // locate review panel
-        // critical mission so set retry to 2
-        // TODO: we're currently debugging so disable retry
+        // critical mission so set retry to higher number
         final Integer FIND_REVIEW_PANEL_RETRY = 2;
         Integer findReviewPanelRetryCounter = 0;
         while (findReviewPanelRetryCounter <= FIND_REVIEW_PANEL_RETRY) {
@@ -399,7 +398,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
                 final WebElement nextPageLinkElement = this.getNextPageLinkElement();
                 if (nextPageLinkElement.isEnabled() && nextPageLinkElement.isDisplayed()) {
-                    employeeReviewElements = this.locate(null, nextPageLinkElement, true, true);
+                    employeeReviewElements = this.locate(null, nextPageLinkElement, true, false);
                 }
             }
 
