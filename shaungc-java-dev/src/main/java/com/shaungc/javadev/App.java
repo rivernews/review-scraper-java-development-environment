@@ -128,16 +128,20 @@ public class App {
                     );
                 }
             } catch (ScraperException | ScraperShouldHaltException e) {
-                Logger.info(e.getMessage());
+                final String exceptionMessage = e.getMessage();
+                final String exceptionStackTrace = Arrays.toString(e.getStackTrace());
+                final String exceptionDetail = exceptionMessage + "\n" + exceptionStackTrace;
+
+                Logger.info(exceptionMessage);
                 Logger.errorAlsoSlack(
                     (new StringBuilder()).append(
                             "A scraper exception is raised and its message is logged; which is not an error of the program, but more of the webpage the scraper is dealing with (or the selenium server issue). Refer to the current url of the scraper to investigate more: "
                         )
                         .append(driver.getCurrentUrl())
                         .append("\nException Stack Trace:\n```")
-                        .append(Arrays.toString(e.getStackTrace()))
+                        .append(exceptionStackTrace)
                         .append("```\n\nException Name and Description:\n```")
-                        .append(e.getMessage())
+                        .append(exceptionMessage)
                         .append("```\n")
                         .toString()
                 );
@@ -147,11 +151,14 @@ public class App {
                         "%s:%s:%s",
                         ScraperJobMessageType.ERROR.getString(),
                         ScraperJobMessageTo.SLACK_MD_SVC.getString(),
-                        "ScraperException: " + e.getMessage()
+                        "ScraperException: " + exceptionDetail
                     )
                 );
             } catch (Exception e) {
                 System.out.println(e);
+                final String exceptionMessage = e.getMessage();
+                final String exceptionStackTrace = Arrays.toString(e.getStackTrace());
+                final String exceptionDetail = exceptionMessage + "\n" + exceptionStackTrace;
 
                 // TODO: we cannot dump html because `archiveManager` is not yet initialized
                 // because org name and id are not yet scraped
@@ -163,7 +170,7 @@ public class App {
                         "%s:%s:%s",
                         ScraperJobMessageType.ERROR.getString(),
                         ScraperJobMessageTo.SLACK_MD_SVC.getString(),
-                        "Exception: " + e.getMessage()
+                        "Exception: " + exceptionDetail
                     )
                 );
 
@@ -188,7 +195,7 @@ public class App {
                         .append(currentFacingPage)
                         .append("```")
                         .append("\nException Stack Trace:\n```")
-                        .append(Arrays.toString(e.getStackTrace()))
+                        .append(exceptionStackTrace)
                         .append("```\n\nException Name and Description:\n```")
                         .append(e.getMessage())
                         .append("```\n")
