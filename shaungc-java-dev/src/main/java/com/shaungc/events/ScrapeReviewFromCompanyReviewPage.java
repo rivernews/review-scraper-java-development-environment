@@ -396,13 +396,10 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             if (employeeReviewElements == null || employeeReviewElements.size() == 0) {
                 this.driver.get(currentPageLink);
-                try {
-                    TimeUnit.SECONDS.sleep(2);
-                } catch (InterruptedException e) {}
 
-                WebElement nextPageLinkElement = this.getNextPageLinkElement();
+                final WebElement nextPageLinkElement = this.getNextPageLinkElement();
                 if (nextPageLinkElement.isEnabled() && nextPageLinkElement.isDisplayed()) {
-                    employeeReviewElements = this.locate(null, this.getNextPageLinkElement(), true, true);
+                    employeeReviewElements = this.locate(null, nextPageLinkElement, true, true);
                 }
             }
 
