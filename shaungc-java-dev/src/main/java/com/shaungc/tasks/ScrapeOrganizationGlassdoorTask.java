@@ -96,7 +96,8 @@ public class ScrapeOrganizationGlassdoorTask {
                 (new StringBuilder()).append("`")
                     .append(Configuration.SUPERVISOR_PUBSUB_CHANNEL_NAME)
                     .append("` - ")
-                    .append("`isFinalSession` is `null`, please check why isFinalSession did not go through the logic to be assigned.")
+                    .append("`isFinalSession` is `null`, please check why isFinalSession did not go through the logic to be assigned.\n")
+                    .append("Facing page: " + this.driver.getCurrentUrl())
                     .toString()
             );
         }
