@@ -91,6 +91,16 @@ public class ScrapeOrganizationGlassdoorTask {
             this.continueCrossSessionScraper();
         }
 
+        if (this.isFinalSession == null) {
+            throw new ScraperException(
+                (new StringBuilder()).append("`")
+                    .append(Configuration.SUPERVISOR_PUBSUB_CHANNEL_NAME)
+                    .append("` - ")
+                    .append("`isFinalSession` is `null`, please check why isFinalSession did not go through the logic to be assigned.")
+                    .toString()
+            );
+        }
+
         if (this.isFinalSession) {
             this.generateFinalSessionReport();
         } else {
