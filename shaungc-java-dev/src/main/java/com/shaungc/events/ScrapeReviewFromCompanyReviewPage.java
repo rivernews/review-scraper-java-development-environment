@@ -57,7 +57,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     public Integer wentThroughReviewPages = Configuration.TEST_COMPANY_LAST_PROGRESS_PAGE;
 
     /** expose other data for external use */
-    public Boolean isFinalSession = false;
+    public Boolean isFinalSession = true;
 
     /**
      * For regular scraper mode

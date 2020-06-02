@@ -34,7 +34,10 @@ public class ScrapeOrganizationGlassdoorTask {
     public Integer localReviewsCount;
     public Integer processedReviewPages;
 
-    public Boolean isFinalSession;
+    // specify default to avoid `isFinalSession` not assigned before use
+    // but you should pay attention to 'low went through rate' warning
+    // where the job is too quick to be finalized
+    public Boolean isFinalSession = true;
 
     public ScrapeOrganizationGlassdoorTask(final WebDriver driver, final PubSubSubscription pubSubSubscription, final String companyName)
         throws ScraperException {
@@ -89,17 +92,6 @@ public class ScrapeOrganizationGlassdoorTask {
             this.launchSessionScraper();
         } else if (Configuration.SCRAPER_MODE.equals(ScraperMode.RENEWAL.getString())) {
             this.continueCrossSessionScraper();
-        }
-
-        if (this.isFinalSession == null) {
-            throw new ScraperException(
-                (new StringBuilder()).append("`")
-                    .append(Configuration.SUPERVISOR_PUBSUB_CHANNEL_NAME)
-                    .append("` - ")
-                    .append("`isFinalSession` is `null`, please check why isFinalSession did not go through the logic to be assigned.\n")
-                    .append("Facing page: " + this.driver.getCurrentUrl())
-                    .toString()
-            );
         }
 
         if (this.isFinalSession) {
