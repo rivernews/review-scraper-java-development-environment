@@ -298,8 +298,10 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             By.cssSelector(this.employeeReviewElementsLocalCssSelector)
         );
         // meta info
-        final Integer reviewReportTime = 5;
-        final Integer reportingRate = (Integer) (this.localReviewCount / reviewReportTime);
+        final Integer reviewReportTimes = 5;
+        final Integer reportingRate = (this.localReviewCount > reviewReportTimes)
+            ? (Integer) (this.localReviewCount / reviewReportTimes)
+            : 1;
         final Timer progressReportingTimer = new Timer(Duration.ofSeconds(10));
         final Timer browserGarbageCollectionTimer = !Configuration.RUNNING_IN_TRAVIS ? new Timer(Duration.ofMinutes(5)) : null;
 
