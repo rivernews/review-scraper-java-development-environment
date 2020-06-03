@@ -2,6 +2,7 @@ package com.shaungc.dataStorage;
 
 import com.google.gson.Gson;
 import com.shaungc.exceptions.ScraperShouldHaltException;
+import com.shaungc.javadev.Configuration;
 import com.shaungc.utilities.Logger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -21,6 +22,7 @@ import software.amazon.awssdk.services.s3.model.PublicAccessBlockConfiguration;
 import software.amazon.awssdk.services.s3.model.PutBucketTaggingRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutPublicAccessBlockRequest;
+import software.amazon.awssdk.services.s3.model.S3Error;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.model.Tag;
 import software.amazon.awssdk.services.s3.model.Tagging;
@@ -95,6 +97,24 @@ public class S3Service {
             Logger.info("Bucket already own by you, will do nothing: " + this.bucketName);
         } catch (final BucketAlreadyExistsException e) {
             Logger.info("Bucket name used by others and must be corrected first: " + this.bucketName);
+            throw e;
+        } catch (final S3Exception e) {
+            if (e.getMessage().toLowerCase().contains("conflicting conditional operation is currently in progress against this resource")) {
+                Logger.warnAlsoSlack(
+                    (
+                        new StringBuilder()
+                            .append("`")
+                            .append(Configuration.SUPERVISOR_PUBSUB_CHANNEL_NAME)
+                            .append("` ")
+                            .append("A race condition occured while attempting to create bucket. Will skip create bucket, but if bucket `")
+                            .append(this.bucketName)
+                            .append("` does not exist, the following tasks will fail.")
+                    ).toString()
+                );
+
+                return;
+            }
+
             throw e;
         } catch (final Exception e) {
             Logger.info("Unknown error occured while using the bucket name " + this.bucketName);
