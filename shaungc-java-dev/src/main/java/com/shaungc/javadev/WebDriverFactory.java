@@ -70,7 +70,9 @@ public class WebDriverFactory {
         // the use of `EAGER` - which waits on event `DOMContentLoaded`, but not for Ajax,
         // is fine because most of glassdoor website are pre-regenerated static pages
         // https://stackoverflow.com/a/60167733/9814131
-        chromeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
+        if (!Configuration.RUNNING_IN_TRAVIS) {
+            chromeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
+        }
 
         // clearer log
         // https://stackoverflow.com/a/20748376/9814131
