@@ -13,7 +13,7 @@ before_install:
     
   fi
 install:
-- sudo apt-get install google-chrome-stable
+- sudo apt-get install --allow-unauthenticated google-chrome-stable
 - wget -N https://chromedriver.storage.googleapis.com/2.43/chromedriver_linux64.zip
   -P ~/
 - unzip ~/chromedriver_linux64.zip -d ~/
