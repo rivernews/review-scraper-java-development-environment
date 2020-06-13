@@ -1,9 +1,15 @@
 # make sure every command succeed
 # https://stackoverflow.com/a/19622569/9814131
 
-export IMAGE_NAME=shaungc/gd-selenium-standalone
+if [ "$1" = "debug" ]; then
+    export IMAGE_NAME=shaungc/gd-selenium-standalone-debug
+    DOCKERFILE='./debug.Dockerfile'
+else
+    export IMAGE_NAME=shaungc/gd-selenium-standalone
+    DOCKERFILE='./Dockerfile'
+fi
 
-if docker build -f ./Dockerfile -t "${IMAGE_NAME}:latest" . ; then
+if docker build -f ${DOCKERFILE} -t "${IMAGE_NAME}:latest" . ; then
     echo 'Build success'
 else
     echo 'Build failed'

@@ -1,6 +1,9 @@
-FROM selenium/standalone-chrome:3.141.59-20200525
+FROM selenium/standalone-chrome-debug:3.141.59-20200525
 # Dockerfile at
 # https://github.com/SeleniumHQ/docker-selenium/blob/master/StandaloneChrome/Dockerfile
+#
+# Instructions at
+# https://github.com/SeleniumHQ/docker-selenium
 
 COPY entry_point.sh /opt/bin/entry_point.sh
 
