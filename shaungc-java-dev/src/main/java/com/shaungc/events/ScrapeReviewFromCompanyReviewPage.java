@@ -884,7 +884,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 );
         } catch (final NoSuchElementException e) {
             if (Configuration.DEBUG) {
-                Logger.info("WARN: cannot scrape rating metrics - work & life balance");
+                final String htmlDumpPath =
+                    this.archiveManager.writeHtml("review:cannotLocateRatingMetricsValues", this.driver.getPageSource());
+                Logger.warnAlsoSlack(
+                    String.format("WARN: cannot scrape rating metrics - work & life balance. <%s|Dumped S3 file>.", htmlDumpPath)
+                );
             }
         }
 
