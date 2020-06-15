@@ -882,13 +882,16 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                         .getAttribute("title")
                         .strip()
                 );
-        } catch (final NoSuchElementException e) {
+        } catch (final NoSuchElementException e) {}
+        if (reviewDataStore.stableReviewData.reviewRatingMetrics.workLifeBalanceRating.compareTo(Float.valueOf("0.0")) < 0) {
             if (Configuration.DEBUG) {
                 final String htmlDumpPath =
-                    this.archiveManager.writeHtml("review:cannotLocateRatingMetricsValues", this.driver.getPageSource());
+                    this.archiveManager.writeHtml("review:cannotLocateWorkLifeBalanceMetricValue", this.driver.getPageSource());
                 Logger.warnAlsoSlack(
                     String.format("WARN: cannot scrape rating metrics - work & life balance. <%s|Dumped S3 file>.", htmlDumpPath)
                 );
+            } else {
+                Logger.warnAlsoSlack(String.format("WARN: cannot scrape rating metrics - work & life balance."));
             }
         }
 
