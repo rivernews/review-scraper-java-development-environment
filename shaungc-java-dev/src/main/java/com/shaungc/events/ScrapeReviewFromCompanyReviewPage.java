@@ -895,9 +895,10 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 this.archiveManager.writeHtml("review:cannotLocateWorkLifeBalanceMetricValue", this.driver.getPageSource());
             Logger.warnAlsoSlack(
                 String.format(
-                    "cannot scrape rating metrics - work & life balance: `%s`. <%s|Dumped S3 file>. Check to make sure the review really did not provide WLB rating.",
+                    "cannot scrape rating metrics - work & life balance: `%s`, review id `%s`. <%s|Dumped S3 file>. Check to make sure the review really did not provide WLB rating.",
                     reviewDataStore.stableReviewData.reviewRatingMetrics.workLifeBalanceRating,
-                    htmlDumpPath
+                    reviewDataStore.stableReviewData.reviewId,
+                    this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath)
                 )
             );
         }
