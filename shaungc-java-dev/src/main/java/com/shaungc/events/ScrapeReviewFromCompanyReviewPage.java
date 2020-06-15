@@ -170,7 +170,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     locatedElements.add(reviewPanelElement);
                     break;
                 } else {
-                    Logger.warnAlsoSlack(
+                    Logger.infoAlsoSlack(
                         String.format(
                             "*(%s)* (current session %s) Cannot locate review panel, tried %sth time(s), approach type `%s`, 2nd approach",
                             this.archiveManager.orgName,
@@ -181,7 +181,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     );
                 }
             } catch (TimeoutException e) {
-                Logger.warnAlsoSlack(
+                Logger.infoAlsoSlack(
                     String.format(
                         "*(%s)* (current session %s) Cannot locate review panel, tried %sth time(s), approach type %s",
                         this.archiveManager.orgName,
@@ -851,16 +851,29 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             );
 
         // scrape rating metrics
+        WebElement dropdownIcon = null;
+        // if has dropdown icon, means that it has rating metrics data
         try {
-            // if has dropdown icon, means that it has rating metrics data
-            employeeReviewLiElement.findElement(By.cssSelector("span.gdRatings"));
-            // previously used selector:
-            // employeeReviewLiElement.findElement(By.cssSelector("span.gdRatings i.subRatingsDrop"));
+            // example see
+            // https://s3.console.aws.amazon.com/s3/object/iriversland-qualitative-org-review-v3/AMD-15/logs/review%253AcannotLocateWorkLifeBalanceMetricValue2020-06-15T23%253A18%253A14.765055Z.html?region=us-west-2&tab=overview
+            dropdownIcon = employeeReviewLiElement.findElement(By.cssSelector("span.gdRatings span.SVGInline"));
+        } catch (final NoSuchElementException e) {}
+        // for second attempt let's try previously used selector
+        if (dropdownIcon == null) {
+            try {
+                dropdownIcon = employeeReviewLiElement.findElement(By.cssSelector("span.gdRatings i.subRatingsDrop"));
+            } catch (final NoSuchElementException e) {}
+        }
+        if (dropdownIcon != null) {
             this.parseReviewRatingMetrics(employeeReviewLiElement, reviewDataStore);
-        } catch (final NoSuchElementException e) {
-            final String htmlDumpPath =
-                this.archiveManager.writeHtml("review:cannotLocateDetailMetricsDropdown", this.driver.getPageSource());
-            Logger.warnAlsoSlack(String.format("WARN: cannot locate detail metrics dropdown. <%s|Dumped S3 file>.", htmlDumpPath));
+        } else {
+            // since it could be the webpage indeed the review has no detail metrics
+            // so only raise attention in DEBUG mode
+            if (Configuration.DEBUG) {
+                final String htmlDumpPath =
+                    this.archiveManager.writeHtml("review:cannotLocateDetailMetricsDropdown", this.driver.getPageSource());
+                Logger.warnAlsoSlack(String.format("cannot locate detail metrics dropdown. <%s|Dumped S3 file>.", htmlDumpPath));
+            }
         }
 
         // scrape featured
@@ -976,7 +989,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         return (
             this.reviewPanelElementCssSelector +
             String.format(" %s[id$='%s']", this.employeeReviewElementsLocalCssSelector, reviewId) +
-            " div.mt span.gdRatings"
+            " div.mt span.gdRatings[class*=subRatings]"
             // previously used selector:
             // " div.mt span.gdRatings div.subRatings"
         );
