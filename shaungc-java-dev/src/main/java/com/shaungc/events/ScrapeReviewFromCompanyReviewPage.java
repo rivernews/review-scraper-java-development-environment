@@ -853,7 +853,9 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         // scrape rating metrics
         try {
             // if has dropdown icon, means that it has rating metrics data
-            employeeReviewLiElement.findElement(By.cssSelector("span.gdRatings i.subRatingsDrop"));
+            employeeReviewLiElement.findElement(By.cssSelector("span.gdRatings"));
+            // previously used selector:
+            // employeeReviewLiElement.findElement(By.cssSelector("span.gdRatings i.subRatingsDrop"));
             this.parseReviewRatingMetrics(employeeReviewLiElement, reviewDataStore);
         } catch (final NoSuchElementException e) {
             final String htmlDumpPath =
@@ -972,7 +974,9 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         return (
             this.reviewPanelElementCssSelector +
             String.format(" %s[id$='%s']", this.employeeReviewElementsLocalCssSelector, reviewId) +
-            " div.mt span.gdRatings div.subRatings"
+            " div.mt span.gdRatings"
+            // previously used selector:
+            // " div.mt span.gdRatings div.subRatings"
         );
     }
 
