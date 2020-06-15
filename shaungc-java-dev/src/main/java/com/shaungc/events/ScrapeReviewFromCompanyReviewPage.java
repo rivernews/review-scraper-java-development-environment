@@ -889,16 +889,17 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                         .strip()
                 );
         } catch (final NoSuchElementException e) {}
+        // throw warn when no value scraped
         if (reviewDataStore.stableReviewData.reviewRatingMetrics.workLifeBalanceRating.compareTo(Float.valueOf("0.0")) < 0) {
-            if (Configuration.DEBUG) {
-                final String htmlDumpPath =
-                    this.archiveManager.writeHtml("review:cannotLocateWorkLifeBalanceMetricValue", this.driver.getPageSource());
-                Logger.warnAlsoSlack(
-                    String.format("WARN: cannot scrape rating metrics - work & life balance. <%s|Dumped S3 file>.", htmlDumpPath)
-                );
-            } else {
-                Logger.warnAlsoSlack(String.format("WARN: cannot scrape rating metrics - work & life balance."));
-            }
+            final String htmlDumpPath =
+                this.archiveManager.writeHtml("review:cannotLocateWorkLifeBalanceMetricValue", this.driver.getPageSource());
+            Logger.warnAlsoSlack(
+                String.format(
+                    "WARN: cannot scrape rating metrics - work & life balance: `%s`. <%s|Dumped S3 file>. Check to make sure the review really did not provide WLB rating.",
+                    reviewDataStore.stableReviewData.reviewRatingMetrics.workLifeBalanceRating,
+                    htmlDumpPath
+                )
+            );
         }
 
         // culture and values rating
