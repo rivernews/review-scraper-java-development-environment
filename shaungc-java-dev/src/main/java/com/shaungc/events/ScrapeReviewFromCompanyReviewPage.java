@@ -883,7 +883,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                         .strip()
                 );
         } catch (final NoSuchElementException e) {}
-        Logger.info("work life balance value " + reviewDataStore.stableReviewData.reviewRatingMetrics.workLifeBalanceRating);
+        Logger.infoAlsoSlack("work life balance value " + reviewDataStore.stableReviewData.reviewRatingMetrics.workLifeBalanceRating);
         if (reviewDataStore.stableReviewData.reviewRatingMetrics.workLifeBalanceRating.compareTo(Float.valueOf("0.0")) < 0) {
             if (Configuration.DEBUG) {
                 final String htmlDumpPath =
