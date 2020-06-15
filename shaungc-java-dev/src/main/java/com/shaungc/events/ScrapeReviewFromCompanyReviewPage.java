@@ -855,7 +855,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             // if has dropdown icon, means that it has rating metrics data
             employeeReviewLiElement.findElement(By.cssSelector("span.gdRatings i.subRatingsDrop"));
             this.parseReviewRatingMetrics(employeeReviewLiElement, reviewDataStore);
-        } catch (final NoSuchElementException e) {}
+        } catch (final NoSuchElementException e) {
+            final String htmlDumpPath =
+                this.archiveManager.writeHtml("review:cannotLocateDetailMetricsDropdown", this.driver.getPageSource());
+            Logger.warnAlsoSlack(String.format("WARN: cannot locate detail metrics dropdown. <%s|Dumped S3 file>.", htmlDumpPath));
+        }
 
         // scrape featured
         try {
@@ -883,7 +887,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                         .strip()
                 );
         } catch (final NoSuchElementException e) {}
-        Logger.infoAlsoSlack("work life balance value " + reviewDataStore.stableReviewData.reviewRatingMetrics.workLifeBalanceRating);
         if (reviewDataStore.stableReviewData.reviewRatingMetrics.workLifeBalanceRating.compareTo(Float.valueOf("0.0")) < 0) {
             if (Configuration.DEBUG) {
                 final String htmlDumpPath =
