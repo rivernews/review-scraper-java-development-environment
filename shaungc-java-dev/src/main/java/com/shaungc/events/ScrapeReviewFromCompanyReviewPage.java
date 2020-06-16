@@ -16,7 +16,9 @@ import com.shaungc.utilities.ScraperMode;
 import com.shaungc.utilities.Timer;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -755,6 +757,21 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         return employeeReviewId;
     }
 
+    private static final Set<String> contentBlockReviewIdWhiteListSet = new HashSet<String>();
+
+    static {
+        // https://www.glassdoor.com/Reviews/SAP-Reviews-E10471_P329.htm
+        // s3://iriversland-qualitative-org-review-v3/SAP-10471/logs/review:commentTitleNotCaptured.2020-03-05T19:58:36.533556Z.html
+        ScrapeReviewFromCompanyReviewPage.contentBlockReviewIdWhiteListSet.add("31306489");
+        ScrapeReviewFromCompanyReviewPage.contentBlockReviewIdWhiteListSet.add("31546268");
+        // Salesforce-11159/logs/review:commentTitleNotCaptured.2020-03-15T09:16:28.501665Z.html
+        // https://www.glassdoor.com/Reviews/Salesforce-Reviews-E11159_P358.htm
+        ScrapeReviewFromCompanyReviewPage.contentBlockReviewIdWhiteListSet.add("32284203");
+        // SAP Concur (2020-06-10)
+        // s3 link -> https://s3.console.aws.amazon.com/s3/object/iriversland-qualitative-org-review-v3/SAP%2520Concur-8763/logs/review%253AcommentTitleNotCaptured2020-06-16T06%253A55%253A47.510226Z.html?region=us-west-2&tab=overview
+        ScrapeReviewFromCompanyReviewPage.contentBlockReviewIdWhiteListSet.add("33629280");
+    }
+
     private Boolean scrapeEmployeeReview(final WebElement employeeReviewLiElement, final EmployeeReviewData reviewDataStore)
         throws ScraperException {
         reviewDataStore.stableReviewData.reviewId = this.parseReviewId(employeeReviewLiElement);
@@ -776,13 +793,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             if (commentTitleH2Element != null && commentTitleH2Element.getText().toLowerCase().contains("content blocked")) {
                 // whitelist (known "Content Blocked" case)
                 if (
-                    // https://www.glassdoor.com/Reviews/SAP-Reviews-E10471_P329.htm
-                    // s3://iriversland-qualitative-org-review-v3/SAP-10471/logs/review:commentTitleNotCaptured.2020-03-05T19:58:36.533556Z.html
-                    !reviewDataStore.stableReviewData.reviewId.equals("31306489") &&
-                    !reviewDataStore.stableReviewData.reviewId.equals("31546268") &&
-                    // Salesforce-11159/logs/review:commentTitleNotCaptured.2020-03-15T09:16:28.501665Z.html
-                    // https://www.glassdoor.com/Reviews/Salesforce-Reviews-E11159_P358.htm
-                    !reviewDataStore.stableReviewData.reviewId.equals("32284203")
+                    !ScrapeReviewFromCompanyReviewPage.contentBlockReviewIdWhiteListSet.contains(reviewDataStore.stableReviewData.reviewId)
                 ) {
                     final String htmlDumpPath =
                         this.archiveManager.writeHtml("review:commentTitleNotCaptured", this.driver.getPageSource());
