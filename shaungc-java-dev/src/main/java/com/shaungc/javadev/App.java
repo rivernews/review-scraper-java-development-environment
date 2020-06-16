@@ -25,7 +25,7 @@ import org.openqa.selenium.WebDriver;
 public class App {
 
     public static void main(String[] args) {
-        PubSubSubscription pubSubSubscription = new PubSubSubscription();
+        final PubSubSubscription pubSubSubscription = new PubSubSubscription();
         WebDriver driver = null;
 
         try {
