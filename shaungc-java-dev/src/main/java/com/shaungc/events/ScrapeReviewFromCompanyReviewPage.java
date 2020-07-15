@@ -858,7 +858,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         // scrape rating
         reviewDataStore.stableReviewData.reviewRatingMetrics.overallRating =
             Float.parseFloat(
-                employeeReviewLiElement.findElement(By.cssSelector("span.gdRatings span.rating span.value-title")).getAttribute("title")
+                employeeReviewLiElement.findElement(By.cssSelector("span.gdRatings span.rating span[title]")).getAttribute("title")
             );
 
         // scrape rating metrics
@@ -908,7 +908,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             reviewDataStore.stableReviewData.reviewRatingMetrics.workLifeBalanceRating =
                 Float.parseFloat(
                     ratingMetricsElement
-                        .findElement(By.cssSelector("ul li:nth-child(1) span.gdBars.gdRatings"))
+                        .findElement(By.cssSelector("ul li:nth-child(1) span.gdBars.gdRatings[title]"))
                         .getAttribute("title")
                         .strip()
                 );
@@ -932,7 +932,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             reviewDataStore.stableReviewData.reviewRatingMetrics.cultureAndValuesRating =
                 Float.parseFloat(
                     ratingMetricsElement
-                        .findElement(By.cssSelector("ul li:nth-child(2) span.gdBars.gdRatings"))
+                        .findElement(By.cssSelector("ul li:nth-child(2) span.gdBars.gdRatings[title]"))
                         .getAttribute("title")
                         .strip()
                 );
@@ -947,7 +947,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             reviewDataStore.stableReviewData.reviewRatingMetrics.careerOpportunitiesRating =
                 Float.parseFloat(
                     ratingMetricsElement
-                        .findElement(By.cssSelector("ul li:nth-child(3) span.gdBars.gdRatings"))
+                        .findElement(By.cssSelector("ul li:nth-child(3) span.gdBars.gdRatings[title]"))
                         .getAttribute("title")
                         .strip()
                 );
@@ -962,7 +962,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             reviewDataStore.stableReviewData.reviewRatingMetrics.compensationAndBenefitsRating =
                 Float.parseFloat(
                     ratingMetricsElement
-                        .findElement(By.cssSelector("ul li:nth-child(4) span.gdBars.gdRatings"))
+                        .findElement(By.cssSelector("ul li:nth-child(4) span.gdBars.gdRatings[title]"))
                         .getAttribute("title")
                         .strip()
                 );
@@ -977,7 +977,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             reviewDataStore.stableReviewData.reviewRatingMetrics.seniorManagementRating =
                 Float.parseFloat(
                     ratingMetricsElement
-                        .findElement(By.cssSelector("ul li:nth-child(5) span.gdBars.gdRatings"))
+                        .findElement(By.cssSelector("ul li:nth-child(5) span.gdBars.gdRatings[title]"))
                         .getAttribute("title")
                         .strip()
                 );
