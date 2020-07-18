@@ -1065,26 +1065,31 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             showMoreLinkElement.click();
         }
 
-        // main text
+        // main text (work dutation / type description) (also included in `rawParagraphs`)
         try {
             reviewDataStore.stableReviewData.reviewTextData.mainText =
-                employeeReviewLiElement.findElement(By.cssSelector("p.mainText")).getText().strip();
+                employeeReviewLiElement.findElement(By.cssSelector("div.gdReview div.mt p.mainText")).getText().strip();
         } catch (final Exception e) {}
 
-        // pro text
+        // pro text (also included in `rawParagraphs`)
         // TODO: cannot find element
         // reviewDataStore.reviewTextData.proText =
         // employeeReviewLiElement.findElement(By.cssSelector("div.hreview div.mt
         // div[class*=ReviewText]:nth-child(1) p:nth-child(2)")).getText().strip();
 
-        // con text
+        // con text (also included in `rawParagraphs`)
         // TODO: cannot find element
         // reviewDataStore.reviewTextData.conText =
         // employeeReviewLiElement.findElement(By.cssSelector("div.hreview div.mt
         // div[class*=ReviewText]:nth-child(2) p:nth-child(2)")).getText().strip();
 
-        final List<WebElement> paragraphElements = employeeReviewLiElement.findElements(By.cssSelector("div.hreview div.mt p"));
-
+        // collect catch-all text contents in review body, this includes work duration, pros, cons, advice to management, and org's response
+        //
+        // <li class="empReview cf" id="empReview_12014907">
+        //   <div class="gdReview">
+        //     <div>
+        // ->  <div class="row mt">
+        final List<WebElement> paragraphElements = employeeReviewLiElement.findElements(By.cssSelector("div.gdReview div.mt p"));
         for (final WebElement paragraphElement : paragraphElements) {
             reviewDataStore.stableReviewData.reviewTextData.rawParagraphs.add(paragraphElement.getText().strip());
         }
