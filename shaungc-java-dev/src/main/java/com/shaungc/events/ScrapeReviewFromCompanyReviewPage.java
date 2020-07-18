@@ -886,8 +886,9 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 final String dumpedFileDownloadUrl = this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath);
                 Logger.warnAlsoSlack(
                     String.format(
-                        "cannot locate dropdown icon for detail metrics for review id `%s`. You may check the <%s|dumped S3 file> and see if the review indeed has no breakdown ratings, then you're good.",
+                        "cannot locate dropdown icon for detail metrics for review id `%s` at <%s|webpage>. You may check the <%s|dumped S3 file> and see if the review indeed has no breakdown ratings, then you're good.",
                         reviewDataStore.stableReviewData.reviewId,
+                        this.driver.getCurrentUrl(),
                         dumpedFileDownloadUrl
                     )
                 );
