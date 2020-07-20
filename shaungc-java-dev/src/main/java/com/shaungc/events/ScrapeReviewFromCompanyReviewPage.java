@@ -770,7 +770,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         // SAP Concur (2020-06-10)
         // s3 link -> https://s3.console.aws.amazon.com/s3/object/iriversland-qualitative-org-review-v3/SAP%2520Concur-8763/logs/review%253AcommentTitleNotCaptured2020-06-16T06%253A55%253A47.510226Z.html?region=us-west-2&tab=overview
         ScrapeReviewFromCompanyReviewPage.contentBlockReviewIdWhiteListSet.add("33629280");
-        // Lawrence Livermore National Laboratory (review date 2020-07-01, page 4)
+        // Lawrence Livermore National Laboratory (review date 2020-07-01, page 4 & page 1)
         // s3 link -> https://s3.console.aws.amazon.com/s3/object/iriversland-qualitative-org-review-v3/Lawrence%2520Livermore%2520National%2520Laboratory-35235/logs/review%253AcommentTitleNotCaptured2020-07-20T22%253A23%253A18.255086Z.html?region=us-west-2&tab=overview
         ScrapeReviewFromCompanyReviewPage.contentBlockReviewIdWhiteListSet.add("34003408");
     }
