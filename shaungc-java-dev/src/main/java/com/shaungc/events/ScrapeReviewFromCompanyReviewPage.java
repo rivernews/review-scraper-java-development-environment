@@ -709,11 +709,9 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 "Unable to scrape local & global review count or scraped `localReviewCount=0` from reviewPanelElement:\n```" +
                 reviewPanelElementRawContent.substring(0, Math.min(reviewPanelElementRawContent.length(), 500)) +
                 "...```\n" +
-                "Please check the review page html, see why scraper cannot find the review counts. Html saved <" +
-                ArchiveManager.BUCKET_URL +
-                "|on s3> at key `" +
-                htmlDumpPath +
-                "`"
+                "Please check the review page html, see why scraper cannot find the review counts. <" +
+                this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath) +
+                "|Html file saved on s3>."
             );
         }
     }
@@ -804,13 +802,12 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     throw new ScraperException(
                         String.format(
                             "Found a 'Content Blocked' review at <%s|current page>, this is a new blocked review\n```%s```\n" +
-                            "Please check if review `%s` is stored before and if so, figure out a way to store this change. Dumped html <%s|on s3> at key `%s`\n" +
+                            "Please check if review `%s` is stored before and if so, figure out a way to store this change. Dumped html <%s|on s3>. " +
                             "Then, add this review to whitelist (hard coded) in function `scrapeEmployeeReview()`.",
                             this.driver.getCurrentUrl(),
                             commentTitleH2Element.getText(),
                             reviewDataStore.stableReviewData.reviewId,
-                            ArchiveManager.BUCKET_URL,
-                            htmlDumpPath
+                            this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath)
                         )
                     );
                 }
@@ -827,7 +824,10 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             final String htmlDumpPath = this.archiveManager.writeHtml("review:commentTitleNotCaptured", this.driver.getPageSource());
             throw new ScraperShouldHaltException(
-                String.format("Comment title canot be captured. Html dump on <%s|s3> at key: `%s`", ArchiveManager.BUCKET_URL, htmlDumpPath)
+                String.format(
+                    "Comment title canot be captured. <%s|Html file dumped on s3>.",
+                    this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath)
+                )
             );
         }
 
