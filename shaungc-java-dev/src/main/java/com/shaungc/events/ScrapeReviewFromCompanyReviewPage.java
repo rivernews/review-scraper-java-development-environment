@@ -758,16 +758,24 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
     private static final Set<String> contentBlockReviewIdWhiteListSet = new HashSet<String>();
 
     static {
+        // SAP
         // https://www.glassdoor.com/Reviews/SAP-Reviews-E10471_P329.htm
         // s3://iriversland-qualitative-org-review-v3/SAP-10471/logs/review:commentTitleNotCaptured.2020-03-05T19:58:36.533556Z.html
         ScrapeReviewFromCompanyReviewPage.contentBlockReviewIdWhiteListSet.add("31306489");
         ScrapeReviewFromCompanyReviewPage.contentBlockReviewIdWhiteListSet.add("31546268");
+        // review date 2020-07-15, page 321
+        // s3 link -> https://s3.console.aws.amazon. dcom/s3/object/iriversland-qualitative-org-review-v3/SAP-10471/logs/review:commentTitleNotCaptured2020-07-20T23:40:27.832681Z.html?region=us-west-2&tab=overview
+        ScrapeReviewFromCompanyReviewPage.contentBlockReviewIdWhiteListSet.add("34247323");
+
+        // Salesforce
         // Salesforce-11159/logs/review:commentTitleNotCaptured.2020-03-15T09:16:28.501665Z.html
         // https://www.glassdoor.com/Reviews/Salesforce-Reviews-E11159_P358.htm
         ScrapeReviewFromCompanyReviewPage.contentBlockReviewIdWhiteListSet.add("32284203");
+
         // SAP Concur (2020-06-10)
         // s3 link -> https://s3.console.aws.amazon.com/s3/object/iriversland-qualitative-org-review-v3/SAP%2520Concur-8763/logs/review%253AcommentTitleNotCaptured2020-06-16T06%253A55%253A47.510226Z.html?region=us-west-2&tab=overview
         ScrapeReviewFromCompanyReviewPage.contentBlockReviewIdWhiteListSet.add("33629280");
+
         // Lawrence Livermore National Laboratory (review date 2020-07-01, page 4 & page 1)
         // s3 link -> https://s3.console.aws.amazon.com/s3/object/iriversland-qualitative-org-review-v3/Lawrence%2520Livermore%2520National%2520Laboratory-35235/logs/review%253AcommentTitleNotCaptured2020-07-20T22%253A23%253A18.255086Z.html?region=us-west-2&tab=overview
         ScrapeReviewFromCompanyReviewPage.contentBlockReviewIdWhiteListSet.add("34003408");
