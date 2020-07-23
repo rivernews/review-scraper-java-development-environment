@@ -8,7 +8,7 @@ RUN mvn package
 
 # CMD ["sh", "-c", "mvn clean install && mvn exec:java"]
 
-FROM adoptopenjdk/openjdk11:alpine-jre
+FROM adoptopenjdk/openjdk11-openj9:alpine-jre
 
 WORKDIR /tmp/build
 
