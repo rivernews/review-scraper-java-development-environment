@@ -133,6 +133,8 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
                     this.driver.get(reviewPageUrl);
                 } else if (nextPageLinkElement != null) {
+                    final String nextPageLinkElementText = nextPageLinkElement.getText();
+
                     nextPageLinkElement.click();
 
                     try {
@@ -141,7 +143,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     this.waitForReviewPanelLoading();
 
                     Logger.infoAlsoSlack(
-                        "Now clicking element `" + nextPageLinkElement.getText() + "`" + ", url is `" + this.driver.getCurrentUrl() + "`"
+                        "Now clicking element `" + nextPageLinkElementText + "`" + ", url is `" + this.driver.getCurrentUrl() + "`"
                     );
                 } else {
                     this.driver.findElement(By.cssSelector("article#WideCol a.eiCell.reviews")).click();
@@ -332,11 +334,6 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     this.publishProgress();
                     progressReportingTimer.restart();
                 }
-
-                // TODO: remove this if not needed, since we write each review to s3 right after
-                // we parsed it, so collecting all reviews here seems unecessary
-                // UPDATE: currently commenting this out to reduce memory usage
-                // glassdoorCompanyParsedData.employeeReviewDataList.add(employeeReviewData);
 
                 // send message per 50 reviews (5 page, each around 10 reviews)
                 if (this.wentThroughReviewsCount % (reportingRate) == 0) {
