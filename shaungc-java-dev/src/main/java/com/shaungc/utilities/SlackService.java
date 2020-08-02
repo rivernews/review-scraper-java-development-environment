@@ -14,8 +14,8 @@ public class SlackService {
 
     static final URI WEBHOOK_URL = Configuration.SLACK_WEBHOOK_URL;
 
-    public static CompletableFuture<HttpResponse<String>> asyncSendMessage(String message) {
-        HashMap<String, String> data = new HashMap<String, String>();
+    public static CompletableFuture<HttpResponse<String>> asyncSendMessage(final String message) {
+        final HashMap<String, String> data = new HashMap<String, String>();
 
         data.put("username", SlackService.SENDER_TITLE);
         data.put("text", message);
@@ -23,11 +23,22 @@ public class SlackService {
         return HttpService.asyncPost(data, SlackService.WEBHOOK_URL);
     }
 
-    public static HttpResponse<String> sendMessage(String message) {
-        HashMap<String, String> data = new HashMap<String, String>();
+    public static HttpResponse<String> sendMessage(final String message) {
+        return SlackService.sendMessage(message, null);
+    }
+
+    public static HttpResponse<String> sendMessageToErrorChannel(final String message) {
+        return SlackService.sendMessage(message, "#error");
+    }
+
+    public static HttpResponse<String> sendMessage(final String message, final String channel) {
+        final HashMap<String, String> data = new HashMap<String, String>();
 
         data.put("username", SlackService.SENDER_TITLE);
         data.put("text", message);
+        if (channel != null) {
+            data.put("channel", channel);
+        }
 
         return HttpService.post(data, SlackService.WEBHOOK_URL);
     }
