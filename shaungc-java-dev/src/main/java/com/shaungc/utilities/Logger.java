@@ -68,7 +68,11 @@ public class Logger {
 
             // send slack if needed
             if (alsoSendSlackMessage) {
-                SlackService.sendMessage(finalMessage.toString());
+                if (logLevel.getVerbosenessLevelValue() == LoggerLevel.ERROR.getVerbosenessLevelValue()) {
+                    SlackService.sendMessageToErrorChannel(finalMessage.toString());
+                } else {
+                    SlackService.sendMessage(finalMessage.toString());
+                }
             }
         }
     }
