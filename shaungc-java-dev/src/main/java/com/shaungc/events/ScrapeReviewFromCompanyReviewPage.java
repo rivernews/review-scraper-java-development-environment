@@ -198,15 +198,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             if (findReviewPanelRetryCounter > FIND_REVIEW_PANEL_RETRY) {
                 if (throwException) {
-                    final String htmlDumpPath =
-                        this.archiveManager.writeHtml("review:cannotLocateReviewPanel", this.driver.getPageSource());
                     throw new ScraperShouldHaltException(
-                        String.format(
-                            "Cannot locate review panel after `%s` retries. <%s|Dumped html on s3>, scraper was facing `%s`.",
-                            findReviewPanelRetryCounter,
-                            this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath),
-                            this.driver.getCurrentUrl()
-                        )
+                        "review:cannotLocateReviewPanel",
+                        String.format("Cannot locate review panel after `%s` retries.", findReviewPanelRetryCounter),
+                        this.archiveManager,
+                        this.driver
                     );
                 } else {
                     break;
@@ -707,15 +703,14 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         if (glassdoorReviewMetadataStore.localReviewCount.equals(0)) {
             // Report abnormal case - we should be scraping an org because it has reviews;
             // otherwise it's not of our concern
-            final String htmlDumpPath =
-                this.archiveManager.writeHtml("reviewMeta:NoLocalGlobalReviewCountWarning", this.driver.getPageSource());
             throw new ScraperShouldHaltException(
+                "reviewMeta:NoLocalGlobalReviewCountWarning",
                 "Unable to scrape local & global review count or scraped `localReviewCount=0` from reviewPanelElement:\n```" +
                 reviewPanelElementRawContent.substring(0, Math.min(reviewPanelElementRawContent.length(), 500)) +
                 "...```\n" +
-                "Please check the review page html, see why scraper cannot find the review counts. <" +
-                this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath) +
-                "|Html file saved on s3>."
+                "Please check the review page html, see why scraper cannot find the review counts.",
+                this.archiveManager,
+                this.driver
             );
         }
     }
@@ -808,19 +803,18 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 if (
                     !ScrapeReviewFromCompanyReviewPage.contentBlockReviewIdWhiteListSet.contains(reviewDataStore.stableReviewData.reviewId)
                 ) {
-                    final String htmlDumpPath =
-                        this.archiveManager.writeHtml("review:commentTitleNotCaptured", this.driver.getPageSource());
-
                     throw new ScraperException(
+                        "review:commentTitleNotCaptured",
                         String.format(
                             "Found a 'Content Blocked' review at <%s|current page>, this is a new blocked review\n```%s```\n" +
-                            "Please check if review `%s` is stored before and if so, figure out a way to store this change. Dumped html <%s|on s3>. " +
+                            "Please check if review `%s` is stored before and if so, figure out a way to store this change. " +
                             "Then, add this review to whitelist (hard coded) in function `scrapeEmployeeReview()`.",
                             this.driver.getCurrentUrl(),
                             commentTitleH2Element.getText(),
-                            reviewDataStore.stableReviewData.reviewId,
-                            this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath)
-                        )
+                            reviewDataStore.stableReviewData.reviewId
+                        ),
+                        this.archiveManager,
+                        this.driver
                     );
                 }
 
@@ -834,12 +828,11 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 return false;
             }
 
-            final String htmlDumpPath = this.archiveManager.writeHtml("review:commentTitleNotCaptured", this.driver.getPageSource());
             throw new ScraperShouldHaltException(
-                String.format(
-                    "Comment title canot be captured. <%s|Html file dumped on s3>.",
-                    this.archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath)
-                )
+                "review:commentTitleNotCaptured",
+                "Comment title canot be captured.",
+                this.archiveManager,
+                this.driver
             );
         }
 

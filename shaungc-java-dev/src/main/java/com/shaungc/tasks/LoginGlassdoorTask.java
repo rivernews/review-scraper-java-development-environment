@@ -53,13 +53,11 @@ public class LoginGlassdoorTask {
             TimeoutException e
         ) {
             final ArchiveManager headlessArchiveManager = new ArchiveManager();
-            final String htmlDumpPath = headlessArchiveManager.writeHtml("login:cannotLocateSignInButton", this.driver.getPageSource());
             throw new ScraperShouldHaltException(
-                String.format(
-                    "Cannot locate sign in button. <%s|Download dumped html on s3>, scraper was facing `%s`.",
-                    headlessArchiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath),
-                    this.driver.getCurrentUrl()
-                )
+                "login:cannotLocateSignInButton",
+                "Cannot locate sign in button.",
+                headlessArchiveManager,
+                this.driver
             );
         }
 

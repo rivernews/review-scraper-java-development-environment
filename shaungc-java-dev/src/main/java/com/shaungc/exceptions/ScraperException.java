@@ -1,6 +1,8 @@
 package com.shaungc.exceptions;
 
+import com.shaungc.dataStorage.ArchiveManager;
 import com.shaungc.utilities.Logger;
+import org.openqa.selenium.WebDriver;
 
 /**
  * ScraperException
@@ -20,5 +22,24 @@ public class ScraperException extends Exception {
     public ScraperException(String errorMessage, Throwable originalError) {
         super(errorMessage, originalError);
         Logger.errorAlsoSlack(errorMessage + "\nOriginal Error:\n" + originalError.toString());
+    }
+
+    public ScraperException(
+        final String logFilePrefix,
+        final String errorMessage,
+        final ArchiveManager archiveManager,
+        final WebDriver driver
+    ) {
+        super(errorMessage);
+        final String htmlDumpPath = archiveManager.writeHtml(logFilePrefix, driver.getPageSource());
+
+        Logger.errorAlsoSlack(
+            String.format(
+                "%s\n<%s|Download dumped html on s3>, scraper was facing `%s`.",
+                errorMessage,
+                archiveManager.getFullUrlOnS3FromFilePathBasedOnOrgDirectory(htmlDumpPath),
+                driver.getCurrentUrl()
+            )
+        );
     }
 }
