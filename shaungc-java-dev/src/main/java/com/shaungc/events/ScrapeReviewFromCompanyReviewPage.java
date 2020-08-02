@@ -320,6 +320,13 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     throw new ScraperException("Terminating per request");
                 }
 
+                // check if element is staled (state changed) before proceeding
+                try {
+                    employeeReviewElement.isEnabled();
+                } catch (Exception e) {
+                    throw new ScraperException("employeeReviewElement is staled. Please check if something changed the element's state.");
+                }
+
                 final EmployeeReviewData employeeReviewData = new EmployeeReviewData();
 
                 if (this.scrapeEmployeeReview(employeeReviewElement, employeeReviewData)) {
