@@ -135,12 +135,15 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     this.driver.get(reviewPageUrl);
                 } else if (nextPageLinkElement != null) {
                     String nextPageLinkElementText;
+                    String debug__nextPageLinkElementIsEnabled = "no";
                     try {
+                        debug__nextPageLinkElementIsEnabled = nextPageLinkElement.isEnabled() ? "yes" : "no";
                         nextPageLinkElementText = nextPageLinkElement.getText();
                     } catch (StaleElementReferenceException e) {
                         throw new ScraperShouldHaltException(
                             "staleElementError:nextPageLinkElement",
-                            e.getMessage(),
+                            "nextPageLinkElement stale element error. nextPageLinkElement.isEnabled() ? " +
+                            debug__nextPageLinkElementIsEnabled,
                             this.archiveManager,
                             this.driver
                         );
