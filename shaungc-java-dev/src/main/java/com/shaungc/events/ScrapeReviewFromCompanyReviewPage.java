@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -133,7 +134,17 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
                     this.driver.get(reviewPageUrl);
                 } else if (nextPageLinkElement != null) {
-                    final String nextPageLinkElementText = nextPageLinkElement.getText();
+                    String nextPageLinkElementText;
+                    try {
+                        nextPageLinkElementText = nextPageLinkElement.getText();
+                    } catch (StaleElementReferenceException e) {
+                        throw new ScraperShouldHaltException(
+                            "staleElementError:nextPageLinkElement",
+                            e.getMessage(),
+                            this.archiveManager,
+                            this.driver
+                        );
+                    }
 
                     nextPageLinkElement.click();
 
@@ -319,8 +330,13 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 // check if element is staled (state changed) before proceeding
                 try {
                     employeeReviewElement.isEnabled();
-                } catch (Exception e) {
-                    throw new ScraperException("employeeReviewElement is staled. Please check if something changed the element's state.");
+                } catch (StaleElementReferenceException e) {
+                    throw new ScraperException(
+                        "staleElementError:employeeReviewElement",
+                        "employeeReviewElement is staled. Please check if something changed the element's state.",
+                        this.archiveManager,
+                        this.driver
+                    );
                 }
 
                 final EmployeeReviewData employeeReviewData = new EmployeeReviewData();
