@@ -70,7 +70,10 @@ public class Logger {
             if (alsoSendSlackMessage) {
                 SlackService.sendMessage(finalMessage.toString());
                 // additionally post to #error channel
-                if (logLevel.getVerbosenessLevelValue() == LoggerLevel.ERROR.getVerbosenessLevelValue()) {
+                if (
+                    logLevel.getVerbosenessLevelValue() == LoggerLevel.ERROR.getVerbosenessLevelValue() ||
+                    logLevel.getVerbosenessLevelValue() == LoggerLevel.WARN.getVerbosenessLevelValue()
+                ) {
                     SlackService.sendMessageToErrorChannel(finalMessage.toString());
                 }
             }
