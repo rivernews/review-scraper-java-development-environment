@@ -101,7 +101,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
     protected List<WebElement> locate(
         final String reviewPageUrl,
-        final WebElement nextPageLinkElement,
+        final String currentPageLinkForFindingNextPageLink,
         final Boolean onlyLocateReviewCards,
         final Boolean throwException
     ) {
@@ -109,13 +109,14 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
         final String appraochType = reviewPageUrl != null
             ? "direct review page url"
-            : nextPageLinkElement != null ? "click next page link" : "initial review tab click";
+            : currentPageLinkForFindingNextPageLink != null ? "click next page link" : "initial review tab click";
 
         // locate review panel
         // critical mission so set retry to higher number
         final Integer FIND_REVIEW_PANEL_RETRY = 2;
         Integer findReviewPanelRetryCounter = 0;
         while (findReviewPanelRetryCounter <= FIND_REVIEW_PANEL_RETRY) {
+            // check if there's a outstanding termination request first
             if (pubSubSubscription.receivedTerminationRequest) {
                 throw new ScraperShouldHaltException(
                     (new StringBuilder()).append(this.orgNameSlackMessagePrefix)
@@ -127,41 +128,51 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             }
 
             findReviewPanelRetryCounter++;
+
             try {
-                // navigate to reviews page
+                // navigate to / click for reviews page
+
                 if (reviewPageUrl != null && !reviewPageUrl.strip().isEmpty()) {
                     Logger.infoAlsoSlack("Now accessing review page url `" + reviewPageUrl + "`");
 
                     this.driver.get(reviewPageUrl);
-                } else if (nextPageLinkElement != null) {
-                    String nextPageLinkElementText;
-                    String debug__nextPageLinkElementIsEnabled = "no";
-                    try {
-                        debug__nextPageLinkElementIsEnabled = nextPageLinkElement.isEnabled() ? "yes" : "no";
-                        nextPageLinkElementText = nextPageLinkElement.getText();
-                    } catch (StaleElementReferenceException e) {
-                        throw new ScraperShouldHaltException(
-                            "staleElementError:nextPageLinkElement",
-                            "nextPageLinkElement stale element error. nextPageLinkElement.isEnabled() ? " +
-                            debug__nextPageLinkElementIsEnabled,
-                            this.archiveManager,
-                            this.driver
-                        );
+                } else if (currentPageLinkForFindingNextPageLink != null) {
+                    this.driver.get(currentPageLinkForFindingNextPageLink);
+
+                    final WebElement nextPageLinkElement = this.getNextPageLinkElement();
+
+                    // short circuit to next retry, b/c
+                    // if can't even get the next page link element, then no need to locate review panel
+                    if (nextPageLinkElement == null || !nextPageLinkElement.isEnabled() || !nextPageLinkElement.isDisplayed()) {
+                        if (findReviewPanelRetryCounter > FIND_REVIEW_PANEL_RETRY) {
+                            if (throwException) {
+                                this.raiseLocateRetryExhaustedError(findReviewPanelRetryCounter);
+                            } else {
+                                break;
+                            }
+                        } else {
+                            this.applyLocateRetryBuffer(findReviewPanelRetryCounter);
+                            continue;
+                        }
                     }
 
-                    nextPageLinkElement.click();
+                    final String nextPageLinkElementText = nextPageLinkElement.getText();
 
+                    // click and wait for review panel loading
+                    nextPageLinkElement.click();
                     try {
                         TimeUnit.SECONDS.sleep(2);
                     } catch (InterruptedException e) {}
                     this.waitForReviewPanelLoading();
 
                     Logger.infoAlsoSlack(
-                        "Now clicking element `" + nextPageLinkElementText + "`" + ", url is `" + this.driver.getCurrentUrl() + "`"
+                        "Now clicked element `" + nextPageLinkElementText + "`" + ", url is `" + this.driver.getCurrentUrl() + "`."
                     );
                 } else {
                     this.driver.findElement(By.cssSelector("article#WideCol a.eiCell.reviews")).click();
                 }
+
+                // capture review panel element
 
                 // 1st appraoch
                 WebElement reviewPanelElement = null;
@@ -174,7 +185,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     Logger.warnAlsoSlack(
                         (new StringBuilder()).append(this.orgNameSlackMessagePrefix)
                             .append(" ")
-                            .append("locating review panel, 1st approach failed")
+                            .append("1st approach failed locating review panel")
                             .toString()
                     );
                 }
@@ -190,7 +201,7 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                 } else {
                     Logger.infoAlsoSlack(
                         String.format(
-                            "*(%s)* (current session %s) Cannot locate review panel, tried %sth time(s), approach type `%s`, 2nd approach",
+                            "*(%s)* (current session %s) 2nd (last) approach failed locating review panel. Tried %sth time(s), approach type `%s`.",
                             this.archiveManager.orgName,
                             this.scraperSessionTimer.captureCurrentSessionElapseDurationString(),
                             findReviewPanelRetryCounter,
@@ -199,9 +210,9 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
                     );
                 }
             } catch (TimeoutException e) {
-                Logger.infoAlsoSlack(
+                Logger.warnAlsoSlack(
                     String.format(
-                        "*(%s)* (current session %s) Cannot locate review panel, tried %sth time(s), approach type %s",
+                        "*(%s)* (current session %s) Timeout while locating review panel, trying %sth time(s), approach type %s.",
                         this.archiveManager.orgName,
                         this.scraperSessionTimer.captureCurrentSessionElapseDurationString(),
                         findReviewPanelRetryCounter,
@@ -212,29 +223,13 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             if (findReviewPanelRetryCounter > FIND_REVIEW_PANEL_RETRY) {
                 if (throwException) {
-                    throw new ScraperShouldHaltException(
-                        "review:cannotLocateReviewPanel",
-                        String.format("Cannot locate review panel after `%s` retries.", findReviewPanelRetryCounter),
-                        this.archiveManager,
-                        this.driver
-                    );
+                    this.raiseLocateRetryExhaustedError(findReviewPanelRetryCounter);
                 } else {
                     break;
                 }
             }
 
-            // try to mitigate redis disconnection & avoid SLK timeout by keeping some
-            // publish commands out there
-            Logger.warn("Publish progress before cooling down");
-            this.publishProgress();
-
-            // add some sleep between retry, if it's network congestion this may mitigate it
-            Logger.warn("Cooling down before next retry for seconds: " + (10 * findReviewPanelRetryCounter));
-            try {
-                TimeUnit.SECONDS.sleep(10 * findReviewPanelRetryCounter);
-            } catch (InterruptedException interruptedException) {
-                throw new ScraperShouldHaltException("Sleep interrupted: while sleeping for review panel capture retry");
-            }
+            this.applyLocateRetryBuffer(findReviewPanelRetryCounter);
         }
         // TODO: filter by engineering category
         // confirm that we are on review page while locating filter button
@@ -266,6 +261,30 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
         }
 
         return locatedElements;
+    }
+
+    private void raiseLocateRetryExhaustedError(final Integer retryCounter) {
+        throw new ScraperShouldHaltException(
+            "review:cannotLocateReviewPanel",
+            String.format("Cannot locate review panel after `%s` retries.", retryCounter),
+            this.archiveManager,
+            this.driver
+        );
+    }
+
+    private void applyLocateRetryBuffer(final Integer findReviewPanelRetryCounter) {
+        // try to mitigate redis disconnection & avoid SLK timeout by keeping some
+        // publish commands out there
+        Logger.warn("Publish progress before cooling down");
+        this.publishProgress();
+
+        // add some sleep between retry, if it's network congestion this may mitigate it
+        Logger.warn("Cooling down before next retry for seconds: " + (10 * findReviewPanelRetryCounter));
+        try {
+            TimeUnit.SECONDS.sleep(10 * findReviewPanelRetryCounter);
+        } catch (InterruptedException interruptedException) {
+            throw new ScraperShouldHaltException("Sleep interrupted: while sleeping for review panel capture retry");
+        }
     }
 
     @Override
@@ -396,10 +415,12 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
             }
 
             // Proceed to next page
+            //
+            //
 
             employeeReviewElements = null;
 
-            // approach type: try direct url first
+            // === approach type: try direct url first ===
 
             final String currentPageLink = this.driver.getCurrentUrl();
 
@@ -414,15 +435,10 @@ public class ScrapeReviewFromCompanyReviewPage extends AScraperEvent<GlassdoorCo
 
             employeeReviewElements = this.locate(nextPageLink, null, true, false);
 
-            // approach type: try finding a next link and click on it
+            // === approach type: try finding a next link and click on it ===
 
             if (employeeReviewElements == null || employeeReviewElements.size() == 0) {
-                this.driver.get(currentPageLink);
-
-                final WebElement nextPageLinkElement = this.getNextPageLinkElement();
-                if (nextPageLinkElement != null && nextPageLinkElement.isEnabled() && nextPageLinkElement.isDisplayed()) {
-                    employeeReviewElements = this.locate(null, nextPageLinkElement, true, false);
-                }
+                employeeReviewElements = this.locate(null, currentPageLink, true, false);
             }
 
             // if still no any review card, probably we reached the bottom page (review panel exists but empty)
